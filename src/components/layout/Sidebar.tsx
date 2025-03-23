@@ -50,15 +50,23 @@ const Sidebar = () => {
         <div className={cn("flex items-center", collapsed ? "justify-center w-full" : "")}>
           {!collapsed && (
             <div className="flex items-center animate-fade-in">
-              <Building className="h-5 w-5 text-primary mr-2" />
+              <img 
+                src="/lovable-uploads/5bf70fa7-08a9-4818-b349-27239b6e83cf.png" 
+                alt="EIFFAGE" 
+                className="h-6 mr-1"
+              />
               <span className="font-semibold text-lg text-sidebar-foreground">
-                RH Zénith
+                RH
               </span>
             </div>
           )}
           {collapsed && (
-            <div className="flex items-center justify-center animate-fade-in p-1 bg-primary/10 rounded-lg">
-              <Building className="h-5 w-5 text-primary" />
+            <div className="flex items-center justify-center animate-fade-in p-1 rounded-lg">
+              <img 
+                src="/lovable-uploads/5bf70fa7-08a9-4818-b349-27239b6e83cf.png" 
+                alt="EIFFAGE" 
+                className="h-6"
+              />
             </div>
           )}
         </div>

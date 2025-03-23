@@ -25,13 +25,20 @@ const Header = () => {
 
   return (
     <header className="h-16 border-b border-border/70 backdrop-blur-sm bg-background/80 sticky top-0 z-10 flex items-center justify-between px-6 shadow-sm">
-      <div className="relative w-64">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-        <Input 
-          type="search" 
-          placeholder="Rechercher..." 
-          className="pl-10 h-9 bg-secondary/80 border-none w-full rounded-full" 
+      <div className="flex items-center">
+        <img 
+          src="/lovable-uploads/5bf70fa7-08a9-4818-b349-27239b6e83cf.png" 
+          alt="EIFFAGE" 
+          className="h-10 mr-4"
         />
+        <div className="relative w-64">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+          <Input 
+            type="search" 
+            placeholder="Rechercher..." 
+            className="pl-10 h-9 bg-secondary/80 border-none w-full rounded-full" 
+          />
+        </div>
       </div>
       
       <div className="flex items-center gap-3">
