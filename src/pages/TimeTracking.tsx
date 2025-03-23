@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Calendar, Clock, Download, Filter, Play, Square, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { EmployeeTimeClockDialog } from "@/components/timeTracking/EmployeeTimeClockDialog";
 
 // Mock time tracking data
 const timeTrackingData = [
@@ -156,12 +156,7 @@ const TimeTracking = () => {
             <Download size={16} />
             <span>Exporter le rapport</span>
           </Button>
-          <div className="relative">
-            <Button className="gap-2">
-              <Clock size={16} />
-              <span>Pointer entrée/sortie</span>
-            </Button>
-          </div>
+          <EmployeeTimeClockDialog className="gap-2" />
         </div>
       </div>
       
