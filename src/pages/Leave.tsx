@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 import { ExportLeaveButton } from "@/components/leave/ExportLeaveButton";
 import { LeaveNotification } from "@/components/leave/LeaveNotification";
+import { LeaveRequestDialog } from "@/components/leave/LeaveRequestDialog";
 
 type LeaveRequest = Tables<"leave_requests">;
 
@@ -23,6 +24,7 @@ const Leave = () => {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -121,7 +123,12 @@ const Leave = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Gestion des Congés</h1>
         <div className="flex gap-2">
-          <Button variant="default" size="lg" className="text-base px-6 py-5">
+          <Button 
+            variant="default" 
+            size="lg" 
+            className="text-base px-6 py-5"
+            onClick={() => setIsDialogOpen(true)}
+          >
             Nouvelle Demande
           </Button>
           <ExportLeaveButton data={leaveRequests} isLoading={isLoading} />
@@ -197,6 +204,12 @@ const Leave = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      <LeaveRequestDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
+        onSuccess={fetchLeaveRequests} 
+      />
     </div>
   );
 };
