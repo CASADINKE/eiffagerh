@@ -187,7 +187,7 @@ const Salary = () => {
   // Fonction pour exporter les bulletins de paie
   const exportPayslips = () => {
     const headers = {
-      id: "ID",
+      id: "ID", // Added the missing id field to fix the error
       employee: "Employé",
       position: "Poste",
       period: "Période",
