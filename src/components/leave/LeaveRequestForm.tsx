@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -46,21 +47,25 @@ const LeaveFormSchema = z.object({
   reason: z.string().optional(),
 });
 
+type LeaveFormValues = z.infer<typeof LeaveFormSchema>;
+
 interface LeaveRequestFormProps {
   employees: Employee[];
-  onSubmit: (values: z.infer<typeof LeaveFormSchema>) => void;
-  isSubmitting: boolean;
+  onSubmit: (values: LeaveFormValues) => void;
+  onCancel: () => void;
+  isLoading: boolean;
 }
 
 export function LeaveRequestForm({
   employees,
   onSubmit,
-  isSubmitting,
+  onCancel,
+  isLoading,
 }: LeaveRequestFormProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof LeaveFormSchema>>({
+  const form = useForm<LeaveFormValues>({
     resolver: zodResolver(LeaveFormSchema),
     defaultValues: {
       employee_id: "",
@@ -228,15 +233,14 @@ export function LeaveRequestForm({
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              Envoi en cours...
-            </>
-          ) : (
-            "Envoyer la demande"
-          )}
-        </Button>
+        <div className="flex justify-between">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

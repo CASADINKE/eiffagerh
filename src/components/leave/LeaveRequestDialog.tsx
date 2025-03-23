@@ -11,12 +11,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
+import { z } from "zod";
 
 interface LeaveRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
+
+// Define the form schema to match LeaveRequestForm
+const LeaveFormSchema = z.object({
+  employee_id: z.string(),
+  start_date: z.date(),
+  end_date: z.date(),
+  type: z.string(),
+  reason: z.string().optional(),
+});
+
+// Type based on the schema
+type LeaveFormValues = z.infer<typeof LeaveFormSchema>;
 
 export function LeaveRequestDialog({
   open,
@@ -27,13 +40,7 @@ export function LeaveRequestDialog({
   const { toast } = useToast();
   const { data: employees, isLoading: employeesLoading } = useEmployees();
   
-  const handleSubmit = async (formData: {
-    type: "annual" | "sick" | "parental" | "other";
-    start_date: string;
-    end_date: string;
-    reason?: string;
-    employee_id?: string;
-  }) => {
+  const handleSubmit = async (formData: LeaveFormValues) => {
     setIsSubmitting(true);
     try {
       // Get the selected employee or use the first one if none is selected
@@ -46,8 +53,8 @@ export function LeaveRequestDialog({
 
       const { error } = await supabase.from("leave_requests").insert({
         type: formData.type,
-        start_date: formData.start_date,
-        end_date: formData.end_date,
+        start_date: formData.start_date.toISOString(),
+        end_date: formData.end_date.toISOString(),
         reason: formData.reason || null,
         status: "pending",
         employee_id: employee_id,

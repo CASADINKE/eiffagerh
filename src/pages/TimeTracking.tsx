@@ -13,7 +13,7 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { TimeTrackingHeader } from "@/components/timeTracking/TimeTrackingHeader";
 import { TimeTrackingStats } from "@/components/timeTracking/TimeTrackingStats";
 import { WorkingHoursChart } from "@/components/timeTracking/WorkingHoursChart";
-import { TimeTrackingFilters } from "@/components/timeTracking/TimeTrackingFilters";
+import { TimeTrackingFilters, TimeTrackingFilters as TimeTrackingFiltersType } from "@/components/timeTracking/TimeTrackingFilters";
 import { TimeEntriesTable } from "@/components/timeTracking/TimeEntriesTable";
 import { handleExportTimeEntries } from "@/components/timeTracking/TimeTrackingUtils";
 
@@ -29,40 +29,53 @@ const workingHoursData = [
 
 const TimeTracking = () => {
   const [activeTab, setActiveTab] = useState("today");
-  const [dateFilter, setDateFilter] = useState("today");
-  const [employeeFilter, setEmployeeFilter] = useState("all");
-  const [periodFilter, setPeriodFilter] = useState("month");
+  const [filters, setFilters] = useState<TimeTrackingFiltersType>({
+    employeeId: null,
+    dateRange: null
+  });
 
   const { data: employees = [], isLoading: employeesLoading } = useEmployees();
   const { 
     data: timeEntries = [], 
     isLoading: entriesLoading,
     isError: entriesError
-  } = useTimeEntries(employeeFilter !== "all" ? employeeFilter : undefined);
+  } = useTimeEntries(filters.employeeId || undefined);
   const clockOutMutation = useClockOutMutation();
 
-  const getFilterDate = (date: string) => {
-    return format(new Date(date), "yyyy-MM-dd");
-  };
+  // Filter time entries based on date range if present
+  const filteredTimeEntries = timeEntries.filter(entry => {
+    if (!filters.dateRange?.from) return true;
+    
+    const entryDate = new Date(entry.date);
+    const from = filters.dateRange.from;
+    const to = filters.dateRange.to || from;
+    
+    // Set hours to 0 for proper date comparison
+    const entryDateOnly = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
+    const fromDateOnly = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+    const toDateOnly = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+    
+    return entryDateOnly >= fromDateOnly && entryDateOnly <= toDateOnly;
+  });
 
+  // Filter based on active tab
   const today = format(new Date(), "yyyy-MM-dd");
   const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
-
-  const filteredTimeEntries = timeEntries.filter(entry => {
-    const entryDate = getFilterDate(entry.date);
-    return (
-      (dateFilter === "today" && entryDate === today) ||
-      (dateFilter === "yesterday" && entryDate === yesterday) ||
-      dateFilter === "all"
-    );
+  
+  const tabFilteredEntries = filteredTimeEntries.filter(entry => {
+    const entryDate = format(new Date(entry.date), "yyyy-MM-dd");
+    
+    if (activeTab === "today") return entryDate === today;
+    if (activeTab === "yesterday") return entryDate === yesterday;
+    return true; // "history" tab shows all entries
   });
 
   const activeEmployeeCount = timeEntries.filter(
-    entry => !entry.clock_out && getFilterDate(entry.date) === today
+    entry => !entry.clock_out && format(new Date(entry.date), "yyyy-MM-dd") === today
   ).length;
 
   const completedEntriesForToday = timeEntries.filter(
-    entry => entry.clock_out && getFilterDate(entry.date) === today
+    entry => entry.clock_out && format(new Date(entry.date), "yyyy-MM-dd") === today
   );
 
   const totalCompletedHours = completedEntriesForToday.reduce((acc, entry) => {
@@ -83,8 +96,19 @@ const TimeTracking = () => {
 
   const isLoading = employeesLoading || entriesLoading;
 
+  const handleFilterChange = (newFilters: TimeTrackingFiltersType) => {
+    setFilters(newFilters);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      employeeId: null,
+      dateRange: null
+    });
+  };
+
   const handleExport = (format = 'csv') => {
-    handleExportTimeEntries(filteredTimeEntries, dateFilter, periodFilter, format);
+    handleExportTimeEntries(filteredTimeEntries, activeTab, format);
   };
 
   return (
@@ -99,6 +123,13 @@ const TimeTracking = () => {
       
       <WorkingHoursChart data={workingHoursData} />
       
+      <TimeTrackingFilters
+        employees={employees}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onResetFilters={handleResetFilters}
+      />
+      
       <Card>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col sm:flex-row justify-between p-4 border-b border-border">
@@ -107,21 +138,11 @@ const TimeTracking = () => {
               <TabsTrigger value="yesterday">Hier</TabsTrigger>
               <TabsTrigger value="history">Historique</TabsTrigger>
             </TabsList>
-            
-            <TimeTrackingFilters 
-              dateFilter={dateFilter}
-              setDateFilter={setDateFilter}
-              periodFilter={periodFilter}
-              setPeriodFilter={setPeriodFilter}
-              employeeFilter={employeeFilter}
-              setEmployeeFilter={setEmployeeFilter}
-              employees={employees}
-            />
           </div>
           
           <TabsContent value="today" className="m-0">
             <TimeEntriesTable 
-              timeEntries={filteredTimeEntries}
+              timeEntries={tabFilteredEntries}
               isLoading={isLoading}
               entriesError={entriesError}
               handleClockOut={handleClockOut}
@@ -130,7 +151,7 @@ const TimeTracking = () => {
           
           <TabsContent value="yesterday" className="m-0">
             <TimeEntriesTable 
-              timeEntries={filteredTimeEntries}
+              timeEntries={tabFilteredEntries}
               isLoading={isLoading}
               entriesError={entriesError}
               handleClockOut={handleClockOut}
@@ -139,7 +160,7 @@ const TimeTracking = () => {
           
           <TabsContent value="history" className="m-0">
             <TimeEntriesTable 
-              timeEntries={filteredTimeEntries}
+              timeEntries={tabFilteredEntries}
               isLoading={isLoading}
               entriesError={entriesError}
               handleClockOut={handleClockOut}

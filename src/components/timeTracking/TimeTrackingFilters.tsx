@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ import { fr } from "date-fns/locale";
 import { Employee } from "@/hooks/useEmployees";
 import { Card } from "@/components/ui/card";
 import { mapEmployeeToUI } from "@/types/employee";
+import { cn } from "@/lib/utils";
 
 export interface TimeTrackingFiltersProps {
   employees: Employee[];
