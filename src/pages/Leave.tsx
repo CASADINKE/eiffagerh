@@ -22,6 +22,7 @@ type LeaveRequest = Tables<"leave_requests">;
 const Leave = () => {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -100,6 +101,20 @@ const Leave = () => {
     });
   };
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
+  // Filtrer les demandes de congés en fonction de l'onglet actif
+  const getFilteredLeaveRequests = () => {
+    if (activeTab === "all") {
+      return leaveRequests;
+    }
+    return leaveRequests.filter(leave => leave.status === activeTab);
+  };
+
+  const filteredRequests = getFilteredLeaveRequests();
+
   return (
     <div className="p-4 md:p-6">
       <LeaveNotification />
@@ -116,7 +131,12 @@ const Leave = () => {
           <CardTitle>Mes Demandes de Congés</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="all" className="w-full">
+          <Tabs 
+            defaultValue="all" 
+            value={activeTab} 
+            onValueChange={handleTabChange} 
+            className="w-full"
+          >
             <TabsList className="mb-4">
               <TabsTrigger value="all">Toutes</TabsTrigger>
               <TabsTrigger value="pending">En attente</TabsTrigger>
@@ -124,61 +144,54 @@ const Leave = () => {
               <TabsTrigger value="rejected">Refusées</TabsTrigger>
             </TabsList>
 
-            {["all", "pending", "approved", "rejected"].map((tabValue) => (
-              <TabsContent key={tabValue} value={tabValue}>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
+            <TabsContent value={activeTab}>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Date de début</TableHead>
+                      <TableHead>Date de fin</TableHead>
+                      <TableHead>Motif</TableHead>
+                      <TableHead>Statut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
                       <TableRow>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Date de début</TableHead>
-                        <TableHead>Date de fin</TableHead>
-                        <TableHead>Motif</TableHead>
-                        <TableHead>Statut</TableHead>
+                        <TableCell colSpan={5} className="text-center py-10">
+                          Chargement des demandes de congés...
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {isLoading ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-10">
-                            Chargement des demandes de congés...
+                    ) : filteredRequests.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-10">
+                          Aucune demande de congé trouvée
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredRequests.map((leave) => (
+                        <TableRow key={leave.id}>
+                          <TableCell>{getTypeLabel(leave.type)}</TableCell>
+                          <TableCell>{formatDate(leave.start_date)}</TableCell>
+                          <TableCell>{formatDate(leave.end_date)}</TableCell>
+                          <TableCell>{leave.reason || "-"}</TableCell>
+                          <TableCell>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                                leave.status
+                              )}`}
+                            >
+                              {getStatusLabel(leave.status)}
+                            </span>
                           </TableCell>
                         </TableRow>
-                      ) : leaveRequests.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-10">
-                            Aucune demande de congé trouvée
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        leaveRequests
-                          .filter(
-                            (leave) =>
-                              tabValue === "all" || leave.status === tabValue
-                          )
-                          .map((leave) => (
-                            <TableRow key={leave.id}>
-                              <TableCell>{getTypeLabel(leave.type)}</TableCell>
-                              <TableCell>{formatDate(leave.start_date)}</TableCell>
-                              <TableCell>{formatDate(leave.end_date)}</TableCell>
-                              <TableCell>{leave.reason || "-"}</TableCell>
-                              <TableCell>
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
-                                    leave.status
-                                  )}`}
-                                >
-                                  {getStatusLabel(leave.status)}
-                                </span>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
-            ))}
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
