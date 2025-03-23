@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navigationItems = [
-  { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
+  { path: "/dashboard", title: "Dashboard", icon: LayoutDashboard },
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/salary", title: "Paie", icon: DollarSign },
