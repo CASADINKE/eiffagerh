@@ -1,7 +1,7 @@
 
-import { Download, Calendar } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
+import { Link } from "react-router-dom";
 
 interface SalaryHeaderProps {
   exportPayslips: () => void;
@@ -19,8 +19,9 @@ export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
           <Download size={16} />
           <span>Exporter les bulletins</span>
         </Button>
-        <SalaryPaymentDialog />
-        <Button>Générer les bulletins de paie</Button>
+        <Button as={Link} to="/salary-payment">
+          Paiement des salaires
+        </Button>
       </div>
     </div>
   );
