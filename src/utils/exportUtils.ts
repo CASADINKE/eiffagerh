@@ -1,4 +1,3 @@
-
 /**
  * Fonction utilitaire pour exporter des données au format CSV
  */
@@ -70,4 +69,52 @@ export function formatDateFR(date: string | Date): string {
     month: 'long',
     day: 'numeric'
   });
+}
+
+/**
+ * Fonction utilitaire pour générer un PDF à partir d'un élément HTML
+ */
+export async function generatePDFFromElement(
+  element: HTMLElement,
+  filename: string,
+  options: {
+    orientation?: 'portrait' | 'landscape';
+    format?: string;
+    scale?: number;
+  } = {}
+) {
+  try {
+    const {
+      orientation = 'portrait',
+      format = 'a4',
+      scale = 2
+    } = options;
+    
+    // Generate the PDF
+    const canvas = await html2canvas(element, {
+      scale: scale,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff"
+    });
+    
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: orientation,
+      unit: 'mm',
+      format: format
+    });
+    
+    const pdfWidth = orientation === 'portrait' ? 210 : 297; // A4 dimensions
+    const imgWidth = pdfWidth;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    pdf.save(`${filename}.pdf`);
+    
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de la génération du PDF:", error);
+    throw error;
+  }
 }

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,13 +10,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, FileDown, FileText } from "lucide-react";
+import { Eye, FileDown, FileText, FilePdf } from "lucide-react";
 import { toast } from "sonner";
 import { Payslip } from "@/services/payslipService";
 import { SalaryPayment } from "@/services/salaryPaymentService";
 import { exportToCSV } from "@/utils/exportUtils";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface PayslipsListProps {
   payslips: Payslip[] | undefined;
@@ -147,24 +154,28 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8 w-8 p-0"
-                          title="Télécharger CSV"
-                          onClick={() => handleDownloadPayslip(payslip)}
-                        >
-                          <FileDown className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8 w-8 p-0"
-                          title="Télécharger PDF"
-                          onClick={() => handleDownloadPDF(payslip)}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 w-8 p-0"
+                              title="Exporter"
+                            >
+                              <FileDown className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleDownloadPayslip(payslip)}>
+                              <FileText className="mr-2 h-4 w-4" />
+                              Télécharger CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDownloadPDF(payslip)}>
+                              <FilePdf className="mr-2 h-4 w-4" />
+                              Télécharger PDF
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>

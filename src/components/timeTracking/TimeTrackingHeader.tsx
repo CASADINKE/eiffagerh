@@ -1,7 +1,13 @@
 
-import { FileDown, Clock } from "lucide-react";
+import { FileDown, FilePdf, FileText, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmployeeTimeClockDialog } from "./EmployeeTimeClockDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TimeTrackingHeaderProps {
   handleExport: (format?: string) => void;
@@ -18,10 +24,24 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
       <div className="flex flex-col sm:flex-row gap-2">
         <EmployeeTimeClockDialog className="w-full sm:w-auto" />
         
-        <Button variant="outline" onClick={() => handleExport()} className="w-full sm:w-auto">
-          <FileDown size={16} className="mr-2" />
-          Exporter
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full sm:w-auto">
+              <FileDown size={16} className="mr-2" />
+              Exporter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleExport('csv')}>
+              <FileText className="mr-2 h-4 w-4" />
+              Exporter en CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport('pdf')}>
+              <FilePdf className="mr-2 h-4 w-4" />
+              Exporter en PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

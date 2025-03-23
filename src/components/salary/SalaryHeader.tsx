@@ -1,10 +1,16 @@
 
-import { Download } from "lucide-react";
+import { FileDown, FilePdf, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SalaryHeaderProps {
-  exportPayslips: () => void;
+  exportPayslips: (format?: string) => void;
 }
 
 export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
@@ -15,10 +21,24 @@ export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
         <p className="text-muted-foreground">Suivez et gérez les salaires, bulletins de paie et indemnités</p>
       </div>
       <div className="flex gap-3">
-        <Button variant="outline" className="gap-2" onClick={exportPayslips}>
-          <Download size={16} />
-          <span>Exporter les bulletins</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <FileDown size={16} />
+              <span>Exporter</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => exportPayslips('csv')}>
+              <FileText className="mr-2 h-4 w-4" />
+              Exporter en CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportPayslips('pdf')}>
+              <FilePdf className="mr-2 h-4 w-4" />
+              Exporter en PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Link to="/salary-payment">
           <Button>
             Paiement des salaires
