@@ -25,19 +25,24 @@ export function LeaveRequestDialog({
   const { toast } = useToast();
 
   const handleSubmit = async (formData: {
-    type: string;
+    type: "annual" | "sick" | "parental" | "other";
     start_date: string;
     end_date: string;
     reason?: string;
   }) => {
     setIsSubmitting(true);
     try {
+      // Get the current user - in a full implementation this would come from auth context
+      // For now we'll use a placeholder value or could get from a session
+      const employee_id = "00000000-0000-0000-0000-000000000000"; // Placeholder ID - in real app get from auth
+
       const { error } = await supabase.from("leave_requests").insert({
         type: formData.type,
         start_date: formData.start_date,
         end_date: formData.end_date,
         reason: formData.reason || null,
         status: "pending",
+        employee_id: employee_id, // Add the required employee_id field
       });
 
       if (error) throw error;
