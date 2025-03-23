@@ -1,14 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { Bell, Search, Moon, Sun, User } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { Bell, Search, Moon, Sun } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
 const Header = () => {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
-  const { toast } = useToast();
 
   // Initialize dark theme on component mount
   useEffect(() => {
@@ -22,10 +21,7 @@ const Header = () => {
   };
 
   const handleNotificationClick = () => {
-    toast({
-      title: "Notifications",
-      description: "Vous n'avez pas de nouvelles notifications",
-    });
+    toast.info("Vous n'avez pas de nouvelles notifications");
   };
 
   return (
@@ -65,24 +61,7 @@ const Header = () => {
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
         </Button>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-9 gap-2 font-normal rounded-full hover:bg-secondary">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white shadow-sm">
-                <span className="text-xs font-semibold">AD</span>
-              </div>
-              <span className="hidden sm:inline">Administrateur</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Profil
-            </DropdownMenuItem>
-            <DropdownMenuItem>Paramètres</DropdownMenuItem>
-            <DropdownMenuItem>Déconnexion</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <LogoutButton />
       </div>
     </header>
   );
