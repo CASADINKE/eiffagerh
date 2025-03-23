@@ -56,7 +56,7 @@ export function PayslipDetails({
                 <div className="font-bold">Employeur</div>
                 <div className="flex items-center mt-2">
                   <img 
-                    src="/lovable-uploads/5bf70fa7-08a9-4818-b349-27239b6e83cf.png" 
+                    src="/lovable-uploads/95f61541-ced4-45dc-ab8a-070c9c0c67f3.png" 
                     alt="EIFFAGE" 
                     className="h-8 mr-2"
                   />
@@ -78,7 +78,7 @@ export function PayslipDetails({
                 <div className="text-right">
                   <div>Période de paie: {paymentPeriod || format(new Date(), 'MMMM yyyy')}</div>
                   <div className="mt-2">
-                    <div>Matricule: {payslip.employee_id.substring(0, 5)}</div>
+                    <div>Matricule: {payslip.employee_id.substring(0, 5).toUpperCase()}</div>
                     <div>{payslip.employee?.full_name || "Employé"}</div>
                   </div>
                 </div>
@@ -106,7 +106,7 @@ export function PayslipDetails({
                     <td className="border-r px-2 py-1">10/10/23</td>
                     <td className="border-r px-2 py-1 text-center">E.R</td>
                     <td className="border-r px-2 py-1 text-center">1</td>
-                    <td className="border-r px-2 py-1 text-center">{payslip.employee?.role || "EMPLOYE"}</td>
+                    <td className="border-r px-2 py-1 text-center">{payslip.employee?.role || "CONDUCTEUR ENGINS"}</td>
                     <td className="px-2 py-1 text-center">10/10/1988</td>
                   </tr>
                 </tbody>
@@ -128,7 +128,7 @@ export function PayslipDetails({
               </thead>
               <tbody>
                 <tr className="text-sm">
-                  <td className="border-r px-2 py-1">101 Salaire de base du mois</td>
+                  <td className="border-r px-2 py-1">102 Salaire de base du mois</td>
                   <td className="border-r px-2 py-1 text-right">{payslip.base_salary.toLocaleString()}</td>
                   <td className="border-r px-2 py-1 text-center">1.00</td>
                   <td className="border-r px-2 py-1"></td>
@@ -167,7 +167,7 @@ export function PayslipDetails({
                   <td className="border-r px-2 py-1">401 Impôt général</td>
                   <td className="border-r px-2 py-1"></td>
                   <td className="border-r px-2 py-1"></td>
-                  <td className="border-r px-2 py-1 text-right">{payslip.tax_amount.toLocaleString()}</td>
+                  <td className="border-r px-2 py-1 text-right">{(payslip.tax_amount - 3000).toLocaleString()}</td>
                   <td className="border-r px-2 py-1"></td>
                   <td className="border-r px-2 py-1"></td>
                   <td className="px-2 py-1"></td>
@@ -182,7 +182,7 @@ export function PayslipDetails({
                   <td className="px-2 py-1"></td>
                 </tr>
                 <tr className="text-sm">
-                  <td className="border-r px-2 py-1">6673 Acompte sur prêt</td>
+                  <td className="border-r px-2 py-1">6673 Avance sur prêt</td>
                   <td className="border-r px-2 py-1"></td>
                   <td className="border-r px-2 py-1"></td>
                   <td className="border-r px-2 py-1 text-right">{Math.floor(payslip.deductions - 3000).toLocaleString()}</td>
@@ -219,7 +219,7 @@ export function PayslipDetails({
                 </thead>
                 <tbody>
                   <tr className="text-sm">
-                    <td className="border-r px-2 py-1 text-center" colSpan={2}>{(payslip.base_salary).toLocaleString()}</td>
+                    <td className="border-r px-2 py-1 text-center" colSpan={2}>{payslip.base_salary.toLocaleString()}</td>
                     <td className="border-r px-2 py-1 text-center" colSpan={2}>{(payslip.base_salary - Math.floor(payslip.base_salary * 0.058)).toLocaleString()}</td>
                     <td className="border-r px-2 py-1 text-center">{Math.floor(payslip.base_salary * 0.058).toLocaleString()}</td>
                     <td className="border-r px-2 py-1 text-center"></td>

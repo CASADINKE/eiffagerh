@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { UseFormReturn } from "react-hook-form";
 import { PaymentFormValues } from "./PaymentFormSchema";
+import { Textarea } from "@/components/ui/textarea";
 
 interface PaymentFormFieldsProps {
   form: UseFormReturn<PaymentFormValues>;
@@ -35,6 +36,25 @@ interface PaymentFormFieldsProps {
 export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
   return (
     <>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <img 
+            src="/lovable-uploads/95f61541-ced4-45dc-ab8a-070c9c0c67f3.png" 
+            alt="EIFFAGE" 
+            className="h-10"
+          />
+          <div>
+            <div className="font-bold">EIFFAGE</div>
+            <div className="text-sm">ÉNERGIE - T&D Sénégal</div>
+          </div>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          AV FÉLIX EBOUÉ 5 KM DES BRAS<br />
+          BP<br />
+          DAKAR SÉNÉGAL
+        </div>
+      </div>
+      
       <FormField
         control={form.control}
         name="payment_period"
@@ -45,7 +65,7 @@ export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
               <Input placeholder="Mai 2024" {...field} />
             </FormControl>
             <FormDescription>
-              La période pour laquelle les salaires sont payés
+              La période pour laquelle les salaires sont payés (ex: Mai 2024)
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -126,12 +146,33 @@ export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
       
       <FormField
         control={form.control}
+        name="convention"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Convention collective</FormLabel>
+            <FormControl>
+              <Input placeholder="Convention Collective Nationale" {...field} />
+            </FormControl>
+            <FormDescription>
+              Convention collective applicable aux employés
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description (optionnel)</FormLabel>
+            <FormLabel>Notes supplémentaires</FormLabel>
             <FormControl>
-              <Input placeholder="Notes additionnelles" {...field} />
+              <Textarea 
+                placeholder="Informations additionnelles concernant ce paiement de salaire..." 
+                className="resize-none h-20" 
+                {...field} 
+              />
             </FormControl>
             <FormDescription>
               Informations supplémentaires concernant le paiement
