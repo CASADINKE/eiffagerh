@@ -78,8 +78,8 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className={className}>
-          <Clock size={16} className="mr-2" />
+        <Button size="lg" className={`text-lg font-semibold py-6 ${className}`}>
+          <Clock size={20} className="mr-2" />
           <span>Pointer entrée/sortie</span>
         </Button>
       </DialogTrigger>
