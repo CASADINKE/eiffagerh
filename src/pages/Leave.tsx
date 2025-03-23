@@ -8,7 +8,6 @@ import { LeaveNotification } from "@/components/leave/LeaveNotification";
 import { LeaveRequestDialog } from "@/components/leave/LeaveRequestDialog";
 import { LeaveHeader } from "@/components/leave/LeaveHeader";
 import { LeaveTabs } from "@/components/leave/LeaveTabs";
-import { LeaveTableContainer } from "@/components/leave/LeaveTableContainer";
 import { Calendar } from "lucide-react";
 
 type LeaveRequest = Tables<"leave_requests">;
@@ -72,12 +71,8 @@ const Leave = () => {
           <LeaveTabs 
             activeTab={activeTab} 
             onTabChange={handleTabChange} 
-          />
-
-          <LeaveTableContainer 
-            leaveRequests={leaveRequests} 
-            isLoading={isLoading} 
-            activeTab={activeTab}
+            leaveRequests={leaveRequests}
+            isLoading={isLoading}
           />
         </CardContent>
       </Card>

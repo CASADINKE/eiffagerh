@@ -1,13 +1,19 @@
 
 import React from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { LeaveTableContainer } from "./LeaveTableContainer";
+import { Tables } from "@/integrations/supabase/types";
+
+type LeaveRequest = Tables<"leave_requests">;
 
 interface LeaveTabsProps {
   activeTab: string;
   onTabChange: (value: string) => void;
+  leaveRequests: LeaveRequest[];
+  isLoading: boolean;
 }
 
-export function LeaveTabs({ activeTab, onTabChange }: LeaveTabsProps) {
+export function LeaveTabs({ activeTab, onTabChange, leaveRequests, isLoading }: LeaveTabsProps) {
   return (
     <Tabs 
       value={activeTab} 
@@ -40,6 +46,38 @@ export function LeaveTabs({ activeTab, onTabChange }: LeaveTabsProps) {
           Refusées
         </TabsTrigger>
       </TabsList>
+      
+      <TabsContent value="all" className="pt-4">
+        <LeaveTableContainer 
+          leaveRequests={leaveRequests} 
+          isLoading={isLoading} 
+          activeTab="all"
+        />
+      </TabsContent>
+      
+      <TabsContent value="pending" className="pt-4">
+        <LeaveTableContainer 
+          leaveRequests={leaveRequests} 
+          isLoading={isLoading} 
+          activeTab="pending"
+        />
+      </TabsContent>
+      
+      <TabsContent value="approved" className="pt-4">
+        <LeaveTableContainer 
+          leaveRequests={leaveRequests} 
+          isLoading={isLoading} 
+          activeTab="approved"
+        />
+      </TabsContent>
+      
+      <TabsContent value="rejected" className="pt-4">
+        <LeaveTableContainer 
+          leaveRequests={leaveRequests} 
+          isLoading={isLoading} 
+          activeTab="rejected"
+        />
+      </TabsContent>
     </Tabs>
   );
 }

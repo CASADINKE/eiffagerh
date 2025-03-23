@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TabsContent } from "@/components/ui/tabs";
 import { Tables } from "@/integrations/supabase/types";
 import { LeaveTable } from "./LeaveTable";
 
@@ -22,7 +21,7 @@ interface LeaveTableContainerProps {
 
 export function LeaveTableContainer({ leaveRequests, isLoading, activeTab }: LeaveTableContainerProps) {
   return (
-    <TabsContent value={activeTab} className="m-0">
+    <div className="w-full">
       <Table>
         <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
           <TableRow className="hover:bg-transparent">
@@ -41,6 +40,6 @@ export function LeaveTableContainer({ leaveRequests, isLoading, activeTab }: Lea
           />
         </TableBody>
       </Table>
-    </TabsContent>
+    </div>
   );
 }
