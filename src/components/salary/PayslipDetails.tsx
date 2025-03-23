@@ -1,6 +1,5 @@
-
 import React, { useRef } from "react";
-import { Printer, FileDown, X, FilePdf } from "lucide-react";
+import { Printer, FileDown, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Payslip } from "@/services/salaryPaymentService";
@@ -29,7 +28,6 @@ export function PayslipDetails({
   const payslipRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = () => {
-    // Prepare payslip data for download
     const payslipData = [{
       id: payslip.id,
       employee: payslip.employee?.full_name || "Employé",
@@ -43,7 +41,6 @@ export function PayslipDetails({
       mode_paiement: paymentMethod
     }];
 
-    // Use the exportToCSV function from exportUtils
     exportToCSV(
       payslipData,
       `bulletin-paie-${payslip.employee?.full_name || "employe"}-${paymentPeriod?.replace(/\s/g, "-") || "periode"}`,
@@ -61,7 +58,6 @@ export function PayslipDetails({
       }
     );
     
-    // Call the onDownload prop
     onDownload();
   };
 
@@ -88,8 +84,7 @@ export function PayslipDetails({
         format: 'a4'
       });
       
-      // Calculate dimensions to fit the content properly
-      const imgWidth = 210; // A4 width in mm (210mm)
+      const imgWidth = 210;
       const imgHeight = canvas.height * imgWidth / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
@@ -132,7 +127,7 @@ export function PayslipDetails({
               className="bg-red-600 hover:bg-red-700 text-white font-bold" 
               onClick={handleDownloadPDF}
             >
-              <FilePdf className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4 mr-2" />
               PDF
             </Button>
             <Button 
@@ -148,13 +143,11 @@ export function PayslipDetails({
         
         <div className="overflow-y-auto p-6 bg-gray-100">
           <div ref={payslipRef} className="payslip-content border rounded-md overflow-hidden shadow-lg bg-white">
-            {/* En-tête du bulletin */}
             <div className="text-center font-bold text-lg py-3 border-b bg-gray-900 text-white">
               BULLETIN DE PAIE
             </div>
             
             <div className="flex border-b">
-              {/* Partie gauche - Information employeur */}
               <div className="w-1/2 p-4 border-r bg-gray-100">
                 <div className="font-bold text-gray-900 text-base">Employeur</div>
                 <div className="flex items-center mt-2">
@@ -176,7 +169,6 @@ export function PayslipDetails({
                 </div>
               </div>
               
-              {/* Partie droite - Information paie */}
               <div className="w-1/2 p-4 bg-gray-100">
                 <div className="text-right">
                   <div className="text-gray-900 font-medium">Période de paie: <span className="font-bold">{paymentPeriod || format(new Date(), 'MMMM yyyy')}</span></div>
@@ -188,7 +180,6 @@ export function PayslipDetails({
               </div>
             </div>
             
-            {/* Corps du bulletin */}
             <div className="px-4 py-2 border-b bg-blue-800 text-white font-semibold">
               Convention Collective Nationale
             </div>
@@ -216,7 +207,6 @@ export function PayslipDetails({
               </table>
             </div>
             
-            {/* Détails des rubriques */}
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-300 text-sm">
@@ -306,7 +296,6 @@ export function PayslipDetails({
               </tfoot>
             </table>
             
-            {/* Résumé */}
             <div className="border-t">
               <table className="w-full">
                 <thead>
@@ -334,7 +323,6 @@ export function PayslipDetails({
               </table>
             </div>
             
-            {/* Pied de page */}
             <div className="border-t p-3 text-sm grid grid-cols-2 gap-4 bg-gray-100">
               <div className="text-gray-800">
                 <div><span className="font-bold text-gray-900">CONGES PAYES:</span> {Math.floor(payslip.base_salary / 12).toLocaleString()}</div>

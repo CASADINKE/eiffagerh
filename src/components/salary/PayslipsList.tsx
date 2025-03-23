@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, FileDown, FilePdf } from "lucide-react";
+import { Eye, FileDown, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Payslip } from "@/services/payslipService";
 import { SalaryPayment } from "@/services/salaryPaymentService";
@@ -27,7 +26,6 @@ interface PayslipsListProps {
 export function PayslipsList({ payslips, latestPayment, onViewPayslip }: PayslipsListProps) {
   
   const handleDownloadPayslip = (payslip: Payslip) => {
-    // Prepare payslip data for download
     const payslipData = [{
       id: payslip.id,
       employee: payslip.employee?.full_name || "Employé",
@@ -41,7 +39,6 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
       mode_paiement: latestPayment?.payment_method || "virement bancaire"
     }];
 
-    // Use the exportToCSV function
     exportToCSV(
       payslipData,
       `bulletin-paie-${payslip.employee?.full_name || "employe"}-${latestPayment?.payment_period?.replace(/\s/g, "-") || "periode"}`,
@@ -62,12 +59,9 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
     toast.success(`Bulletin téléchargé pour ${payslip.employee?.full_name || "l'employé"}`);
   };
 
-  // Function to handle PDF download
   const handleDownloadPDF = async (payslip: Payslip) => {
-    // First we need to view the payslip to render it
     onViewPayslip(payslip);
     
-    // Wait a bit for the payslip modal to render
     setTimeout(async () => {
       try {
         const payslipElement = document.querySelector(".payslip-content") as HTMLElement;
@@ -93,8 +87,7 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
           format: 'a4'
         });
         
-        // Calculate dimensions to fit the content properly
-        const imgWidth = 210; // A4 width in mm (210mm)
+        const imgWidth = 210;
         const imgHeight = canvas.height * imgWidth / canvas.width;
         
         pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
@@ -170,7 +163,7 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
                           title="Télécharger PDF"
                           onClick={() => handleDownloadPDF(payslip)}
                         >
-                          <FilePdf className="h-4 w-4" />
+                          <FileText className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
