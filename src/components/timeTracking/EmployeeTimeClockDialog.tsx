@@ -32,8 +32,8 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Fetch employees data
-  const { data: employees, isLoading: employeesLoading, isError: employeesError } = useEmployees();
+  // Fetch employees data from listes_employées table
+  const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployees();
   
   // Fetch time entries to know which employees are already clocked in
   const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
@@ -45,41 +45,45 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   // Loading state combines both employees and entries loading
   const isLoading = employeesLoading || entriesLoading;
   
-  // Filter employees based on search query
+  // Filter employees based on search query - search in nom, prenom, matricule and site
   const filteredEmployees = employees?.filter(employee => 
     employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    employee.matricule.toLowerCase().includes(searchQuery.toLowerCase()) ||
     employee.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    employee.department.toLowerCase().includes(searchQuery.toLowerCase())
+    employee.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    employee.site.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  const handleClockInOut = (employeeId: string, name: string) => {
+  const handleClockInOut = (employeeId: string) => {
     // Check if employee is already clocked in
     const activeEntry = getActiveTimeEntry(timeEntries, employeeId);
     
     if (activeEntry) {
       // Clock out
       clockOutMutation.mutate(activeEntry.id);
+      toast.success("Pointage de sortie enregistré");
     } else {
       // Clock in
       clockInMutation.mutate({ employeeId });
+      toast.success("Pointage d'entrée enregistré");
     }
     
     setOpen(false);
   };
   
   const getInitials = (name: string) => {
-    return name.split(" ").map(n => n[0]).join("");
+    return name.split(" ").map(n => n[0]).join("").toUpperCase();
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className={className}>
-          <Clock size={16} />
+          <Clock size={16} className="mr-2" />
           <span>Pointer entrée/sortie</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Pointer entrée/sortie</DialogTitle>
           <DialogDescription>
@@ -91,7 +95,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un employé..."
+              placeholder="Rechercher un employé par matricule, nom ou site..."
               className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -113,9 +117,9 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[180px]">Matricule</TableHead>
                 <TableHead>Employé</TableHead>
-                <TableHead>Poste</TableHead>
-                <TableHead>Département</TableHead>
+                <TableHead>Site</TableHead>
                 <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -127,6 +131,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
                 
                 return (
                   <TableRow key={employee.id}>
+                    <TableCell className="font-medium">{employee.matricule}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
@@ -136,21 +141,23 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
                             <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
                           )}
                         </Avatar>
-                        <span>{employee.name}</span>
+                        <div>
+                          <p className="font-medium">{employee.name}</p>
+                          <p className="text-xs text-muted-foreground">{employee.position}</p>
+                        </div>
                         {isActive && (
                           <span className="inline-flex h-2 w-2 rounded-full bg-green-500" />
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{employee.position}</TableCell>
-                    <TableCell>{employee.department}</TableCell>
+                    <TableCell>{employee.site}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant={isActive ? "destructive" : "secondary"}
                         size="sm"
-                        onClick={() => handleClockInOut(employee.id, employee.name)}
+                        onClick={() => handleClockInOut(employee.id)}
                       >
-                        <Clock size={14} />
+                        <Clock size={14} className="mr-1" />
                         <span>{isActive ? "Pointer sortie" : "Pointer entrée"}</span>
                       </Button>
                     </TableCell>
