@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, FileDown, FileText, File } from "lucide-react";
+import { Eye, Download, FileText, File } from "lucide-react";
 import { toast } from "sonner";
 import { Payslip } from "@/services/payslipService";
 import { SalaryPayment } from "@/services/salaryPaymentService";
@@ -161,7 +162,7 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
                               className="h-8 w-8 p-0"
                               title="Exporter"
                             >
-                              <FileDown className="h-4 w-4" />
+                              <Download className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

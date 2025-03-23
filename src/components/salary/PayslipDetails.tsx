@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { X, Printer, FileDownload } from "lucide-react";
+import { X, Printer, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Payslip } from "@/services/payslipService";
@@ -50,7 +50,7 @@ export function PayslipDetails({
               <Printer className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={onDownload}>
-              <FileDownload className="h-4 w-4" />
+              <Download className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
@@ -313,7 +313,7 @@ export function PayslipDetails({
               Imprimer
             </Button>
             <Button variant="outline" onClick={onDownload}>
-              <FileDownload className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-4 w-4" />
               Télécharger
             </Button>
           </div>
