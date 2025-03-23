@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface EmployeeTimeClockDialogProps {
   className?: string;
@@ -32,7 +33,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Utiliser useEmployeesUI au lieu de useEmployees
+  // Use useEmployeesUI instead of useEmployees
   const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployeesUI();
   
   // Fetch pointage entries to know which employees are already clocked in
@@ -45,7 +46,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   // Loading state combines both employees and entries loading
   const isLoading = employeesLoading || entriesLoading;
   
-  // Filter employees based on search query - search in nom, prenom, matricule and site
+  // Filter employees based on search query - search in name, matricule, position and department and site
   const filteredEmployees = employees?.filter(employee => 
     employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     employee.matricule.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -54,23 +55,42 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
     employee.site.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  const handleClockInOut = (employeeId: string) => {
+  const handleClockInOut = async (employeeId: string) => {
     console.log("Handling clock in/out for employee:", employeeId);
     
-    // Check if employee is already clocked in
-    const activeEntry = getActivePointage(pointageEntries, employeeId);
-    
-    if (activeEntry) {
-      // Clock out
-      console.log("Clocking out employee, entry ID:", activeEntry.id);
-      clockOutMutation.mutate(activeEntry.id);
-    } else {
-      // Clock in
-      console.log("Clocking in employee:", employeeId);
-      clockInMutation.mutate({ employeeId });
+    try {
+      // First check if this employee exists in the profiles table
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", employeeId)
+        .single();
+        
+      if (profileError) {
+        // If the employee doesn't exist in profiles table, we need to handle this
+        console.log("Employee not found in profiles table:", profileError);
+        toast.error("Employé non trouvé dans la base de données. Veuillez vous assurer que l'employé est enregistré correctement.");
+        return;
+      }
+      
+      // Check if employee is already clocked in
+      const activeEntry = getActivePointage(pointageEntries, employeeId);
+      
+      if (activeEntry) {
+        // Clock out
+        console.log("Clocking out employee, entry ID:", activeEntry.id);
+        clockOutMutation.mutate(activeEntry.id);
+      } else {
+        // Clock in
+        console.log("Clocking in employee:", employeeId);
+        clockInMutation.mutate({ employeeId });
+      }
+      
+      setOpen(false);
+    } catch (error) {
+      console.error("Error in handleClockInOut:", error);
+      toast.error("Une erreur est survenue lors du pointage");
     }
-    
-    setOpen(false);
   };
   
   const getInitials = (name: string) => {
