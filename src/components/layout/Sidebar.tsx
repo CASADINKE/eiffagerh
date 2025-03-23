@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -8,7 +9,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Building
+  Building,
+  CreditCard
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -23,12 +25,14 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
 
 const navigationItems = [
   { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
+  { path: "/salary", title: "Salaires", icon: CreditCard },
   { path: "/settings", title: "Paramètres", icon: Settings },
 ];
 
@@ -36,6 +40,7 @@ const Sidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
+  const [salaryDialogOpen, setSalaryDialogOpen] = useState(false);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -105,6 +110,23 @@ const Sidebar = () => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Creer Paiement button */}
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <button
+                    onClick={() => setSalaryDialogOpen(true)}
+                    className={cn(
+                      "flex items-center gap-3 w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 my-1",
+                      "text-gray-300 hover:text-white hover:bg-blue-600/90",
+                      collapsed && "justify-center"
+                    )}
+                  >
+                    <CreditCard size={18} />
+                    {!collapsed && <span>Créer Paiement</span>}
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -126,6 +148,9 @@ const Sidebar = () => {
           )}
         </div>
       </SidebarFooter>
+
+      {/* Salary Payment Dialog */}
+      <SalaryPaymentDialog open={salaryDialogOpen} onOpenChange={setSalaryDialogOpen} />
     </SidebarComponent>
   );
 };

@@ -54,10 +54,20 @@ const paymentFormSchema = z.object({
 
 type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 
-export function SalaryPaymentDialog() {
-  const [open, setOpen] = useState(false);
+interface SalaryPaymentDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function SalaryPaymentDialog({ open, onOpenChange }: SalaryPaymentDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Use either controlled or uncontrolled state
+  const isControlled = open !== undefined && onOpenChange !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+  const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
 
   const defaultValues: Partial<PaymentFormValues> = {
     payment_period: format(new Date(), "MMMM yyyy"),
@@ -86,7 +96,7 @@ export function SalaryPaymentDialog() {
       
       if (paymentId) {
         toast.success("Paiement des salaires créé avec succès!");
-        setOpen(false);
+        setIsOpen(false);
         form.reset(defaultValues);
         navigate(`/salary-payment/${paymentId}`);
       }
@@ -99,13 +109,15 @@ export function SalaryPaymentDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2" onClick={() => setOpen(true)}>
-          <Calendar className="h-4 w-4" />
-          <span>Paiement Salaire</span>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button className="gap-2" onClick={() => setIsOpen(true)}>
+            <Calendar className="h-4 w-4" />
+            <span>Paiement Salaire</span>
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Paiement des salaires</DialogTitle>
@@ -225,7 +237,7 @@ export function SalaryPaymentDialog() {
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => setOpen(false)}
+                onClick={() => setIsOpen(false)}
                 disabled={loading}
               >
                 Annuler

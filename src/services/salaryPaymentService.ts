@@ -40,7 +40,8 @@ export const createSalaryPayment = async (paymentData: Omit<SalaryPayment, 'id' 
       return null;
     }
     
-    return data.id;
+    // Type assertion to ensure we can access the id property
+    return (data as any).id;
   } catch (error) {
     console.error("Error creating salary payment:", error);
     toast.error("Erreur lors de la création du paiement de salaire");
