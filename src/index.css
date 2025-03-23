@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -125,6 +126,20 @@
   
   .subtle-bg {
     @apply bg-gradient-to-br from-background to-muted/50;
+  }
+  
+  /* Login page backdrop */
+  .auth-backdrop {
+    @apply bg-cover bg-center bg-no-repeat;
+    background-image: url('/lovable-uploads/e5e09184-0b90-4331-86c9-3db921eb2a9b.png');
+  }
+  
+  .auth-card {
+    @apply backdrop-blur-md bg-white/10 border border-white/20 shadow-xl;
+  }
+  
+  .auth-input {
+    @apply bg-white/20 backdrop-blur-sm border-white/20;
   }
 }
 

@@ -61,12 +61,19 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-secondary/20 p-4">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-cover bg-center p-4" 
+      style={{ 
+        backgroundImage: "url('/lovable-uploads/e5e09184-0b90-4331-86c9-3db921eb2a9b.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}
+    >
       <div className="w-full max-w-md">
-        <Card className="w-full">
+        <Card className="w-full backdrop-blur-sm bg-white/10 border border-white/20 shadow-xl">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl">EIFFAGE</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-primary">EIFFAGE</CardTitle>
+            <CardDescription className="text-foreground/80">
               Plateforme de gestion des ressources humaines
             </CardDescription>
           </CardHeader>
@@ -84,7 +91,7 @@ const Auth = () => {
                           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
                             placeholder="vous@exemple.com"
-                            className="pl-10"
+                            className="pl-10 bg-white/20 backdrop-blur-sm border-white/20"
                             {...field}
                           />
                         </div>
@@ -105,7 +112,7 @@ const Auth = () => {
                           <Input
                             type="password"
                             placeholder="••••••••"
-                            className="pl-10"
+                            className="pl-10 bg-white/20 backdrop-blur-sm border-white/20"
                             {...field}
                           />
                         </div>
@@ -121,7 +128,7 @@ const Auth = () => {
             </Form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
-            <p className="text-xs text-center text-muted-foreground">
+            <p className="text-xs text-center text-foreground/70">
               En vous connectant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
             </p>
           </CardFooter>
