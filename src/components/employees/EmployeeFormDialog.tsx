@@ -32,7 +32,7 @@ const EmployeeFormDialog = ({ open, onOpenChange }: EmployeeFormDialogProps) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-[900px] w-[95%] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ajouter un nouvel employé</DialogTitle>
           <DialogDescription>

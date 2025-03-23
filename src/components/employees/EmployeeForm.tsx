@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -29,6 +30,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { EmployeeFormData } from "@/hooks/useEmployeeOperations";
+import { Textarea } from "@/components/ui/textarea";
 
 const employerOptions = [
   { value: "phoenix", label: "Phoenix Interim Suarl" },
@@ -84,15 +86,15 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="matricule"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Matricule</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Matricule</FormLabel>
                 <FormControl>
-                  <Input placeholder="EMP-00001" {...field} />
+                  <Input placeholder="EMP-00001" {...field} className="p-3 text-base h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -103,17 +105,17 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="employeur"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Employeur</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Employeur</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="p-3 text-base h-12">
                       <SelectValue placeholder="Sélectionner un employeur" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {employerOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem key={option.value} value={option.value} className="text-base">
                         {option.label}
                       </SelectItem>
                     ))}
@@ -128,10 +130,10 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="nom"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Nom</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nom de famille" {...field} />
+                  <Input placeholder="Nom de famille" {...field} className="p-3 text-base h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -142,10 +144,10 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="prenom"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Prénom</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Prénom</FormLabel>
                 <FormControl>
-                  <Input placeholder="Prénom" {...field} />
+                  <Input placeholder="Prénom" {...field} className="p-3 text-base h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -157,22 +159,24 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             name="date_naissance"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Date de naissance</FormLabel>
+                <FormLabel className="text-base">Date de naissance</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
-                        className={`w-full pl-3 text-left font-normal ${
+                        className={`w-full h-12 p-3 text-base text-left font-normal flex justify-between items-center ${
                           !field.value ? "text-muted-foreground" : ""
                         }`}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? (
-                          format(field.value, "dd MMMM yyyy", { locale: fr })
-                        ) : (
-                          <span>Sélectionner une date</span>
-                        )}
+                        <span>
+                          {field.value ? (
+                            format(field.value, "dd MMMM yyyy", { locale: fr })
+                          ) : (
+                            "Sélectionner une date"
+                          )}
+                        </span>
+                        <CalendarIcon className="ml-auto h-5 w-5" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -183,6 +187,7 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
                       onSelect={field.onChange}
                       initialFocus
                       locale={fr}
+                      className="rounded-md border"
                     />
                   </PopoverContent>
                 </Popover>
@@ -195,10 +200,10 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="poste"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Poste</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Poste</FormLabel>
                 <FormControl>
-                  <Input placeholder="Poste occupé" {...field} />
+                  <Input placeholder="Poste occupé" {...field} className="p-3 text-base h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -209,10 +214,14 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="adresse"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adresse</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Adresse</FormLabel>
                 <FormControl>
-                  <Input placeholder="Adresse complète" {...field} />
+                  <Textarea 
+                    placeholder="Adresse complète" 
+                    {...field} 
+                    className="p-3 text-base min-h-[5rem] resize-none" 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -223,10 +232,10 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="telephone"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Téléphone</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Téléphone</FormLabel>
                 <FormControl>
-                  <Input placeholder="Numéro de téléphone" {...field} />
+                  <Input placeholder="Numéro de téléphone" {...field} className="p-3 text-base h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -237,10 +246,10 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="affectation"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Affectation</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Affectation</FormLabel>
                 <FormControl>
-                  <Input placeholder="Affectation" {...field} />
+                  <Input placeholder="Affectation" {...field} className="p-3 text-base h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -251,17 +260,17 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
             control={form.control}
             name="site"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Site</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Site</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="p-3 text-base h-12">
                       <SelectValue placeholder="Sélectionner un site" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {siteOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem key={option.value} value={option.value} className="text-base">
                         {option.label}
                       </SelectItem>
                     ))}
@@ -273,11 +282,21 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
           />
         </div>
 
-        <div className="flex justify-end space-x-2">
-          <Button variant="outline" type="button" onClick={onCancel} disabled={isLoading}>
+        <div className="flex justify-end space-x-4 pt-4">
+          <Button 
+            variant="outline" 
+            type="button" 
+            onClick={onCancel} 
+            disabled={isLoading}
+            className="px-6 py-2 text-base h-12"
+          >
             Annuler
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="px-6 py-2 text-base h-12"
+          >
             {isLoading ? "Enregistrement..." : "Enregistrer"}
           </Button>
         </div>
