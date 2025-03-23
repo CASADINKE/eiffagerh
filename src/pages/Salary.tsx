@@ -1,13 +1,10 @@
 
 import React, { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import { useSalaryPayments } from "@/hooks/useSalaryPayments";
 import { useSalaryDetails } from "@/hooks/useSalaryDetails";
 import { SalaryPaymentsTable } from "@/components/salary/SalaryPaymentsTable";
 import { SalaryDetailsTable } from "@/components/salary/SalaryDetailsTable";
 import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
-import { Link } from "react-router-dom";
 import { SalaryHeader } from "@/components/salary/SalaryHeader";
 import { exportToCSV } from "@/utils/exportUtils";
 import { toast } from "sonner";
@@ -61,14 +58,6 @@ const Salary = () => {
       <div className="grid gap-6 salary-content" ref={contentRef}>
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Détails des salaires</h2>
-          <Button 
-            onClick={() => setIsSalaryDetailDialogOpen(true)}
-            size="sm"
-            className="gap-1"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Ajouter un salaire
-          </Button>
         </div>
 
         <SalaryDetailsTable 

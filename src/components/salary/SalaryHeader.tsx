@@ -1,13 +1,6 @@
 
-import { FileDown, File, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { generatePDFFromElement } from "@/utils/exportUtils";
 import { toast } from "sonner";
 
@@ -43,24 +36,6 @@ export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
         <p className="text-muted-foreground">Suivez et gérez les salaires, bulletins de paie et indemnités</p>
       </div>
       <div className="flex gap-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <FileDown size={16} />
-              <span>Exporter</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => exportPayslips('csv')}>
-              <FileText className="mr-2 h-4 w-4" />
-              Exporter en CSV
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportPDF}>
-              <File className="mr-2 h-4 w-4" />
-              Exporter en PDF
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
         <Link to="/salary-payment">
           <Button>
             Paiement des salaires
