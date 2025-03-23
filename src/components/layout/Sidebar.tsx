@@ -29,7 +29,7 @@ const navigationItems = [
   { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
-  { path: "/salary", title: "Salaires", icon: DollarSign },
+  { path: "/salary", title: "Paie", icon: DollarSign }, // Changed title from "Salaires" to "Paie"
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
   { path: "/settings", title: "Paramètres", icon: Settings },
 ];
