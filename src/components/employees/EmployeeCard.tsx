@@ -3,18 +3,10 @@ import { cn } from "@/lib/utils";
 import { MoreHorizontal, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Employee } from "@/hooks/useEmployees";
 
 interface EmployeeCardProps {
-  employee: {
-    id: string;
-    name: string;
-    position: string;
-    department: string;
-    email: string;
-    phone: string;
-    avatar?: string;
-    status: "active" | "on-leave" | "terminated";
-  };
+  employee: Employee;
   className?: string;
 }
 
