@@ -12,7 +12,6 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Legend,
 } from "recharts";
 
 const chartData = [
@@ -67,7 +66,7 @@ const Dashboard = () => {
         />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-5">
           <div className="mb-4">
             <h2 className="text-lg font-semibold">Aperçu des présences</h2>
@@ -80,10 +79,6 @@ const Dashboard = () => {
                   <linearGradient id="colorAttendance" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
                     <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
-                  </linearGradient>
-                  <linearGradient id="colorLeave" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
@@ -103,14 +98,6 @@ const Dashboard = () => {
                   stroke="hsl(var(--primary))"
                   fillOpacity={1}
                   fill="url(#colorAttendance)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="leave"
-                  name="Congé"
-                  stroke="hsl(var(--accent))"
-                  fillOpacity={1}
-                  fill="url(#colorLeave)"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -136,7 +123,6 @@ const Dashboard = () => {
                   }} 
                   formatter={(value) => [`${value.toLocaleString()} FCFA`, 'Salaire moyen']}
                 />
-                <Legend />
                 <Bar 
                   dataKey="value" 
                   name="Salaire moyen" 
