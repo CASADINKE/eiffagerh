@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -32,7 +32,6 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   // Redirect if user is already logged in
   if (user) {
@@ -63,16 +62,10 @@ const Auth = () => {
       const { error, success } = await signIn(data.email, data.password);
       
       if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: error.message,
-        });
+        toast.error("Erreur de connexion: " + error.message);
       } else if (success) {
-        toast({
-          title: "Connexion réussie",
-          description: "Vous êtes maintenant connecté.",
-        });
+        toast.success("Connexion réussie");
+        navigate("/dashboard");
       }
     } finally {
       setIsLoading(false);
@@ -85,16 +78,9 @@ const Auth = () => {
       const { error, success } = await signUp(data.email, data.password, data.fullName);
       
       if (error) {
-        toast({
-          variant: "destructive",
-          title: "Erreur d'inscription",
-          description: error.message,
-        });
+        toast.error("Erreur d'inscription: " + error.message);
       } else if (success) {
-        toast({
-          title: "Inscription réussie",
-          description: "Veuillez vérifier votre email pour confirmer votre compte.",
-        });
+        toast.success("Inscription réussie. Veuillez vérifier votre email.");
         setActiveTab("login");
       }
     } finally {
