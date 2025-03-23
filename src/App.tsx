@@ -37,7 +37,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/employees" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['super_admin', 'admin', 'manager']}>
                 <Layout>
                   <Employees />
                 </Layout>
@@ -51,7 +51,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/salary" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['super_admin', 'admin', 'manager']}>
                 <Layout>
                   <Salary />
                 </Layout>
@@ -65,7 +65,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
                 <Layout>
                   <Settings />
                 </Layout>
