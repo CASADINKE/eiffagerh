@@ -73,14 +73,14 @@ export const TimeTrackingFilters: React.FC<TimeTrackingFiltersProps> = ({
             Employé
           </Label>
           <Select
-            value={filters.employeeId || ""}
-            onValueChange={(value) => handleFilterChange("employeeId", value || null)}
+            value={filters.employeeId || "all"}
+            onValueChange={(value) => handleFilterChange("employeeId", value === "all" ? null : value)}
           >
             <SelectTrigger id="employee-filter" className="w-full sm:w-[200px]">
               <SelectValue placeholder="Tous les employés" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les employés</SelectItem>
+              <SelectItem value="all">Tous les employés</SelectItem>
               {mappedEmployees.map((employee) => (
                 <SelectItem key={employee.id} value={employee.id}>
                   {employee.name}
