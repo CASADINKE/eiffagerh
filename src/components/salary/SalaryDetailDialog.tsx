@@ -1,297 +1,253 @@
 
-import { useState, useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { SalaryDetail } from "@/services/salaryDetailsService";
-import { useEmployees } from "@/hooks/useEmployees";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateSalaryDetail, useUpdateSalaryDetail } from "@/hooks/useSalaryDetails";
-import { toast } from "sonner";
-
-const salaryDetailSchema = z.object({
-  employee_id: z.string().uuid("Veuillez sélectionner un employé"),
-  base_salary: z.coerce.number().min(0, "Le salaire de base doit être positif"),
-  contract_type: z.string().min(1, "Veuillez sélectionner un type de contrat"),
-  pay_grade: z.string().optional().nullable(),
-  currency: z.string().min(1, "Veuillez sélectionner une devise"),
-  payment_frequency: z.string().min(1, "Veuillez sélectionner une fréquence de paiement"),
-  tax_rate: z.coerce.number().min(0, "Le taux d'imposition doit être positif").max(1, "Le taux d'imposition doit être inférieur à 100%").optional().nullable(),
-});
-
-type SalaryDetailFormValues = z.infer<typeof salaryDetailSchema>;
+import { SalaryDetail } from "@/services/salaryDetailsService";
+import { useToast } from "@/hooks/use-toast";
 
 interface SalaryDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  salaryDetail: SalaryDetail | null;
+  salaryDetail?: SalaryDetail | null;
+  employeeId?: string;
+  onSuccess?: () => void;
 }
 
-export function SalaryDetailDialog({ open, onOpenChange, salaryDetail }: SalaryDetailDialogProps) {
-  const [loading, setLoading] = useState(false);
-  const { data: employees } = useEmployees();
+export function SalaryDetailDialog({ 
+  open, 
+  onOpenChange, 
+  salaryDetail, 
+  employeeId,
+  onSuccess 
+}: SalaryDetailDialogProps) {
+  const { toast } = useToast();
   const createSalaryDetail = useCreateSalaryDetail();
   const updateSalaryDetail = useUpdateSalaryDetail();
-
-  const isEditing = !!salaryDetail;
-
-  const form = useForm<SalaryDetailFormValues>({
-    resolver: zodResolver(salaryDetailSchema),
-    defaultValues: {
-      employee_id: "",
-      base_salary: 0,
-      contract_type: "CDI",
-      pay_grade: null,
-      currency: "FCFA",
-      payment_frequency: "monthly",
-      tax_rate: 0.15,
-    },
+  
+  const [formData, setFormData] = React.useState({
+    employee_id: '',
+    base_salary: 0,
+    contract_type: 'CDI',
+    pay_grade: '',
+    currency: 'FCFA',
+    payment_frequency: 'monthly',
+    tax_rate: 15,
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (salaryDetail) {
-      form.reset({
+      setFormData({
         employee_id: salaryDetail.employee_id,
         base_salary: salaryDetail.base_salary,
         contract_type: salaryDetail.contract_type,
-        pay_grade: salaryDetail.pay_grade,
+        pay_grade: salaryDetail.pay_grade || '',
         currency: salaryDetail.currency,
         payment_frequency: salaryDetail.payment_frequency,
-        tax_rate: salaryDetail.tax_rate,
+        tax_rate: salaryDetail.tax_rate || 15,
       });
+    } else if (employeeId) {
+      setFormData(prev => ({ ...prev, employee_id: employeeId }));
     }
-  }, [salaryDetail, form]);
+  }, [salaryDetail, employeeId]);
 
-  const onSubmit = async (data: SalaryDetailFormValues) => {
-    setLoading(true);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
+    // Convert specific fields to numbers
+    const numericData = {
+      ...formData,
+      base_salary: Number(formData.base_salary),
+      tax_rate: Number(formData.tax_rate),
+    };
+
     try {
-      if (isEditing && salaryDetail) {
-        await updateSalaryDetail.mutateAsync({ 
-          id: salaryDetail.id, 
-          data 
+      if (salaryDetail) {
+        // Update existing salary detail
+        await updateSalaryDetail.mutateAsync({
+          id: salaryDetail.id,
+          data: numericData,
         });
-        toast.success("Détail de salaire mis à jour avec succès");
+        toast({
+          title: "Succès",
+          description: "Détails du salaire mis à jour avec succès",
+        });
       } else {
-        await createSalaryDetail.mutateAsync(data);
-        toast.success("Détail de salaire créé avec succès");
+        // Create new salary detail
+        // Make sure to include all required fields and ensure none are undefined
+        const newSalaryDetail = {
+          employee_id: numericData.employee_id,
+          base_salary: numericData.base_salary,
+          contract_type: numericData.contract_type,
+          pay_grade: numericData.pay_grade,
+          currency: numericData.currency,
+          payment_frequency: numericData.payment_frequency,
+          tax_rate: numericData.tax_rate,
+        };
+        
+        await createSalaryDetail.mutateAsync(newSalaryDetail);
+        toast({
+          title: "Succès",
+          description: "Détails du salaire créés avec succès",
+        });
       }
+      
       onOpenChange(false);
-      form.reset();
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error("Error submitting salary detail:", error);
-      toast.error("Erreur lors de l'enregistrement du détail de salaire");
-    } finally {
-      setLoading(false);
+      console.error("Error saving salary detail:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de l'enregistrement des détails du salaire",
+        variant: "destructive",
+      });
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Modifier le détail de salaire" : "Ajouter un détail de salaire"}</DialogTitle>
+          <DialogTitle>{salaryDetail ? "Modifier" : "Ajouter"} les détails du salaire</DialogTitle>
           <DialogDescription>
-            {isEditing 
-              ? "Modifiez les informations du détail de salaire ci-dessous."
-              : "Remplissez les informations du détail de salaire ci-dessous."
-            }
+            {salaryDetail 
+              ? "Modifier les informations salariales de l'employé"
+              : "Ajouter les informations salariales pour un nouvel employé"}
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
-            <FormField
-              control={form.control}
-              name="employee_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Employé</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value} 
-                    disabled={isEditing}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un employé" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {employees?.map((employee) => (
-                        <SelectItem key={employee.id} value={employee.id}>
-                          {employee.name} - {employee.position}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="base_salary"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Salaire de base</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="contract_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type de contrat</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="CDI">CDI</SelectItem>
-                        <SelectItem value="CDD">CDD</SelectItem>
-                        <SelectItem value="Stage">Stage</SelectItem>
-                        <SelectItem value="Consultant">Consultant</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="pay_grade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Niveau</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value || ''} onChange={e => field.onChange(e.target.value || null)} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="base_salary">Salaire de base</Label>
+                <Input
+                  id="base_salary"
+                  name="base_salary"
+                  type="number"
+                  value={formData.base_salary}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="currency">Devise</Label>
+                <Select 
+                  value={formData.currency} 
+                  onValueChange={(value) => handleSelectChange("currency", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner une devise" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FCFA">FCFA</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Devise</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une devise" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="FCFA">FCFA</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="payment_frequency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fréquence de paiement</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une fréquence" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="monthly">Mensuel</SelectItem>
-                        <SelectItem value="biweekly">Bimensuel</SelectItem>
-                        <SelectItem value="weekly">Hebdomadaire</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="contract_type">Type de contrat</Label>
+                <Select 
+                  value={formData.contract_type} 
+                  onValueChange={(value) => handleSelectChange("contract_type", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CDI">CDI</SelectItem>
+                    <SelectItem value="CDD">CDD</SelectItem>
+                    <SelectItem value="Intérim">Intérim</SelectItem>
+                    <SelectItem value="Stage">Stage</SelectItem>
+                    <SelectItem value="Freelance">Freelance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="pay_grade">Grade</Label>
+                <Input
+                  id="pay_grade"
+                  name="pay_grade"
+                  value={formData.pay_grade}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="tax_rate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Taux d'imposition (%)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      step="0.01" 
-                      value={field.value !== null ? field.value * 100 : ''} 
-                      onChange={e => {
-                        const value = e.target.value ? parseFloat(e.target.value) / 100 : null;
-                        field.onChange(value);
-                      }} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                disabled={loading}
-              >
-                Annuler
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Traitement..." : isEditing ? "Mettre à jour" : "Ajouter"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="payment_frequency">Fréquence de paiement</Label>
+                <Select 
+                  value={formData.payment_frequency} 
+                  onValueChange={(value) => handleSelectChange("payment_frequency", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner une fréquence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Mensuel</SelectItem>
+                    <SelectItem value="biweekly">Bimensuel</SelectItem>
+                    <SelectItem value="weekly">Hebdomadaire</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="tax_rate">Taux d'imposition (%)</Label>
+                <Input
+                  id="tax_rate"
+                  name="tax_rate"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.tax_rate}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+            >
+              Annuler
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={createSalaryDetail.isPending || updateSalaryDetail.isPending}
+            >
+              {createSalaryDetail.isPending || updateSalaryDetail.isPending ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
