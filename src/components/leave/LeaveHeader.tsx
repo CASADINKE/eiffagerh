@@ -14,7 +14,7 @@ export function LeaveHeader({ openLeaveRequestDialog, isLoading, leaveRequests }
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Gestion des Congés</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Gestion des congés</h1>
         <p className="text-muted-foreground mt-1">Visualisez et gérez vos demandes de congés</p>
       </div>
       <div className="flex flex-col sm:flex-row gap-3">

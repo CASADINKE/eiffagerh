@@ -29,7 +29,7 @@ export function LeaveTypeIcon({ type }: LeaveTypeIconProps) {
       case "parental":
         return "Congé parental";
       case "other":
-        return "Autre";
+        return "Autre congé";
       default:
         return type;
     }
