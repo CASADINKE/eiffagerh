@@ -4,13 +4,15 @@ import { Search, Plus, ArrowLeft, RotateCcw, Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import EmployeeFormDialog from "@/components/employees/EmployeeFormDialog";
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [employees] = useState([]);
+  const [openForm, setOpenForm] = useState(false);
   
   const handleAddEmployee = () => {
-    toast.info("Fonctionnalité à implémenter");
+    setOpenForm(true);
   };
 
   return (
@@ -127,6 +129,9 @@ const Employees = () => {
           Nouvel employé
         </Button>
       </div>
+
+      {/* Dialog pour le formulaire d'ajout d'employé */}
+      <EmployeeFormDialog open={openForm} onOpenChange={setOpenForm} />
     </div>
   );
 };
