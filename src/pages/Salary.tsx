@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/tabs";
 import StatCard from "@/components/dashboard/StatCard";
 import { exportToCSV } from "@/utils/exportUtils";
+import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
 import {
   BarChart,
   Bar,
@@ -213,6 +214,7 @@ const Salary = () => {
             <Download size={16} />
             <span>Exporter les bulletins</span>
           </Button>
+          <SalaryPaymentDialog />
           <Button>Générer les bulletins de paie</Button>
         </div>
       </div>
