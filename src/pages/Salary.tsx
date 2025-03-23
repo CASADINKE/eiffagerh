@@ -1,88 +1,41 @@
 
-import { useState } from "react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { exportToCSV } from "@/utils/exportUtils";
-import { SalaryHeader } from "@/components/salary/SalaryHeader";
-import { SalaryStatCards } from "@/components/salary/SalaryStatCards";
-import { PayslipsTable } from "@/components/salary/PayslipsTable";
-import { SalariesTable } from "@/components/salary/SalariesTable";
-import { SalaryAnalytics } from "@/components/salary/SalaryAnalytics";
-import { 
-  salaryData, 
-  departmentSalaryData, 
-  paySlipData 
-} from "@/data/salaryData";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
+import { useSalaryPayments } from "@/hooks/useSalaryPayments";
+import { SalaryPaymentsTable } from "@/components/salary/SalaryPaymentsTable";
+import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
+import { Link } from "react-router-dom";
 
 const Salary = () => {
-  const [departmentFilter, setDepartmentFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("payslips");
-  
-  const filteredData = salaryData.filter(
-    item => departmentFilter === "all" || item.department === departmentFilter
-  );
-  
-  const departments = [...new Set(salaryData.map(item => item.department))];
-  
-  // Calculer les dépenses salariales totales
-  const totalSalaryExpense = salaryData.reduce((sum, item) => sum + item.totalSalary, 0);
-  const averageSalary = totalSalaryExpense / salaryData.length;
+  const { data: salaryPayments, isLoading: isLoadingPayments } = useSalaryPayments();
 
-  // Fonction pour exporter les bulletins de paie
-  const exportPayslips = () => {
-    const headers = {
-      id: "ID",
-      employee: "Employé",
-      position: "Poste",
-      period: "Période",
-      baseSalary: "Salaire de base",
-      allowances: "Indemnités",
-      deductions: "Déductions",
-      netSalary: "Salaire net",
-      status: "Statut",
-      date: "Date d'émission"
-    };
-    
-    exportToCSV(paySlipData, "bulletins-de-paie", headers);
-  };
-  
   return (
-    <div className="container mx-auto">
-      <SalaryHeader exportPayslips={exportPayslips} />
-      
-      <SalaryStatCards 
-        totalSalaryExpense={totalSalaryExpense} 
-        averageSalary={averageSalary} 
-      />
+    <div className="container mx-auto p-4 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Gestion des Salaires</h1>
+          <p className="text-muted-foreground">
+            Gérez les paiements de salaire et les bulletins de paie des employés
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <SalaryPaymentDialog />
+          <Button asChild>
+            <Link to="/salary-payment">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Bulletins de paie
+            </Link>
+          </Button>
+        </div>
+      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="mb-6">
-          <TabsTrigger value="payslips">Bulletins de paie</TabsTrigger>
-          <TabsTrigger value="salaries">Salaires</TabsTrigger>
-          <TabsTrigger value="analytics">Analyse</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="payslips">
-          <PayslipsTable paySlipData={paySlipData} />
-        </TabsContent>
-        
-        <TabsContent value="salaries">
-          <SalariesTable 
-            filteredData={filteredData} 
-            departmentFilter={departmentFilter}
-            setDepartmentFilter={setDepartmentFilter}
-            departments={departments}
-          />
-        </TabsContent>
-        
-        <TabsContent value="analytics">
-          <SalaryAnalytics departmentSalaryData={departmentSalaryData} />
-        </TabsContent>
-      </Tabs>
+      <div className="grid gap-6">
+        <SalaryPaymentsTable 
+          payments={salaryPayments || []} 
+          isLoading={isLoadingPayments} 
+        />
+      </div>
     </div>
   );
 };
