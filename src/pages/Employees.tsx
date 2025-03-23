@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Search, Plus, ArrowLeft, RotateCcw, Settings, X, Upload } from "lucide-react";
+import { Search, Plus, ArrowLeft, RotateCcw, Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -12,7 +11,6 @@ const Employees = () => {
   const [employees, setEmployees] = useState<any[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
-  const [formMode, setFormMode] = useState<"add" | "import">("add");
   const [loading, setLoading] = useState(true);
   
   const { fetchEmployees } = useEmployeeOperations();
@@ -43,12 +41,6 @@ const Employees = () => {
   };
   
   const handleAddEmployee = () => {
-    setFormMode("add");
-    setOpenForm(true);
-  };
-  
-  const handleImportEmployees = () => {
-    setFormMode("import");
     setOpenForm(true);
   };
 
@@ -165,17 +157,7 @@ const Employees = () => {
             className="gap-1"
             onClick={handleAddEmployee}
           >
-            <Plus size={16} />
             Ajouter
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1 bg-white"
-            onClick={handleImportEmployees}
-          >
-            <Upload size={16} />
-            Importer
           </Button>
           <Button 
             variant="outline" 
@@ -290,7 +272,7 @@ const Employees = () => {
         </Button>
       </div>
 
-      <EmployeeFormDialog open={openForm} onOpenChange={setOpenForm} mode={formMode} />
+      <EmployeeFormDialog open={openForm} onOpenChange={setOpenForm} />
     </div>
   );
 };
