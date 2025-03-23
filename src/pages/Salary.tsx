@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/tabs";
 import StatCard from "@/components/dashboard/StatCard";
 import { exportToCSV } from "@/utils/exportUtils";
-import SalaryPaymentDialog from "@/components/salary/SalaryPaymentDialog";
 import {
   BarChart,
   Bar,
@@ -187,7 +186,7 @@ const Salary = () => {
   // Fonction pour exporter les bulletins de paie
   const exportPayslips = () => {
     const headers = {
-      id: "ID", // Added the missing id field to fix the error
+      id: "ID",
       employee: "Employé",
       position: "Poste",
       period: "Période",
@@ -214,7 +213,6 @@ const Salary = () => {
             <Download size={16} />
             <span>Exporter les bulletins</span>
           </Button>
-          <SalaryPaymentDialog />
           <Button>Générer les bulletins de paie</Button>
         </div>
       </div>

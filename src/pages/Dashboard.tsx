@@ -1,10 +1,7 @@
 
-import { useEffect, useState } from "react";
 import { Users, Calendar, DollarSign, Clock } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useEmployees, EmployeeStatus } from "@/hooks/useEmployees";
 import {
   AreaChart,
   Area,
@@ -17,88 +14,24 @@ import {
   Bar,
 } from "recharts";
 
+const chartData = [
+  { name: "Jan", attendance: 92, leave: 8 },
+  { name: "Fév", attendance: 90, leave: 10 },
+  { name: "Mar", attendance: 94, leave: 6 },
+  { name: "Avr", attendance: 88, leave: 12 },
+  { name: "Mai", attendance: 96, leave: 4 },
+  { name: "Juin", attendance: 91, leave: 9 },
+];
+
+const salaryData = [
+  { name: "Ingénierie", value: 650000 },
+  { name: "Marketing", value: 500000 },
+  { name: "Ventes", value: 550000 },
+  { name: "RH", value: 450000 },
+  { name: "Finance", value: 600000 },
+];
+
 const Dashboard = () => {
-  const { data: employees, isLoading, error } = useEmployees();
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [salaryData, setSalaryData] = useState([]);
-  const [stats, setStats] = useState({
-    totalEmployees: "0",
-    leaveRequests: "0",
-    totalSalaries: "0 FCFA",
-    avgWorkHours: "0h"
-  });
-
-  useEffect(() => {
-    if (employees) {
-      // Calcul des statistiques
-      const totalEmployees = employees.length;
-      const onLeaveCount = employees.filter(emp => emp.status === "on-leave").length;
-      
-      // Estimation des salaires (pour la démonstration)
-      const avgSalary = 1100000; // Salaire moyen estimé
-      const totalSalary = totalEmployees * avgSalary;
-      
-      setStats({
-        totalEmployees: totalEmployees.toString(),
-        leaveRequests: onLeaveCount.toString(),
-        totalSalaries: `${(totalSalary).toLocaleString()} FCFA`,
-        avgWorkHours: "8,2h" // Valeur fixe pour la démonstration
-      });
-
-      // Générer des données de présence par mois
-      const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"];
-      const attendanceChartData = months.map(name => {
-        // Simuler des données d'assiduité basées sur le nombre d'employés
-        const attendance = 85 + Math.floor(Math.random() * 10);
-        const leave = 100 - attendance;
-        return { name, attendance, leave };
-      });
-      setAttendanceData(attendanceChartData);
-
-      // Générer des données de salaire par département
-      const departments = new Set(employees.map(emp => emp.department));
-      const salaryChartData = Array.from(departments).map(dept => {
-        // Filtrer les employés par département
-        const deptEmployees = employees.filter(emp => emp.department === dept);
-        // Simuler une valeur de salaire moyenne pour le département
-        const value = deptEmployees.length * avgSalary;
-        return { name: dept, value };
-      });
-      setSalaryData(salaryChartData);
-    }
-  }, [employees]);
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="mb-6">
-          <Skeleton className="h-10 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {Array(4).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Skeleton className="h-[400px] w-full" />
-          <Skeleton className="h-[400px] w-full" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="bg-destructive/10 border border-destructive text-destructive p-4 rounded-md">
-          <h2 className="text-lg font-semibold">Erreur de chargement</h2>
-          <p>Une erreur s'est produite lors du chargement des données du tableau de bord.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto">
       <div className="mb-6">
@@ -109,28 +42,28 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Employés"
-          value={stats.totalEmployees}
+          value="128"
           icon={<Users className="text-blue-500" />}
           trend={{ value: 4.5, positive: true }}
           className="bg-blue-50 border-blue-200"
         />
         <StatCard
           title="Demandes de congés"
-          value={stats.leaveRequests}
+          value="8"
           icon={<Calendar className="text-green-500" />}
           trend={{ value: 1.8, positive: false }}
           className="bg-green-50 border-green-200"
         />
         <StatCard
           title="Salaires totaux"
-          value={stats.totalSalaries}
+          value="145 500 000 FCFA"
           icon={<DollarSign className="text-amber-500" />}
           trend={{ value: 2.3, positive: true }}
           className="bg-amber-50 border-amber-200"
         />
         <StatCard
           title="Heures travaillées moy."
-          value={stats.avgWorkHours}
+          value="8,2h"
           icon={<Clock className="text-purple-500" />}
           trend={{ value: 0.5, positive: true }}
           className="bg-purple-50 border-purple-200"
@@ -145,7 +78,7 @@ const Dashboard = () => {
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={attendanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorAttendance" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
