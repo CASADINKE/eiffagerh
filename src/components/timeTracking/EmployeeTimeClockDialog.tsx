@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useTimeEntries, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,7 +33,17 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   const [searchQuery, setSearchQuery] = useState("");
   
   // Fetch employees data
-  const { data: employees, isLoading, isError } = useEmployees();
+  const { data: employees, isLoading: employeesLoading, isError: employeesError } = useEmployees();
+  
+  // Fetch time entries to know which employees are already clocked in
+  const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
+  
+  // Mutations for clock in/out
+  const clockInMutation = useClockInMutation();
+  const clockOutMutation = useClockOutMutation();
+  
+  // Loading state combines both employees and entries loading
+  const isLoading = employeesLoading || entriesLoading;
   
   // Filter employees based on search query
   const filteredEmployees = employees?.filter(employee => 
@@ -42,8 +53,17 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   );
   
   const handleClockInOut = (employeeId: string, name: string) => {
-    // In a real implementation, you would call an API to clock in/out
-    toast.success(`Pointage enregistré pour ${name}`);
+    // Check if employee is already clocked in
+    const activeEntry = getActiveTimeEntry(timeEntries, employeeId);
+    
+    if (activeEntry) {
+      // Clock out
+      clockOutMutation.mutate(activeEntry.id);
+    } else {
+      // Clock in
+      clockInMutation.mutate({ employeeId });
+    }
+    
     setOpen(false);
   };
   
@@ -84,7 +104,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p>Chargement des employés...</p>
           </div>
-        ) : isError ? (
+        ) : employeesError ? (
           <div className="py-8 text-center text-destructive">
             <p>Une erreur est survenue lors du chargement des employés.</p>
             <p className="text-sm text-muted-foreground mt-2">Veuillez réessayer ultérieurement.</p>
@@ -100,34 +120,43 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEmployees.map((employee) => (
-                <TableRow key={employee.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        {employee.avatar ? (
-                          <AvatarImage src={employee.avatar} alt={employee.name} />
-                        ) : (
-                          <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
+              {filteredEmployees.map((employee) => {
+                // Check if employee is currently clocked in
+                const activeEntry = getActiveTimeEntry(timeEntries, employee.id);
+                const isActive = !!activeEntry;
+                
+                return (
+                  <TableRow key={employee.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          {employee.avatar ? (
+                            <AvatarImage src={employee.avatar} alt={employee.name} />
+                          ) : (
+                            <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
+                          )}
+                        </Avatar>
+                        <span>{employee.name}</span>
+                        {isActive && (
+                          <span className="inline-flex h-2 w-2 rounded-full bg-green-500" />
                         )}
-                      </Avatar>
-                      <span>{employee.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{employee.position}</TableCell>
-                  <TableCell>{employee.department}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleClockInOut(employee.id, employee.name)}
-                    >
-                      <Clock size={14} />
-                      <span>Pointer</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>{employee.position}</TableCell>
+                    <TableCell>{employee.department}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant={isActive ? "destructive" : "secondary"}
+                        size="sm"
+                        onClick={() => handleClockInOut(employee.id, employee.name)}
+                      >
+                        <Clock size={14} />
+                        <span>{isActive ? "Pointer sortie" : "Pointer entrée"}</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         ) : (

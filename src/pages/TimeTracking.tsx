@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Calendar, Clock, Download, Filter, Play, Square, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,70 +35,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { EmployeeTimeClockDialog } from "@/components/timeTracking/EmployeeTimeClockDialog";
-
-// Mock time tracking data
-const timeTrackingData = [
-  {
-    id: "1",
-    employee: "Alex Johnson",
-    position: "Développeur Frontend",
-    clockIn: "09:05",
-    clockOut: "18:10",
-    totalHours: "9h 5m",
-    breakTime: "1h",
-    workingTime: "8h 5m",
-    status: "completed",
-    date: "2023-09-18",
-  },
-  {
-    id: "2",
-    employee: "Sarah Williams",
-    position: "Responsable RH",
-    clockIn: "08:55",
-    clockOut: "17:50",
-    totalHours: "8h 55m",
-    breakTime: "45m",
-    workingTime: "8h 10m",
-    status: "completed",
-    date: "2023-09-18",
-  },
-  {
-    id: "3",
-    employee: "Michael Brown",
-    position: "Chef de Produit",
-    clockIn: "09:15",
-    clockOut: "18:30",
-    totalHours: "9h 15m",
-    breakTime: "1h",
-    workingTime: "8h 15m",
-    status: "completed",
-    date: "2023-09-18",
-  },
-  {
-    id: "4",
-    employee: "Emily Davis",
-    position: "Designer UI/UX",
-    clockIn: "09:00",
-    clockOut: "--:--",
-    totalHours: "en cours",
-    breakTime: "30m",
-    workingTime: "en cours",
-    status: "active",
-    date: "2023-09-19",
-  },
-  {
-    id: "5",
-    employee: "Daniel Wilson",
-    position: "Développeur Backend",
-    clockIn: "08:45",
-    clockOut: "--:--",
-    totalHours: "en cours",
-    breakTime: "1h",
-    workingTime: "en cours",
-    status: "active",
-    date: "2023-09-19",
-  },
-];
+import { useTimeEntries, useClockOutMutation, calculateDuration, getActiveTimeEntry } from "@/hooks/useTimeEntries";
+import { useEmployees } from "@/hooks/useEmployees";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Loader2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Weekly working hours data
 const workingHoursData = [
@@ -115,34 +58,71 @@ const TimeTracking = () => {
   const [dateFilter, setDateFilter] = useState("today");
   const [employeeFilter, setEmployeeFilter] = useState("all");
   
-  // Fixed type error by using correct equality check with string values
-  const filteredTimeData = timeTrackingData.filter(
-    record => 
-      (dateFilter === "today" && record.date === "2023-09-19") ||
-      (dateFilter === "yesterday" && record.date === "2023-09-18") ||
-      dateFilter === "all"
-  );
+  // Fetch employees for the filter dropdown
+  const { data: employees = [], isLoading: employeesLoading } = useEmployees();
   
-  // Time tracking metrics
-  const activeEmployees = timeTrackingData.filter(
-    record => record.status === "active" && record.date === "2023-09-19"
+  // Fetch time entries with optional employee filter
+  const { 
+    data: timeEntries = [], 
+    isLoading: entriesLoading,
+    isError: entriesError
+  } = useTimeEntries(employeeFilter !== "all" ? employeeFilter : undefined);
+  
+  // Clock out mutation
+  const clockOutMutation = useClockOutMutation();
+  
+  // Format date to match the filter needs
+  const getFilterDate = (date: string) => {
+    return format(new Date(date), "yyyy-MM-dd");
+  };
+  
+  // Get today and yesterday dates for filtering
+  const today = format(new Date(), "yyyy-MM-dd");
+  const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
+  
+  // Filter time entries by date
+  const filteredTimeEntries = timeEntries.filter(entry => {
+    const entryDate = getFilterDate(entry.date);
+    return (
+      (dateFilter === "today" && entryDate === today) ||
+      (dateFilter === "yesterday" && entryDate === yesterday) ||
+      dateFilter === "all"
+    );
+  });
+  
+  // Calculate metrics for the stats cards
+  const activeEmployeeCount = timeEntries.filter(
+    entry => !entry.clock_out && getFilterDate(entry.date) === today
   ).length;
   
-  // Fixed type error by providing a default for empty array and properly handling types
-  const completedRecordsToday = timeTrackingData.filter(
-    record => record.status === "completed" && record.date === "2023-09-19"
+  const completedEntriesForToday = timeEntries.filter(
+    entry => entry.clock_out && getFilterDate(entry.date) === today
   );
   
-  const averageHoursToday = completedRecordsToday.length > 0
-    ? completedRecordsToday.reduce((acc, curr) => {
-        // Handle the ongoing case where workingTime might be a string "ongoing"
-        if (curr.workingTime === "en cours") return acc;
-        
-        const hours = parseFloat(curr.workingTime.split("h")[0]);
-        const minutes = parseFloat(curr.workingTime.split("h ")[1]?.split("m")[0] || "0") / 60;
-        return acc + hours + minutes;
-      }, 0) / completedRecordsToday.length
+  // Calculate average hours for completed entries today
+  const totalCompletedHours = completedEntriesForToday.reduce((acc, entry) => {
+    const duration = calculateDuration(entry.clock_in, entry.clock_out, entry.break_time);
+    if (duration === "en cours") return acc;
+    
+    const [hours, minutes] = duration.split("h ").map(part => parseFloat(part.replace("m", "")));
+    return acc + hours + (minutes / 60 || 0);
+  }, 0);
+  
+  const averageHours = completedEntriesForToday.length 
+    ? (totalCompletedHours / completedEntriesForToday.length).toFixed(1) 
     : 0;
+  
+  // Handle clock out action
+  const handleClockOut = (entryId: string) => {
+    clockOutMutation.mutate(entryId);
+  };
+  
+  // Helper to get initials for avatar
+  const getInitials = (name: string = "") => {
+    return name.split(" ").map(n => n[0]).join("");
+  };
+  
+  const isLoading = employeesLoading || entriesLoading;
   
   return (
     <div className="container mx-auto">
@@ -163,19 +143,18 @@ const TimeTracking = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
           title="Employés actifs"
-          value={activeEmployees.toString()}
+          value={activeEmployeeCount.toString()}
           icon={<Users />}
         />
         <StatCard
           title="Moyenne d'heures aujourd'hui"
-          value={averageHoursToday ? `${averageHoursToday.toFixed(1)}h` : "N/A"}
+          value={`${averageHours}h`}
           icon={<Clock />}
         />
         <StatCard
-          title="Approbations en attente"
-          value="3"
+          title="Pointages à approuver"
+          value={filteredTimeEntries.length.toString()}
           icon={<Calendar />}
-          trend={{ value: 2, positive: false }}
         />
       </div>
       
@@ -242,125 +221,144 @@ const TimeTracking = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les employés</SelectItem>
-                  <SelectItem value="alex">Alex Johnson</SelectItem>
-                  <SelectItem value="sarah">Sarah Williams</SelectItem>
-                  <SelectItem value="michael">Michael Brown</SelectItem>
+                  {employees.map(employee => (
+                    <SelectItem key={employee.id} value={employee.id}>
+                      {employee.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           
           <TabsContent value="today" className="m-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employé</TableHead>
-                    <TableHead>Poste</TableHead>
-                    <TableHead>Entrée</TableHead>
-                    <TableHead>Sortie</TableHead>
-                    <TableHead>Heures totales</TableHead>
-                    <TableHead>Pause</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTimeData.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell className="font-medium">{record.employee}</TableCell>
-                      <TableCell>{record.position}</TableCell>
-                      <TableCell>{record.clockIn}</TableCell>
-                      <TableCell>{record.clockOut}</TableCell>
-                      <TableCell>{record.totalHours}</TableCell>
-                      <TableCell>{record.breakTime}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          {record.status === "active" ? (
-                            <>
-                              <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                              <span>Actif</span>
-                            </>
-                          ) : (
-                            <span>Terminé</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {record.status === "active" ? (
-                          <Button variant="outline" size="sm" className="gap-1">
-                            <Square size={14} />
-                            <span>Pointer sortie</span>
-                          </Button>
-                        ) : (
-                          <Button variant="outline" size="sm" className="gap-1">
-                            <Play size={14} />
-                            <span>Pointer entrée</span>
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              
-              {filteredTimeData.length === 0 && (
-                <div className="py-6 text-center">
-                  <p className="text-muted-foreground">Aucun enregistrement trouvé pour le filtre sélectionné.</p>
-                </div>
-              )}
-            </div>
+            {renderTimeEntriesTable()}
           </TabsContent>
           
           <TabsContent value="yesterday" className="m-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employé</TableHead>
-                    <TableHead>Poste</TableHead>
-                    <TableHead>Entrée</TableHead>
-                    <TableHead>Sortie</TableHead>
-                    <TableHead>Heures totales</TableHead>
-                    <TableHead>Pause</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTimeData.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell className="font-medium">{record.employee}</TableCell>
-                      <TableCell>{record.position}</TableCell>
-                      <TableCell>{record.clockIn}</TableCell>
-                      <TableCell>{record.clockOut}</TableCell>
-                      <TableCell>{record.totalHours}</TableCell>
-                      <TableCell>{record.breakTime}</TableCell>
-                      <TableCell>
-                        <span>Terminé</span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">
-                          Voir détails
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            {renderTimeEntriesTable()}
           </TabsContent>
           
           <TabsContent value="history" className="m-0">
-            <div className="p-6 text-center">
-              <p className="text-muted-foreground mb-4">Sélectionnez une plage de dates pour consulter l'historique de pointage.</p>
-              <Button>Choisir une plage de dates</Button>
-            </div>
+            {renderTimeEntriesTable()}
           </TabsContent>
         </Tabs>
       </Card>
     </div>
   );
+  
+  // Helper function to render the time entries table
+  function renderTimeEntriesTable() {
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+          <p>Chargement des pointages...</p>
+        </div>
+      );
+    }
+    
+    if (entriesError) {
+      return (
+        <div className="p-8 text-center text-destructive">
+          <p>Une erreur est survenue lors du chargement des pointages.</p>
+          <p className="text-sm text-muted-foreground mt-2">Veuillez réessayer ultérieurement.</p>
+        </div>
+      );
+    }
+    
+    if (filteredTimeEntries.length === 0) {
+      return (
+        <div className="p-8 text-center">
+          <p className="text-muted-foreground">Aucun pointage trouvé pour les critères sélectionnés.</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Employé</TableHead>
+              <TableHead>Département</TableHead>
+              <TableHead>Entrée</TableHead>
+              <TableHead>Sortie</TableHead>
+              <TableHead>Durée</TableHead>
+              <TableHead>Pause</TableHead>
+              <TableHead>Statut</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredTimeEntries.map((entry) => {
+              const isActive = !entry.clock_out;
+              const formattedClockIn = format(new Date(entry.clock_in), "HH:mm", { locale: fr });
+              const formattedClockOut = entry.clock_out 
+                ? format(new Date(entry.clock_out), "HH:mm", { locale: fr }) 
+                : "--:--";
+              const duration = calculateDuration(entry.clock_in, entry.clock_out, entry.break_time);
+              const breakTime = `${entry.break_time}m`;
+              
+              return (
+                <TableRow key={entry.id}>
+                  <TableCell>
+                    {entry.employee && (
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          {entry.employee.avatar ? (
+                            <AvatarImage src={entry.employee.avatar} alt={entry.employee.name} />
+                          ) : (
+                            <AvatarFallback>{getInitials(entry.employee.name)}</AvatarFallback>
+                          )}
+                        </Avatar>
+                        <span>{entry.employee.name}</span>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>{entry.employee?.department || "Non assigné"}</TableCell>
+                  <TableCell>{formattedClockIn}</TableCell>
+                  <TableCell>{formattedClockOut}</TableCell>
+                  <TableCell>{duration}</TableCell>
+                  <TableCell>{breakTime}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      {isActive ? (
+                        <>
+                          <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                          <span>Actif</span>
+                        </>
+                      ) : (
+                        <span>Terminé</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {isActive ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-1"
+                        onClick={() => handleClockOut(entry.id)}
+                      >
+                        <Square size={14} />
+                        <span>Pointer sortie</span>
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="sm" className="gap-1" disabled>
+                        <Clock size={14} />
+                        <span>Terminé</span>
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
 };
 
 export default TimeTracking;
