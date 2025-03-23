@@ -71,11 +71,16 @@ const Employees = () => {
     loadEmployees();
   };
 
+  const handleDeleteRecent = () => {
+    setDeleteRecentDialogOpen(true);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <EmployeeActionBar 
         onAddEmployee={handleAddEmployee} 
         onRefresh={handleRefresh}
+        onDeleteRecent={handleDeleteRecent}
       />
 
       <EmployeeSearchBar 

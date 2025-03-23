@@ -45,7 +45,7 @@ const Sidebar = () => {
   };
 
   return (
-    <SidebarComponent className="transition-all duration-300 ease-in-out border-r border-sidebar-border shadow-sm">
+    <SidebarComponent className="transition-all duration-300 ease-in-out border-r border-sidebar-border shadow-sm bg-[#1a202c] text-white">
       <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
         <div className={cn("flex items-center", collapsed ? "justify-center w-full" : "")}>
           {!collapsed && (
@@ -55,7 +55,7 @@ const Sidebar = () => {
                 alt="EIFFAGE" 
                 className="h-6 mr-1"
               />
-              <span className="font-semibold text-lg text-sidebar-foreground">
+              <span className="font-semibold text-lg text-white">
                 RH
               </span>
             </div>
@@ -74,7 +74,7 @@ const Sidebar = () => {
         {!isMobile && (
           <button 
             onClick={toggleSidebar}
-            className="text-sidebar-foreground hover:text-primary transition-colors bg-sidebar-accent/50 p-1 rounded-md hover:bg-sidebar-accent"
+            className="text-white hover:text-blue-300 transition-colors bg-slate-700/50 p-1 rounded-md hover:bg-slate-700"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -83,10 +83,10 @@ const Sidebar = () => {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className={cn("text-xs uppercase tracking-wider text-sidebar-foreground/70 px-4 pt-4", collapsed && "sr-only")}>
-            Navigation principale
+          <SidebarGroupLabel className={cn("text-xs uppercase tracking-wider text-gray-400 px-4 pt-4", collapsed && "sr-only")}>
+            NAVIGATION PRINCIPALE
           </SidebarGroupLabel>
-          <SidebarGroupContent className="mt-2">
+          <SidebarGroupContent className="mt-2 px-2">
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
@@ -94,10 +94,10 @@ const Sidebar = () => {
                     <NavLink
                       to={item.path}
                       className={({ isActive }) => cn(
-                        "flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200",
+                        "flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 my-1",
                         isActive
-                          ? "text-sidebar-primary-foreground bg-sidebar-primary shadow-sm"
-                          : "text-sidebar-foreground hover:text-sidebar-primary hover:bg-sidebar-accent",
+                          ? "text-white bg-blue-600"
+                          : "text-gray-300 hover:text-white hover:bg-blue-600/90",
                         collapsed && "justify-center"
                       )}
                     >
@@ -112,18 +112,18 @@ const Sidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="px-4 py-3 border-t border-sidebar-border mt-auto">
+      <SidebarFooter className="px-4 py-3 border-t border-slate-700/50 mt-auto">
         <div className={cn(
           "flex items-center gap-3",
           collapsed && "justify-center"
         )}>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm">
             <span className="text-xs font-semibold">AD</span>
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Administrateur</span>
-              <span className="text-xs text-sidebar-foreground/70">Admin</span>
+              <span className="text-sm font-medium text-white">Administrateur</span>
+              <span className="text-xs text-gray-400">Admin</span>
             </div>
           )}
         </div>
