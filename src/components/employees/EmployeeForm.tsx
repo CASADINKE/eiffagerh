@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,9 +65,17 @@ interface EmployeeFormProps {
   onSubmit: (values: EmployeeFormData) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  initialValues?: Partial<EmployeeFormData>;
+  mode?: "create" | "edit";
 }
 
-const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormProps) => {
+const EmployeeForm = ({ 
+  onSubmit, 
+  onCancel, 
+  isLoading = false,
+  initialValues,
+  mode = "create"
+}: EmployeeFormProps) => {
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
@@ -82,6 +90,14 @@ const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormPro
       site: "",
     },
   });
+
+  // Reset form with initialValues when they change
+  useEffect(() => {
+    if (initialValues) {
+      // Reset the form with initial values
+      form.reset(initialValues);
+    }
+  }, [initialValues, form]);
 
   return (
     <Form {...form}>
