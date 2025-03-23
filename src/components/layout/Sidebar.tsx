@@ -1,17 +1,14 @@
-
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users,
   Calendar, 
-  DollarSign, 
   Clock, 
   Settings,
   ChevronLeft,
   ChevronRight,
-  Building,
-  Wallet
+  Building
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -31,8 +28,6 @@ const navigationItems = [
   { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
-  { path: "/salary", title: "Paie", icon: DollarSign },
-  { path: "/salary-payment", title: "Paiement Salaire", icon: Wallet },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
   { path: "/settings", title: "Paramètres", icon: Settings },
 ];
