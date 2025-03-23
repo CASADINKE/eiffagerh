@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Bell, Search, Moon, Sun } from "lucide-react";
+import { Bell, Search, Moon, Sun, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,13 +24,13 @@ const Header = () => {
   };
 
   return (
-    <header className="h-16 border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-10 flex items-center justify-between px-6">
+    <header className="h-16 border-b border-border/70 backdrop-blur-sm bg-background/80 sticky top-0 z-10 flex items-center justify-between px-6 shadow-sm">
       <div className="relative w-64">
-        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
         <Input 
           type="search" 
           placeholder="Rechercher..." 
-          className="pl-9 h-9 bg-secondary border-none w-full" 
+          className="pl-10 h-9 bg-secondary/80 border-none w-full rounded-full" 
         />
       </div>
       
@@ -38,7 +38,7 @@ const Header = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="rounded-full text-muted-foreground hover:text-foreground"
+          className="rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary/80"
           onClick={handleNotificationClick}
         >
           <Bell size={18} />
@@ -47,7 +47,7 @@ const Header = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="rounded-full text-muted-foreground hover:text-foreground"
+          className="rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary/80"
           onClick={toggleTheme}
         >
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
@@ -55,15 +55,18 @@ const Header = () => {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 gap-2 font-normal">
-              <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white">
+            <Button variant="ghost" className="h-9 gap-2 font-normal rounded-full hover:bg-secondary/80">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white shadow-sm">
                 <span className="text-xs font-semibold">AD</span>
               </div>
               <span className="hidden sm:inline">Administrateur</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>Profil</DropdownMenuItem>
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              Profil
+            </DropdownMenuItem>
             <DropdownMenuItem>Paramètres</DropdownMenuItem>
             <DropdownMenuItem>Déconnexion</DropdownMenuItem>
           </DropdownMenuContent>

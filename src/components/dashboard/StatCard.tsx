@@ -16,12 +16,12 @@ interface StatCardProps {
 const StatCard = ({ title, value, icon, trend, className }: StatCardProps) => {
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-xl border bg-card p-5 shadow-elevation-1 transition-all hover:shadow-elevation-2",
+      "relative overflow-hidden rounded-xl border bg-card p-5 shadow-sm card-hover",
       className
     )}>
       <div className="flex justify-between items-start mb-4">
         <div className="text-muted-foreground text-sm font-medium">{title}</div>
-        <div className="text-primary">{icon}</div>
+        <div className="text-primary bg-primary/10 p-2 rounded-lg">{icon}</div>
       </div>
       
       <div className="text-2xl font-semibold mb-2">{value}</div>

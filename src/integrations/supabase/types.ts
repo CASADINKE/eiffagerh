@@ -9,38 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      departments: {
-        Row: {
-          created_at: string
-          id: string
-          manager_id: string | null
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          manager_id?: string | null
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          manager_id?: string | null
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "departments_manager_id_fkey"
-            columns: ["manager_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       employees: {
         Row: {
           address: string | null
@@ -224,56 +192,7 @@ export type Database = {
           role?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_department_id_fkey"
-            columns: ["department_id"]
-            isOneToOne: false
-            referencedRelation: "departments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      salaries: {
-        Row: {
-          amount: number
-          change_reason: string | null
-          created_at: string
-          effective_date: string
-          employee_id: string
-          id: string
-          previous_amount: number | null
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          change_reason?: string | null
-          created_at?: string
-          effective_date: string
-          employee_id: string
-          id?: string
-          previous_amount?: number | null
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          change_reason?: string | null
-          created_at?: string
-          effective_date?: string
-          employee_id?: string
-          id?: string
-          previous_amount?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "salaries_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       time_entries: {
         Row: {
