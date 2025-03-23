@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,10 +16,12 @@ import { PayslipDetails } from "@/components/salary/PayslipDetails";
 import { Payslip } from "@/services/payslipService";
 import { exportToCSV } from "@/utils/exportUtils";
 import { supabase } from "@/integrations/supabase/client";
+import { useSalaryDetails } from "@/hooks/useSalaryDetails";
 
 const SalaryPayment = () => {
   const { data: employees, isLoading: isLoadingEmployees } = useEmployees();
   const { data: payments, isLoading: isLoadingPayments } = useSalaryPayments();
+  const { data: salaryDetails, isLoading: isLoadingSalaryDetails } = useSalaryDetails();
   
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
   const { data: payslips, isLoading: isLoadingPayslips } = usePayslipsByPaymentId(selectedPaymentId);
@@ -52,6 +55,7 @@ const SalaryPayment = () => {
         return;
       }
       
+      // Ensure each employee has a profile
       const profilePromises = employees.map(async (employee) => {
         const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
@@ -77,15 +81,31 @@ const SalaryPayment = () => {
       
       await Promise.all(profilePromises);
       
+      // Generate payslips with calculations based on employee data
       const newPayslips = employees.map(employee => {
-        const baseSalary = 150000;
+        // Find salary details for this employee or use default values
+        const employeeSalaryDetail = salaryDetails?.find(sd => sd.employee_id === employee.id);
+        
+        // Basic salary calculation (use salary detail if available, otherwise use default)
+        const baseSalary = employeeSalaryDetail?.base_salary || 150000;
+        
+        // Standard allowances
         const transportAllowance = 26000;
         const displacementAllowance = 197000;
         const allowances = transportAllowance + displacementAllowance;
-        const socialContributions = 24836;
-        const taxAmount = 89308;
+        
+        // Calculate deductions based on salary
+        const socialContributions = Math.round(baseSalary * 0.1656); // 16.56% of base salary
+        const taxRate = employeeSalaryDetail?.tax_rate || 0.15; // 15% by default
+        const taxAmount = Math.round((baseSalary + allowances) * taxRate);
+        
+        // Total deductions and net salary
         const deductions = socialContributions;
         const netSalary = baseSalary + allowances - deductions - taxAmount;
+        
+        // Calculate social gross and IR base
+        const socialGross = Math.round(baseSalary * 1.5);
+        const irBase = socialGross;
         
         return {
           employee_id: employee.id,
@@ -107,9 +127,9 @@ const SalaryPayment = () => {
             displacement_allowance: displacementAllowance,
             employer: employee.employeur || "EIFFAGE ENERGIE T&D Sénégal",
             site: employee.site || "AV PETIT MBAO X RTE DES BRAS BP 29389 DAKAR SÉNÉGAL",
-            social_gross: 443511,
-            ir_base: 483511,
-            total_deductions: 354350
+            social_gross: socialGross,
+            ir_base: irBase,
+            total_deductions: deductions + taxAmount
           }
         };
       });
@@ -186,7 +206,7 @@ const SalaryPayment = () => {
     }, 1500);
   };
   
-  const isLoading = isLoadingEmployees || isLoadingPayments || isLoadingPayslips;
+  const isLoading = isLoadingEmployees || isLoadingPayments || isLoadingPayslips || isLoadingSalaryDetails;
   
   return (
     <div className="container mx-auto p-4">
