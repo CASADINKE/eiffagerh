@@ -40,9 +40,9 @@ const timeTrackingData = [
   {
     id: "1",
     employee: "Alex Johnson",
-    position: "Frontend Developer",
-    clockIn: "09:05 AM",
-    clockOut: "06:10 PM",
+    position: "Développeur Frontend",
+    clockIn: "09:05",
+    clockOut: "18:10",
     totalHours: "9h 5m",
     breakTime: "1h",
     workingTime: "8h 5m",
@@ -52,9 +52,9 @@ const timeTrackingData = [
   {
     id: "2",
     employee: "Sarah Williams",
-    position: "HR Manager",
-    clockIn: "08:55 AM",
-    clockOut: "05:50 PM",
+    position: "Responsable RH",
+    clockIn: "08:55",
+    clockOut: "17:50",
     totalHours: "8h 55m",
     breakTime: "45m",
     workingTime: "8h 10m",
@@ -64,9 +64,9 @@ const timeTrackingData = [
   {
     id: "3",
     employee: "Michael Brown",
-    position: "Product Manager",
-    clockIn: "09:15 AM",
-    clockOut: "06:30 PM",
+    position: "Chef de Produit",
+    clockIn: "09:15",
+    clockOut: "18:30",
     totalHours: "9h 15m",
     breakTime: "1h",
     workingTime: "8h 15m",
@@ -76,24 +76,24 @@ const timeTrackingData = [
   {
     id: "4",
     employee: "Emily Davis",
-    position: "UI/UX Designer",
-    clockIn: "09:00 AM",
-    clockOut: "--:-- --",
-    totalHours: "ongoing",
+    position: "Designer UI/UX",
+    clockIn: "09:00",
+    clockOut: "--:--",
+    totalHours: "en cours",
     breakTime: "30m",
-    workingTime: "ongoing",
+    workingTime: "en cours",
     status: "active",
     date: "2023-09-19",
   },
   {
     id: "5",
     employee: "Daniel Wilson",
-    position: "Backend Developer",
-    clockIn: "08:45 AM",
-    clockOut: "--:-- --",
-    totalHours: "ongoing",
+    position: "Développeur Backend",
+    clockIn: "08:45",
+    clockOut: "--:--",
+    totalHours: "en cours",
     breakTime: "1h",
-    workingTime: "ongoing",
+    workingTime: "en cours",
     status: "active",
     date: "2023-09-19",
   },
@@ -101,13 +101,13 @@ const timeTrackingData = [
 
 // Weekly working hours data
 const workingHoursData = [
-  { day: "Mon", hours: 8.2 },
-  { day: "Tue", hours: 8.5 },
-  { day: "Wed", hours: 7.8 },
-  { day: "Thu", hours: 8.3 },
-  { day: "Fri", hours: 7.5 },
-  { day: "Sat", hours: 4.2 },
-  { day: "Sun", hours: 0 },
+  { day: "Lun", hours: 8.2 },
+  { day: "Mar", hours: 8.5 },
+  { day: "Mer", hours: 7.8 },
+  { day: "Jeu", hours: 8.3 },
+  { day: "Ven", hours: 7.5 },
+  { day: "Sam", hours: 4.2 },
+  { day: "Dim", hours: 0 },
 ];
 
 const TimeTracking = () => {
@@ -136,7 +136,7 @@ const TimeTracking = () => {
   const averageHoursToday = completedRecordsToday.length > 0
     ? completedRecordsToday.reduce((acc, curr) => {
         // Handle the ongoing case where workingTime might be a string "ongoing"
-        if (curr.workingTime === "ongoing") return acc;
+        if (curr.workingTime === "en cours") return acc;
         
         const hours = parseFloat(curr.workingTime.split("h")[0]);
         const minutes = parseFloat(curr.workingTime.split("h ")[1]?.split("m")[0] || "0") / 60;
@@ -148,18 +148,18 @@ const TimeTracking = () => {
     <div className="container mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-semibold">Time Tracking</h1>
-          <p className="text-muted-foreground">Monitor employee attendance and working hours</p>
+          <h1 className="text-3xl font-semibold">Pointage</h1>
+          <p className="text-muted-foreground">Suivi des présences et des heures de travail des employés</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2">
             <Download size={16} />
-            <span>Export Report</span>
+            <span>Exporter le rapport</span>
           </Button>
           <div className="relative">
             <Button className="gap-2">
               <Clock size={16} />
-              <span>Clock In/Out</span>
+              <span>Pointer entrée/sortie</span>
             </Button>
           </div>
         </div>
@@ -167,17 +167,17 @@ const TimeTracking = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
-          title="Active Employees"
+          title="Employés actifs"
           value={activeEmployees.toString()}
           icon={<Users />}
         />
         <StatCard
-          title="Today's Average Hours"
+          title="Moyenne d'heures aujourd'hui"
           value={averageHoursToday ? `${averageHoursToday.toFixed(1)}h` : "N/A"}
           icon={<Clock />}
         />
         <StatCard
-          title="Pending Approvals"
+          title="Approbations en attente"
           value="3"
           icon={<Calendar />}
           trend={{ value: 2, positive: false }}
@@ -186,7 +186,7 @@ const TimeTracking = () => {
       
       <Card className="mb-8">
         <div className="p-5">
-          <h2 className="text-lg font-semibold mb-4">Weekly Working Hours</h2>
+          <h2 className="text-lg font-semibold mb-4">Heures de travail hebdomadaires</h2>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={workingHoursData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -205,7 +205,7 @@ const TimeTracking = () => {
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '0.5rem'
                   }} 
-                  formatter={(value) => [`${value} hours`, 'Working Time']}
+                  formatter={(value) => [`${value} heures`, 'Temps de travail']}
                 />
                 <Area
                   type="monotone"
@@ -224,29 +224,29 @@ const TimeTracking = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-col sm:flex-row justify-between p-4 border-b border-border">
             <TabsList className="mb-4 sm:mb-0">
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="today">Aujourd'hui</TabsTrigger>
+              <TabsTrigger value="yesterday">Hier</TabsTrigger>
+              <TabsTrigger value="history">Historique</TabsTrigger>
             </TabsList>
             
             <div className="flex gap-2">
               <Select value={dateFilter} onValueChange={setDateFilter}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Filter by date" />
+                  <SelectValue placeholder="Filtrer par date" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="yesterday">Yesterday</SelectItem>
-                  <SelectItem value="all">All Dates</SelectItem>
+                  <SelectItem value="today">Aujourd'hui</SelectItem>
+                  <SelectItem value="yesterday">Hier</SelectItem>
+                  <SelectItem value="all">Toutes les dates</SelectItem>
                 </SelectContent>
               </Select>
               
               <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by employee" />
+                  <SelectValue placeholder="Filtrer par employé" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Employees</SelectItem>
+                  <SelectItem value="all">Tous les employés</SelectItem>
                   <SelectItem value="alex">Alex Johnson</SelectItem>
                   <SelectItem value="sarah">Sarah Williams</SelectItem>
                   <SelectItem value="michael">Michael Brown</SelectItem>
@@ -260,13 +260,13 @@ const TimeTracking = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Clock In</TableHead>
-                    <TableHead>Clock Out</TableHead>
-                    <TableHead>Total Hours</TableHead>
-                    <TableHead>Break Time</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Employé</TableHead>
+                    <TableHead>Poste</TableHead>
+                    <TableHead>Entrée</TableHead>
+                    <TableHead>Sortie</TableHead>
+                    <TableHead>Heures totales</TableHead>
+                    <TableHead>Pause</TableHead>
+                    <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -284,10 +284,10 @@ const TimeTracking = () => {
                           {record.status === "active" ? (
                             <>
                               <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                              <span>Active</span>
+                              <span>Actif</span>
                             </>
                           ) : (
-                            <span>Completed</span>
+                            <span>Terminé</span>
                           )}
                         </div>
                       </TableCell>
@@ -295,12 +295,12 @@ const TimeTracking = () => {
                         {record.status === "active" ? (
                           <Button variant="outline" size="sm" className="gap-1">
                             <Square size={14} />
-                            <span>Clock Out</span>
+                            <span>Pointer sortie</span>
                           </Button>
                         ) : (
                           <Button variant="outline" size="sm" className="gap-1">
                             <Play size={14} />
-                            <span>Clock In</span>
+                            <span>Pointer entrée</span>
                           </Button>
                         )}
                       </TableCell>
@@ -311,7 +311,7 @@ const TimeTracking = () => {
               
               {filteredTimeData.length === 0 && (
                 <div className="py-6 text-center">
-                  <p className="text-muted-foreground">No time tracking records found for the selected filter.</p>
+                  <p className="text-muted-foreground">Aucun enregistrement trouvé pour le filtre sélectionné.</p>
                 </div>
               )}
             </div>
@@ -322,13 +322,13 @@ const TimeTracking = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Clock In</TableHead>
-                    <TableHead>Clock Out</TableHead>
-                    <TableHead>Total Hours</TableHead>
-                    <TableHead>Break Time</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Employé</TableHead>
+                    <TableHead>Poste</TableHead>
+                    <TableHead>Entrée</TableHead>
+                    <TableHead>Sortie</TableHead>
+                    <TableHead>Heures totales</TableHead>
+                    <TableHead>Pause</TableHead>
+                    <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -342,11 +342,11 @@ const TimeTracking = () => {
                       <TableCell>{record.totalHours}</TableCell>
                       <TableCell>{record.breakTime}</TableCell>
                       <TableCell>
-                        <span>Completed</span>
+                        <span>Terminé</span>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button variant="outline" size="sm">
-                          View Details
+                          Voir détails
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -358,8 +358,8 @@ const TimeTracking = () => {
           
           <TabsContent value="history" className="m-0">
             <div className="p-6 text-center">
-              <p className="text-muted-foreground mb-4">Select a date range to view historical time tracking data.</p>
-              <Button>Choose Date Range</Button>
+              <p className="text-muted-foreground mb-4">Sélectionnez une plage de dates pour consulter l'historique de pointage.</p>
+              <Button>Choisir une plage de dates</Button>
             </div>
           </TabsContent>
         </Tabs>
