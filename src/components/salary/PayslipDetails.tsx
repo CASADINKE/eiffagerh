@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Payslip } from "@/services/salaryPaymentService";
 import { format } from "date-fns";
+import { exportToCSV } from "@/utils/exportUtils";
 
 interface PayslipDetailsProps {
   payslip: Payslip;
@@ -23,16 +24,53 @@ export function PayslipDetails({
   onPrint, 
   onDownload 
 }: PayslipDetailsProps) {
+  const handleDownload = () => {
+    // Prepare payslip data for download
+    const payslipData = [{
+      id: payslip.id,
+      employee: payslip.employee?.full_name || "Employé",
+      poste: payslip.employee?.role || "N/A",
+      periode: paymentPeriod || format(new Date(), 'MMMM yyyy'),
+      salaire_base: payslip.base_salary,
+      indemnites: payslip.allowances,
+      deductions: payslip.deductions,
+      impots: payslip.tax_amount,
+      salaire_net: payslip.net_salary,
+      mode_paiement: paymentMethod
+    }];
+
+    // Use the exportToCSV function from exportUtils
+    exportToCSV(
+      payslipData,
+      `bulletin-paie-${payslip.employee?.full_name || "employe"}-${paymentPeriod?.replace(/\s/g, "-") || "periode"}`,
+      {
+        id: "Identifiant",
+        employee: "Employé",
+        poste: "Poste",
+        periode: "Période",
+        salaire_base: "Salaire de base",
+        indemnites: "Indemnités",
+        deductions: "Déductions",
+        impots: "Impôts",
+        salaire_net: "Salaire net",
+        mode_paiement: "Mode de paiement"
+      }
+    );
+    
+    // Call the onDownload prop
+    onDownload();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-white max-w-3xl w-full rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center bg-blue-100">
-          <h2 className="text-xl font-semibold text-blue-950">Bulletin de paie</h2>
+        <div className="p-4 border-b flex justify-between items-center bg-blue-800">
+          <h2 className="text-xl font-bold text-white">Bulletin de paie</h2>
           <div className="flex space-x-2">
             <Button 
               size="sm" 
               variant="default" 
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium" 
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold" 
               onClick={onPrint}
             >
               <Printer className="h-4 w-4 mr-2" />
@@ -41,8 +79,8 @@ export function PayslipDetails({
             <Button 
               size="sm" 
               variant="default" 
-              className="bg-green-600 hover:bg-green-700 text-white font-medium" 
-              onClick={onDownload}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold" 
+              onClick={handleDownload}
             >
               <FileDown className="h-4 w-4 mr-2" />
               Télécharger
@@ -50,7 +88,7 @@ export function PayslipDetails({
             <Button 
               size="sm" 
               variant="outline" 
-              className="border-gray-400 hover:bg-gray-100"
+              className="bg-white border-gray-400 hover:bg-gray-100 font-medium"
               onClick={onClose}
             >
               <X className="h-4 w-4" />
@@ -58,10 +96,10 @@ export function PayslipDetails({
           </div>
         </div>
         
-        <div className="overflow-y-auto p-6 bg-gray-50">
+        <div className="overflow-y-auto p-6 bg-gray-100">
           <div className="border rounded-md overflow-hidden shadow-lg bg-white">
             {/* En-tête du bulletin */}
-            <div className="text-center font-bold text-lg py-3 border-b bg-gray-800 text-white">
+            <div className="text-center font-bold text-lg py-3 border-b bg-gray-900 text-white">
               BULLETIN DE PAIE
             </div>
             
@@ -101,7 +139,7 @@ export function PayslipDetails({
             </div>
             
             {/* Corps du bulletin */}
-            <div className="px-4 py-2 border-b bg-blue-700 text-white font-semibold">
+            <div className="px-4 py-2 border-b bg-blue-800 text-white font-semibold">
               Convention Collective Nationale
             </div>
             
@@ -131,7 +169,7 @@ export function PayslipDetails({
             {/* Détails des rubriques */}
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-200 text-sm">
+                <tr className="bg-gray-300 text-sm">
                   <th className="border-r px-2 py-2 text-left font-bold text-gray-900">Libellé</th>
                   <th className="border-r px-2 py-2 text-center font-bold text-gray-900">Nombre ou Base</th>
                   <th className="border-r px-2 py-2 text-center font-bold text-gray-900">Taux</th>
@@ -151,7 +189,7 @@ export function PayslipDetails({
                   <td className="border-r px-2 py-2"></td>
                   <td className="px-2 py-2"></td>
                 </tr>
-                <tr className="text-sm bg-blue-50 hover:bg-blue-100">
+                <tr className="text-sm bg-blue-100 hover:bg-blue-200">
                   <td className="border-r px-2 py-2 font-medium text-gray-800">105 IPRES</td>
                   <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{payslip.base_salary.toLocaleString()}</td>
                   <td className="border-r px-2 py-2 text-center font-medium text-gray-800">0.0580</td>
@@ -169,7 +207,7 @@ export function PayslipDetails({
                   <td className="border-r px-2 py-2"></td>
                   <td className="px-2 py-2"></td>
                 </tr>
-                <tr className="text-sm bg-blue-50 hover:bg-blue-100">
+                <tr className="text-sm bg-blue-100 hover:bg-blue-200">
                   <td className="border-r px-2 py-2 font-medium text-gray-800">420 Prime de transport</td>
                   <td className="border-r px-2 py-2 text-right font-medium text-gray-800">26 000</td>
                   <td className="border-r px-2 py-2 text-center font-medium text-gray-800">1.000</td>
@@ -187,7 +225,7 @@ export function PayslipDetails({
                   <td className="border-r px-2 py-2"></td>
                   <td className="px-2 py-2"></td>
                 </tr>
-                <tr className="text-sm bg-blue-50 hover:bg-blue-100">
+                <tr className="text-sm bg-blue-100 hover:bg-blue-200">
                   <td className="border-r px-2 py-2 font-medium text-gray-800">410 TRIMF</td>
                   <td className="border-r px-2 py-2"></td>
                   <td className="border-r px-2 py-2"></td>
@@ -207,7 +245,7 @@ export function PayslipDetails({
                 </tr>
               </tbody>
               <tfoot>
-                <tr className="bg-gray-800 text-sm font-bold text-white">
+                <tr className="bg-gray-900 text-sm font-bold text-white">
                   <td className="border-r px-2 py-2 text-right" colSpan={2}>TOTAUX</td>
                   <td className="border-r px-2 py-2"></td>
                   <td className="border-r px-2 py-2 text-right">{(payslip.deductions + payslip.tax_amount).toLocaleString()}</td>
@@ -222,7 +260,7 @@ export function PayslipDetails({
             <div className="border-t">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-200 text-sm">
+                  <tr className="bg-gray-300 text-sm">
                     <th className="border-r px-2 py-2 text-center font-bold text-gray-900" colSpan={2}>Brut Social</th>
                     <th className="border-r px-2 py-2 text-center font-bold text-gray-900" colSpan={2}>Base IR</th>
                     <th className="border-r px-2 py-2 text-center font-bold text-gray-900">IPRES Gén.</th>
@@ -240,7 +278,7 @@ export function PayslipDetails({
                     <td className="border-r px-2 py-2 text-center font-medium text-gray-800"></td>
                     <td className="border-r px-2 py-2 text-center font-medium text-gray-800">{(payslip.tax_amount - 3000).toLocaleString()}</td>
                     <td className="border-r px-2 py-2 text-center font-medium text-gray-800">3 000</td>
-                    <td className="px-2 py-2 text-center font-bold bg-blue-200 text-blue-950 text-lg">{payslip.net_salary.toLocaleString()}</td>
+                    <td className="px-2 py-2 text-center font-bold bg-blue-700 text-white text-lg">{payslip.net_salary.toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>

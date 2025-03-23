@@ -14,6 +14,7 @@ import { Eye, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { Payslip } from "@/services/payslipService";
 import { SalaryPayment } from "@/services/salaryPaymentService";
+import { exportToCSV } from "@/utils/exportUtils";
 
 interface PayslipsListProps {
   payslips: Payslip[] | undefined;
@@ -22,6 +23,43 @@ interface PayslipsListProps {
 }
 
 export function PayslipsList({ payslips, latestPayment, onViewPayslip }: PayslipsListProps) {
+  
+  const handleDownloadPayslip = (payslip: Payslip) => {
+    // Prepare payslip data for download
+    const payslipData = [{
+      id: payslip.id,
+      employee: payslip.employee?.full_name || "Employé",
+      poste: payslip.employee?.role || "N/A",
+      periode: latestPayment?.payment_period || "Période actuelle",
+      salaire_base: payslip.base_salary,
+      indemnites: payslip.allowances,
+      deductions: payslip.deductions,
+      impots: payslip.tax_amount,
+      salaire_net: payslip.net_salary,
+      mode_paiement: latestPayment?.payment_method || "virement bancaire"
+    }];
+
+    // Use the exportToCSV function
+    exportToCSV(
+      payslipData,
+      `bulletin-paie-${payslip.employee?.full_name || "employe"}-${latestPayment?.payment_period?.replace(/\s/g, "-") || "periode"}`,
+      {
+        id: "Identifiant",
+        employee: "Employé",
+        poste: "Poste",
+        periode: "Période",
+        salaire_base: "Salaire de base",
+        indemnites: "Indemnités",
+        deductions: "Déductions",
+        impots: "Impôts",
+        salaire_net: "Salaire net",
+        mode_paiement: "Mode de paiement"
+      }
+    );
+    
+    toast.success(`Bulletin téléchargé pour ${payslip.employee?.full_name || "l'employé"}`);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -71,9 +109,7 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
                           variant="outline" 
                           size="sm" 
                           className="h-8 w-8 p-0"
-                          onClick={() => {
-                            toast.success(`Bulletin téléchargé`);
-                          }}
+                          onClick={() => handleDownloadPayslip(payslip)}
                         >
                           <FileDown className="h-4 w-4" />
                         </Button>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +13,7 @@ import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
 import { PayslipsList } from "@/components/salary/PayslipsList";
 import { PayslipDetails } from "@/components/salary/PayslipDetails";
 import { Payslip } from "@/services/payslipService";
+import { exportToCSV } from "@/utils/exportUtils";
 
 const SalaryPayment = () => {
   const { data: employees, isLoading: isLoadingEmployees } = useEmployees();
@@ -30,7 +30,6 @@ const SalaryPayment = () => {
   const currentDate = new Date();
   const currentMonth = format(currentDate, 'MMMM yyyy', { locale: fr });
   
-  // Get the latest payment based on payment date
   const latestPayment = payments && payments.length > 0 
     ? payments[0] 
     : null;
@@ -44,9 +43,7 @@ const SalaryPayment = () => {
     setGeneratingPayslips(true);
     
     try {
-      // Generate payslips for all employees
       const newPayslips = employees.map(employee => {
-        // Calculate salary components - in a real app, you would get this from the database
         const baseSalary = Math.floor(Math.random() * 300000) + 150000;
         const allowances = Math.floor(baseSalary * 0.2);
         const deductions = Math.floor(baseSalary * 0.1);
@@ -65,17 +62,12 @@ const SalaryPayment = () => {
         };
       });
       
-      // Save payslips to database
       const success = await createPayslips(newPayslips);
       
       if (success) {
-        // Update the latest payment selection to show the newly generated payslips
         setSelectedPaymentId(latestPayment.id);
-        
-        // Invalidate queries to refresh data
         queryClient.invalidateQueries({queryKey: ["payslips"]});
         queryClient.invalidateQueries({queryKey: ["salary-payments"]});
-        
         toast.success(`${newPayslips.length} bulletins de paie générés avec succès`);
       }
     } catch (error) {
@@ -97,15 +89,43 @@ const SalaryPayment = () => {
   };
   
   const printPayslip = () => {
-    // Simulate printing
+    window.print();
     toast.success("Bulletin de paie envoyé à l'imprimante");
-    setTimeout(() => {
-      closePreview();
-    }, 1500);
   };
   
   const downloadPayslip = () => {
-    // Simulate download
+    if (!selectedPayslip) return;
+    
+    const payslipData = [{
+      id: selectedPayslip.id,
+      employee: selectedPayslip.employee?.full_name || "Employé",
+      poste: selectedPayslip.employee?.role || "N/A",
+      periode: latestPayment?.payment_period || currentMonth,
+      salaire_base: selectedPayslip.base_salary,
+      indemnites: selectedPayslip.allowances,
+      deductions: selectedPayslip.deductions,
+      impots: selectedPayslip.tax_amount,
+      salaire_net: selectedPayslip.net_salary,
+      mode_paiement: latestPayment?.payment_method || "virement bancaire"
+    }];
+    
+    exportToCSV(
+      payslipData,
+      `bulletin-paie-${selectedPayslip.employee?.full_name || "employe"}-${(latestPayment?.payment_period || currentMonth).replace(/\s/g, "-")}`,
+      {
+        id: "Identifiant",
+        employee: "Employé",
+        poste: "Poste",
+        periode: "Période",
+        salaire_base: "Salaire de base",
+        indemnites: "Indemnités",
+        deductions: "Déductions",
+        impots: "Impôts",
+        salaire_net: "Salaire net",
+        mode_paiement: "Mode de paiement"
+      }
+    );
+    
     toast.success("Bulletin de paie téléchargé");
     setTimeout(() => {
       closePreview();
