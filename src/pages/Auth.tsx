@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -20,7 +21,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Auth = () => {
-  const { signIn, user } = useAuth();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -41,14 +42,23 @@ const Auth = () => {
   const onLoginSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const { error, success } = await signIn(data.email, data.password);
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
       
       if (error) {
         toast.error("Erreur de connexion: " + error.message);
-      } else if (success) {
+        return;
+      }
+      
+      if (authData.session) {
         toast.success("Connexion réussie");
         navigate("/dashboard");
       }
+    } catch (error) {
+      console.error("Unexpected error during login:", error);
+      toast.error("Une erreur inattendue s'est produite");
     } finally {
       setIsLoading(false);
     }
