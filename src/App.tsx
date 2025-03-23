@@ -8,7 +8,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
-import Employees from "./pages/Employees";
 import Leave from "./pages/Leave";
 import Salary from "./pages/Salary";
 import TimeTracking from "./pages/TimeTracking";
@@ -32,13 +31,6 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/employees" element={
-              <ProtectedRoute allowedRoles={['super_admin', 'admin', 'manager']}>
-                <Layout>
-                  <Employees />
                 </Layout>
               </ProtectedRoute>
             } />
