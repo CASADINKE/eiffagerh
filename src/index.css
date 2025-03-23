@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -131,7 +130,7 @@
   /* Login page backdrop */
   .auth-backdrop {
     @apply bg-cover bg-center bg-no-repeat;
-    background-image: url('/lovable-uploads/e5e09184-0b90-4331-86c9-3db921eb2a9b.png');
+    background-image: url('/lovable-uploads/2fe055e9-5b9f-402e-8761-7883f86c3ad9.png');
   }
   
   .auth-card {
@@ -185,4 +184,3 @@
 .card-with-hover {
   @apply transition-all duration-200 hover:shadow-lg hover:border-primary/20;
 }
-
