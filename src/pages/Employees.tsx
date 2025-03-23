@@ -9,6 +9,7 @@ import EmployeeTableSection from "@/components/employees/EmployeeTableSection";
 import EmployeeSearchBar from "@/components/employees/EmployeeSearchBar";
 import EmployeeQuickActions from "@/components/employees/EmployeeQuickActions";
 import AddEmployeeButton from "@/components/employees/AddEmployeeButton";
+import DeleteRecentEmployeesDialog from "@/components/employees/DeleteRecentEmployeesDialog";
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,6 +17,7 @@ const Employees = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deleteRecentDialogOpen, setDeleteRecentDialogOpen] = useState(false);
   
   const { fetchEmployees } = useEmployeeOperations();
   
@@ -53,6 +55,10 @@ const Employees = () => {
     loadEmployees();
   };
 
+  const handleDeleteRecent = () => {
+    setDeleteRecentDialogOpen(true);
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <EmployeePageHeader />
@@ -65,7 +71,11 @@ const Employees = () => {
       <div className="flex items-center bg-gray-200 p-3 rounded-t-md border border-gray-300">
         <div className="text-lg font-medium text-gray-700">Employés</div>
         <div className="ml-auto flex gap-2">
-          <EmployeeQuickActions onAddEmployee={handleAddEmployee} onRefresh={handleRefresh} />
+          <EmployeeQuickActions 
+            onAddEmployee={handleAddEmployee} 
+            onRefresh={handleRefresh}
+            onDeleteRecent={handleDeleteRecent} 
+          />
         </div>
       </div>
 
@@ -87,6 +97,12 @@ const Employees = () => {
       <EmployeeFormDialog 
         open={openForm} 
         onOpenChange={setOpenForm} 
+        onSuccess={loadEmployees}
+      />
+
+      <DeleteRecentEmployeesDialog
+        open={deleteRecentDialogOpen}
+        onOpenChange={setDeleteRecentDialogOpen}
         onSuccess={loadEmployees}
       />
     </div>

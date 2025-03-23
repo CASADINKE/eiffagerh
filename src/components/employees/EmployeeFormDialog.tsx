@@ -27,17 +27,17 @@ const EmployeeFormDialog = ({
   mode = "create" 
 }: EmployeeFormDialogProps) => {
   const { createEmployee, updateEmployee, isLoading } = useEmployeeOperations();
-  const [initialValues, setInitialValues] = useState<Partial<EmployeeFormData> | null>(null);
+  const [initialValues, setInitialValues] = useState<Partial<EmployeeFormData> | undefined>(undefined);
 
   useEffect(() => {
     if (mode === "edit" && employeeToEdit) {
       // Format the data for the form
       setInitialValues({
         ...employeeToEdit,
-        date_naissance: employeeToEdit.date_naissance ? new Date(employeeToEdit.date_naissance) : new Date(),
+        date_naissance: employeeToEdit.date_naissance ? new Date(employeeToEdit.date_naissance) : undefined,
       });
     } else {
-      setInitialValues(null);
+      setInitialValues(undefined);
     }
   }, [mode, employeeToEdit]);
 

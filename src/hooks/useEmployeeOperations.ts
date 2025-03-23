@@ -102,9 +102,9 @@ export const useEmployeeOperations = () => {
     setIsLoading(true);
     try {
       // Format date if present
-      const formattedData = { ...employeeData };
+      const formattedData: any = { ...employeeData };
       if (formattedData.date_naissance) {
-        formattedData.date_naissance = (formattedData.date_naissance as Date).toISOString().split('T')[0];
+        formattedData.date_naissance = formattedData.date_naissance.toISOString().split('T')[0];
       }
 
       const { data, error } = await supabase
@@ -130,11 +130,65 @@ export const useEmployeeOperations = () => {
     }
   };
 
+  // Add a function to batch delete multiple employees
+  const deleteMultipleEmployees = async (employeeIds: string[]) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('listes_employées')
+        .delete()
+        .in('id', employeeIds);
+
+      if (error) {
+        console.error("Error deleting multiple employees:", error);
+        toast.error(`Erreur: ${error.message}`);
+        throw error;
+      }
+
+      toast.success(`${employeeIds.length} employé(s) supprimé(s) avec succès!`);
+      return true;
+    } catch (err: any) {
+      console.error("Exception when deleting multiple employees:", err);
+      toast.error(`Erreur: ${err.message}`);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Add a function to get recently added employees
+  const fetchRecentEmployees = async (limit = 10) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('listes_employées')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error("Error fetching recent employees:", error);
+        toast.error(`Erreur: ${error.message}`);
+        return [];
+      }
+
+      return data;
+    } catch (err: any) {
+      console.error("Exception when fetching recent employees:", err);
+      toast.error(`Erreur: ${err.message}`);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     createEmployee,
     fetchEmployees,
     deleteEmployee,
     updateEmployee,
+    deleteMultipleEmployees,
+    fetchRecentEmployees,
     isLoading
   };
 };
