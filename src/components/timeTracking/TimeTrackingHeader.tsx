@@ -1,5 +1,5 @@
 
-import { ExportIcon, Clock } from "lucide-react";
+import { FileDown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmployeeTimeClockDialog } from "./EmployeeTimeClockDialog";
 
@@ -19,7 +19,7 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
         <EmployeeTimeClockDialog className="w-full sm:w-auto" />
         
         <Button variant="outline" onClick={() => handleExport()} className="w-full sm:w-auto">
-          <ExportIcon size={16} className="mr-2" />
+          <FileDown size={16} className="mr-2" />
           Exporter
         </Button>
       </div>
