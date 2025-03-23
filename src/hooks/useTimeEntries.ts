@@ -1,7 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Employee } from "./useEmployees";
+import { EmployeeUI, mapEmployeeToUI } from "@/types/employee";
 import { toast } from "sonner";
 
 export interface TimeEntry {
@@ -12,7 +12,7 @@ export interface TimeEntry {
   break_time: number;
   date: string;
   notes: string | null;
-  employee?: Employee;
+  employee?: EmployeeUI;
 }
 
 // Define a type for the profile data returned from Supabase
@@ -61,16 +61,14 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       employee: {
         id: profileData?.id || entry.employee_id,
         name: profileData?.full_name || "Sans nom",
-        department: "Département non assigné", // Fixed: Use a default value instead of trying to access the nested relation
-        avatar: profileData?.avatar_url || undefined,
-        // Add other employee fields with default values
+        department: "Département non assigné",
         position: "Poste non spécifié",
         email: "Email non spécifié",
         phone: "Téléphone non spécifié",
         status: "active" as const,
-        // Add the missing properties
         matricule: "Non spécifié",
-        site: "Site non spécifié"
+        site: "Site non spécifié",
+        avatar: profileData?.avatar_url
       }
     };
   });

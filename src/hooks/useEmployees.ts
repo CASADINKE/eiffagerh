@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { EmployeeUI, mapEmployeesToUI } from "@/types/employee";
 
 export interface Employee {
   id: string;
@@ -35,4 +36,14 @@ export const useEmployees = () => {
       return data as Employee[];
     },
   });
+};
+
+// Hook qui renvoie les employés au format UI
+export const useEmployeesUI = () => {
+  const employeesQuery = useEmployees();
+  
+  return {
+    ...employeesQuery,
+    data: employeesQuery.data ? mapEmployeesToUI(employeesQuery.data) : undefined
+  };
 };

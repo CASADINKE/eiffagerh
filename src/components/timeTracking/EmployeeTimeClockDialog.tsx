@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useEmployees } from "@/hooks/useEmployees";
+import { useEmployeesUI } from "@/hooks/useEmployees";
 import { useTimeEntries, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,8 +31,8 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Fetch employees data from listes_employées table
-  const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployees();
+  // Utiliser useEmployeesUI au lieu de useEmployees
+  const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployeesUI();
   
   // Fetch time entries to know which employees are already clocked in
   const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();

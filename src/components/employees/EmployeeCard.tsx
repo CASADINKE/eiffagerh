@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import { MoreHorizontal, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Employee } from "@/hooks/useEmployees";
+import { EmployeeUI } from "@/types/employee";
 
 interface EmployeeCardProps {
-  employee: Employee;
+  employee: EmployeeUI;
   className?: string;
 }
 

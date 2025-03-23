@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import EmployeeFormDialog from "@/components/employees/EmployeeFormDialog";
@@ -8,11 +7,12 @@ import EmployeeSearchBar from "@/components/employees/EmployeeSearchBar";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import DeleteRecentEmployeesDialog from "@/components/employees/DeleteRecentEmployeesDialog";
 import { Employee } from "@/hooks/useEmployees";
+import { EmployeeUI, mapEmployeesToUI } from "@/types/employee";
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<EmployeeUI[]>([]);
+  const [filteredEmployees, setFilteredEmployees] = useState<EmployeeUI[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deleteRecentDialogOpen, setDeleteRecentDialogOpen] = useState(false);
@@ -39,22 +39,7 @@ const Employees = () => {
     setLoading(true);
     try {
       const rawData = await fetchEmployees();
-      
-      // Map the returned data to match the Employee type
-      const mappedEmployees: Employee[] = rawData.map(emp => ({
-        id: emp.id,
-        name: `${emp.nom} ${emp.prenom}`,
-        position: emp.poste,
-        department: emp.affectation,
-        email: emp.matricule, // Using matricule as email since there's no direct email field
-        phone: emp.telephone,
-        status: "active", // Default status
-        avatar: undefined,
-        // Add the missing properties
-        matricule: emp.matricule,
-        site: emp.site
-      }));
-      
+      const mappedEmployees = mapEmployeesToUI(rawData);
       setEmployees(mappedEmployees);
       setFilteredEmployees(mappedEmployees);
     } catch (error) {

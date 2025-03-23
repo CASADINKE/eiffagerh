@@ -1,5 +1,5 @@
 
-import { Employee } from "@/hooks/useEmployees";
+import { EmployeeUI } from "@/types/employee";
 import { 
   Table, 
   TableHeader, 
@@ -11,7 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface EmployeeTableProps {
-  employees: Employee[];
+  employees: EmployeeUI[];
   isLoading: boolean;
   isError: boolean;
 }

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +46,6 @@ const SalaryPayment = () => {
     setGeneratingPayslips(true);
     
     try {
-      // Vérifier d'abord si l'utilisateur existe déjà dans la table profiles
       const { data: authUser } = await supabase.auth.getUser();
       if (!authUser || !authUser.user) {
         toast.error("Utilisateur non connecté");
@@ -55,17 +53,13 @@ const SalaryPayment = () => {
         return;
       }
       
-      // Pour chaque employé, vérifier s'il existe dans la table profiles
-      // et créer un enregistrement si nécessaire
       const profilePromises = employees.map(async (employee) => {
-        // Vérifier si l'employé existe déjà dans la table profiles
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('id')
           .eq('id', employee.id)
           .single();
         
-        // Si l'employé n'existe pas dans profiles, créer un enregistrement
         if (!existingProfile) {
           await supabase
             .from('profiles')
@@ -74,9 +68,7 @@ const SalaryPayment = () => {
               full_name: `${employee.prenom} ${employee.nom}`,
               role: employee.poste || "Employé",
               avatar_url: null,
-              department: employee.affectation || "N/A",
-              email: null,
-              phone_number: employee.telephone || null,
+              department_id: null,
               updated_at: new Date().toISOString()
             });
         }
@@ -84,10 +76,8 @@ const SalaryPayment = () => {
         return employee;
       });
       
-      // Attendre que tous les profils soient créés ou vérifiés
       await Promise.all(profilePromises);
       
-      // Maintenant créer les bulletins de paie
       const newPayslips = employees.map(employee => {
         const baseSalary = Math.floor(Math.random() * 300000) + 150000;
         const allowances = Math.floor(baseSalary * 0.2);
