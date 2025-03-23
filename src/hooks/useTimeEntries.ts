@@ -67,7 +67,10 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
         position: "Poste non spécifié",
         email: "Email non spécifié",
         phone: "Téléphone non spécifié",
-        status: "active"
+        status: "active" as const,
+        // Add the missing properties
+        matricule: "Non spécifié",
+        site: "Site non spécifié"
       }
     };
   });

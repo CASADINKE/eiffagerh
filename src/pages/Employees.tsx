@@ -49,7 +49,10 @@ const Employees = () => {
         email: emp.matricule, // Using matricule as email since there's no direct email field
         phone: emp.telephone,
         status: "active", // Default status
-        avatar: undefined
+        avatar: undefined,
+        // Add the missing properties
+        matricule: emp.matricule,
+        site: emp.site
       }));
       
       setEmployees(mappedEmployees);
