@@ -1,7 +1,6 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Clock, Search, Check, X } from "lucide-react";
+import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
 import { Button } from "@/components/ui/button";
@@ -81,12 +80,14 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
         </div>
         
         {isLoading ? (
-          <div className="flex justify-center py-8">
+          <div className="flex flex-col items-center justify-center py-8 gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p>Chargement des employés...</p>
           </div>
         ) : isError ? (
           <div className="py-8 text-center text-destructive">
-            <p>Erreur lors du chargement des employés. Veuillez réessayer.</p>
+            <p>Une erreur est survenue lors du chargement des employés.</p>
+            <p className="text-sm text-muted-foreground mt-2">Veuillez réessayer ultérieurement.</p>
           </div>
         ) : filteredEmployees && filteredEmployees.length > 0 ? (
           <Table>
@@ -131,7 +132,9 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
           </Table>
         ) : (
           <div className="py-8 text-center">
-            <p className="text-muted-foreground">Aucun employé trouvé pour votre recherche.</p>
+            <p className="text-muted-foreground">
+              {searchQuery ? "Aucun employé trouvé pour votre recherche." : "Aucun employé disponible."}
+            </p>
           </div>
         )}
       </DialogContent>
