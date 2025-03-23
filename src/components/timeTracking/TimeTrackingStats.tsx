@@ -6,17 +6,21 @@ interface TimeTrackingStatsProps {
   activeEmployeeCount: number;
   averageHours: string | number;
   totalEntries: number;
+  totalEmployees?: number;
 }
 
 export const TimeTrackingStats = ({
   activeEmployeeCount,
   averageHours,
   totalEntries,
+  totalEmployees = 0,
 }: TimeTrackingStatsProps) => {
+  const absentCount = Math.max(0, totalEmployees - activeEmployeeCount);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <StatCard
-        title="Employés actifs"
+        title="Employés pointés"
         value={activeEmployeeCount.toString()}
         icon={<Users />}
       />
@@ -26,8 +30,8 @@ export const TimeTrackingStats = ({
         icon={<Clock />}
       />
       <StatCard
-        title="Pointages à approuver"
-        value={totalEntries.toString()}
+        title="Employés non pointés"
+        value={absentCount.toString()}
         icon={<Calendar />}
       />
     </div>

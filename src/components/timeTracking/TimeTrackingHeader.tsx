@@ -7,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 interface TimeTrackingHeaderProps {
@@ -31,6 +32,13 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => handleExport('csv')}>
               Exporter en CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport('excel')}>
+              Exporter en Excel
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleExport('pdf')}>
+              Exporter en PDF
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
