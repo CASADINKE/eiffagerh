@@ -36,4 +36,4 @@ export const TimeTrackingStats = ({
       />
     </div>
   );
-};
+}
