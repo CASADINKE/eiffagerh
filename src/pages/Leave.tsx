@@ -121,7 +121,9 @@ const Leave = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Gestion des Congés</h1>
         <div className="flex gap-2">
-          <Button variant="default">Nouvelle Demande</Button>
+          <Button variant="default" size="lg" className="text-base px-6 py-5">
+            Nouvelle Demande
+          </Button>
           <ExportLeaveButton data={leaveRequests} isLoading={isLoading} />
         </div>
       </div>
