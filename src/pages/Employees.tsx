@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { Search, Plus, ArrowLeft, RotateCcw, Settings, X, Upload } from "lucide-react";
+import { Search, Plus, ArrowLeft, RotateCcw, Settings, X, Upload, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import EmployeeFormDialog from "@/components/employees/EmployeeFormDialog";
 import { useEmployeeOperations } from "@/hooks/useEmployeeOperations";
+import { exportToCSV } from "@/utils/exportUtils";
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -97,6 +98,30 @@ const Employees = () => {
     // Logique pour fermer la notification
   };
 
+  const handleExportEmployees = () => {
+    if (filteredEmployees.length === 0) {
+      toast.error("Aucun employé à exporter");
+      return;
+    }
+    
+    // Définition des entêtes pour l'export CSV
+    const headers = {
+      matricule: "Matricule",
+      nom: "Nom",
+      prenom: "Prénom",
+      poste: "Poste",
+      site: "Site",
+      telephone: "Téléphone",
+      affectation: "Affectation",
+      employeur: "Employeur",
+      adresse: "Adresse",
+      date_naissance: "Date de naissance"
+    };
+    
+    exportToCSV(filteredEmployees, "liste-employes", headers);
+    toast.success("Export des employés réussi");
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-4">
@@ -176,6 +201,15 @@ const Employees = () => {
           >
             <Upload size={16} />
             Importer
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1 bg-white"
+            onClick={handleExportEmployees}
+          >
+            <Download size={16} />
+            Exporter
           </Button>
           <Button 
             variant="outline" 
