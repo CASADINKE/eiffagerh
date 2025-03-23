@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +15,6 @@ import { PayslipsList } from "@/components/salary/PayslipsList";
 import { PayslipDetails } from "@/components/salary/PayslipDetails";
 import { Payslip } from "@/services/payslipService";
 import { exportToCSV } from "@/utils/exportUtils";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { supabase } from "@/integrations/supabase/client";
 
 const SalaryPayment = () => {
@@ -53,14 +52,15 @@ const SalaryPayment = () => {
         return;
       }
       
+      // Ensure employee profiles exist before creating payslips
       const profilePromises = employees.map(async (employee) => {
-        const { data: existingProfile } = await supabase
+        const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
           .select('id')
           .eq('id', employee.id)
           .single();
         
-        if (!existingProfile) {
+        if (profileError || !existingProfile) {
           await supabase
             .from('profiles')
             .insert({
@@ -78,6 +78,7 @@ const SalaryPayment = () => {
       
       await Promise.all(profilePromises);
       
+      // Create payslips for each employee
       const newPayslips = employees.map(employee => {
         const baseSalary = Math.floor(Math.random() * 300000) + 150000;
         const allowances = Math.floor(baseSalary * 0.2);
@@ -97,13 +98,17 @@ const SalaryPayment = () => {
         };
       });
       
+      // Create the payslips in the database
       const success = await createPayslips(newPayslips);
       
       if (success) {
         setSelectedPaymentId(latestPayment.id);
-        queryClient.invalidateQueries({queryKey: ["payslips"]});
+        // Refresh data after creating payslips
+        queryClient.invalidateQueries({queryKey: ["payslips", latestPayment.id]});
         queryClient.invalidateQueries({queryKey: ["salary-payments"]});
         toast.success(`${newPayslips.length} bulletins de paie générés avec succès`);
+      } else {
+        toast.error("Erreur lors de la génération des bulletins de paie");
       }
     } catch (error) {
       console.error("Error generating payslips:", error);
@@ -177,7 +182,17 @@ const SalaryPayment = () => {
           <p className="text-muted-foreground">Générez et gérez les bulletins de paie des employés</p>
         </div>
         <div className="flex gap-2 mt-4 md:mt-0">
-          <SalaryPaymentDialog />
+          <Button 
+            variant="outline"
+            onClick={() => {
+              const salaryPaymentDialog = document.querySelector('[data-salary-payment-dialog]');
+              if (salaryPaymentDialog) {
+                (salaryPaymentDialog as HTMLButtonElement).click();
+              }
+            }}
+          >
+            Paiement Salaire
+          </Button>
           <Button 
             onClick={generatePayslips} 
             disabled={generatingPayslips || isLoading || !latestPayment}
@@ -224,11 +239,22 @@ const SalaryPayment = () => {
             </CardContent>
           </Card>
           
-          <PayslipsList 
-            payslips={payslips} 
-            latestPayment={latestPayment} 
-            onViewPayslip={showPayslipPreview} 
-          />
+          {/* Display payslips if available, otherwise show a message */}
+          {payslips && payslips.length > 0 ? (
+            <PayslipsList 
+              payslips={payslips} 
+              latestPayment={latestPayment} 
+              onViewPayslip={showPayslipPreview} 
+            />
+          ) : (
+            <Card className="mb-6">
+              <CardContent className="p-8 text-center">
+                <p className="text-muted-foreground">
+                  Aucun bulletin de paie généré. Cliquez sur "Générer les bulletins de paie" pour commencer.
+                </p>
+              </CardContent>
+            </Card>
+          )}
           
           {showPreview && selectedPayslip && (
             <PayslipDetails 
@@ -242,6 +268,11 @@ const SalaryPayment = () => {
           )}
         </>
       )}
+      
+      {/* Hidden SalaryPaymentDialog that can be triggered programmatically */}
+      <div className="hidden">
+        <SalaryPaymentDialog />
+      </div>
     </div>
   );
 };
