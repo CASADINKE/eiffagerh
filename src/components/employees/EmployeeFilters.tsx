@@ -1,20 +1,7 @@
 
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { EmployeeStatus } from "@/hooks/useEmployees";
 
 interface EmployeeFiltersProps {
   searchTerm: string;
@@ -35,66 +22,31 @@ const EmployeeFilters = ({
   setDepartmentFilter,
   departments
 }: EmployeeFiltersProps) => {
+  const handleFilter = () => {
+    // Filtrage déjà géré par le composant parent via les états
+    console.log("Filtrer avec:", searchTerm, statusFilter, departmentFilter);
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row gap-4 mb-6">
+    <div className="flex">
       <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
         <Input 
           type="search" 
-          placeholder="Rechercher des employés..." 
-          className="pl-10"
+          placeholder="Nom / Email" 
+          className="w-[230px]"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
       
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Filter size={16} />
-            <span>Filtrer</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80">
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium mb-2">Statut</h4>
-              <Select 
-                value={statusFilter} 
-                onValueChange={setStatusFilter}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="active">Actif</SelectItem>
-                  <SelectItem value="on-leave">En congé</SelectItem>
-                  <SelectItem value="terminated">Terminé</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-medium mb-2">Département</h4>
-              <Select 
-                value={departmentFilter} 
-                onValueChange={setDepartmentFilter}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un département" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les départements</SelectItem>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
+      <Button 
+        variant="default" 
+        className="ml-2 bg-amber-500 hover:bg-amber-600"
+        onClick={handleFilter}
+      >
+        <Search size={16} className="mr-1" />
+        Filtrer
+      </Button>
     </div>
   );
 };
