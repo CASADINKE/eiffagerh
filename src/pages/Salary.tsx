@@ -186,6 +186,7 @@ const Salary = () => {
   // Fonction pour exporter les bulletins de paie
   const exportPayslips = () => {
     const headers = {
+      id: "ID",
       employee: "Employé",
       position: "Poste",
       period: "Période",
