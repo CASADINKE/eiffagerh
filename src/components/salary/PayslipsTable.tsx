@@ -1,5 +1,5 @@
 
-import { Download, FileText, FilePdf } from "lucide-react";
+import { Download, FileText, File } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -102,7 +102,7 @@ export function PayslipsTable({ paySlipData }: PayslipsTableProps) {
                         Visualiser
                       </DropdownMenuItem>
                       <DropdownMenuItem>
-                        <FilePdf className="mr-2 h-4 w-4" />
+                        <File className="mr-2 h-4 w-4" />
                         Télécharger PDF
                       </DropdownMenuItem>
                       <DropdownMenuItem>

@@ -1,5 +1,4 @@
-
-import { FileDown, FilePdf, FileText } from "lucide-react";
+import { FileDown, File, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
@@ -34,7 +33,7 @@ export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
               Exporter en CSV
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportPayslips('pdf')}>
-              <FilePdf className="mr-2 h-4 w-4" />
+              <File className="mr-2 h-4 w-4" />
               Exporter en PDF
             </DropdownMenuItem>
           </DropdownMenuContent>

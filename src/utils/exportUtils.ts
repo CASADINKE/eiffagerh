@@ -1,6 +1,10 @@
+
 /**
  * Fonction utilitaire pour exporter des données au format CSV
  */
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
 export function exportToCSV<T extends Record<string, any>>(
   data: T[],
   filename: string,

@@ -1,5 +1,4 @@
-
-import { FileDown, FilePdf, FileText, Clock } from "lucide-react";
+import { FileDown, File, FileText, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmployeeTimeClockDialog } from "./EmployeeTimeClockDialog";
 import {
@@ -37,7 +36,7 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
               Exporter en CSV
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport('pdf')}>
-              <FilePdf className="mr-2 h-4 w-4" />
+              <File className="mr-2 h-4 w-4" />
               Exporter en PDF
             </DropdownMenuItem>
           </DropdownMenuContent>

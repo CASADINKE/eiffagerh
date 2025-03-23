@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, FileDown, FileText, FilePdf } from "lucide-react";
+import { Eye, FileDown, FileText, File } from "lucide-react";
 import { toast } from "sonner";
 import { Payslip } from "@/services/payslipService";
 import { SalaryPayment } from "@/services/salaryPaymentService";
@@ -171,7 +170,7 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
                               Télécharger CSV
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDownloadPDF(payslip)}>
-                              <FilePdf className="mr-2 h-4 w-4" />
+                              <File className="mr-2 h-4 w-4" />
                               Télécharger PDF
                             </DropdownMenuItem>
                           </DropdownMenuContent>
