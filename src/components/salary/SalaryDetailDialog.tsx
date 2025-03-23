@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCreateSalaryDetail, useUpdateSalaryDetail } from "@/hooks/useSalaryDetails";
 import { SalaryDetail } from "@/services/salaryDetailsService";
 import { useToast } from "@/hooks/use-toast";
+import { useEmployees } from "@/hooks/useEmployees";
 
 interface SalaryDetailDialogProps {
   open: boolean;
@@ -34,6 +35,7 @@ export function SalaryDetailDialog({
   const { toast } = useToast();
   const createSalaryDetail = useCreateSalaryDetail();
   const updateSalaryDetail = useUpdateSalaryDetail();
+  const { data: employees, isLoading: isLoadingEmployees } = useEmployees();
   
   const [formData, setFormData] = React.useState({
     employee_id: '',
@@ -137,6 +139,29 @@ export function SalaryDetailDialog({
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4">
+            {!salaryDetail && !employeeId && (
+              <div className="space-y-2">
+                <Label htmlFor="employee_id">Employé</Label>
+                <Select 
+                  value={formData.employee_id} 
+                  onValueChange={(value) => handleSelectChange("employee_id", value)}
+                  disabled={isLoadingEmployees}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un employé" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees?.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.prenom} {employee.nom} - {employee.matricule}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="base_salary">Salaire de base</Label>

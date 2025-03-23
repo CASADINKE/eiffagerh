@@ -1,5 +1,5 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useSalaryPayments } from "@/hooks/useSalaryPayments";
@@ -11,10 +11,12 @@ import { Link } from "react-router-dom";
 import { SalaryHeader } from "@/components/salary/SalaryHeader";
 import { exportToCSV } from "@/utils/exportUtils";
 import { toast } from "sonner";
+import { SalaryDetailDialog } from "@/components/salary/SalaryDetailDialog";
 
 const Salary = () => {
   const { data: salaryPayments, isLoading: isLoadingPayments } = useSalaryPayments();
   const { data: salaryDetails, isLoading: isLoadingDetails } = useSalaryDetails();
+  const [isSalaryDetailDialogOpen, setIsSalaryDetailDialogOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   
   // Log de débogage pour vérifier les données récupérées
@@ -57,6 +59,18 @@ const Salary = () => {
       <SalaryHeader exportPayslips={handleExportPayslips} />
 
       <div className="grid gap-6 salary-content" ref={contentRef}>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Détails des salaires</h2>
+          <Button 
+            onClick={() => setIsSalaryDetailDialogOpen(true)}
+            size="sm"
+            className="gap-1"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Ajouter un salaire
+          </Button>
+        </div>
+
         <SalaryDetailsTable 
           salaryDetails={salaryDetails || []} 
           isLoading={isLoadingDetails} 
@@ -67,6 +81,14 @@ const Salary = () => {
           isLoading={isLoadingPayments} 
         />
       </div>
+
+      <SalaryDetailDialog 
+        open={isSalaryDetailDialogOpen}
+        onOpenChange={setIsSalaryDetailDialogOpen}
+        onSuccess={() => {
+          toast.success("Détails du salaire enregistrés avec succès");
+        }}
+      />
 
       <div className="fixed bottom-8 right-8">
         <SalaryPaymentDialog />
