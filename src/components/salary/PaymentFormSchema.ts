@@ -7,7 +7,6 @@ export const paymentFormSchema = z.object({
     required_error: "La date de paiement est requise",
   }),
   payment_method: z.string().min(1, { message: "La méthode de paiement est requise" }),
-  convention: z.string().optional(),
   description: z.string().optional(),
 });
 
@@ -17,6 +16,5 @@ export const defaultPaymentValues = (currentDate: Date): Partial<PaymentFormValu
   payment_period: new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(currentDate),
   payment_date: currentDate,
   payment_method: "virement",
-  convention: "Convention Collective Nationale",
   description: "",
 });
