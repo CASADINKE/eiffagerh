@@ -3,6 +3,7 @@ import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
+  Users,
   Calendar, 
   DollarSign, 
   Clock, 
@@ -26,6 +27,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const navigationItems = [
   { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
+  { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/salary", title: "Salaires", icon: DollarSign },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },

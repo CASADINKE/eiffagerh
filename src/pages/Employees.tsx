@@ -1,76 +1,131 @@
 
-import { useState, useMemo } from "react";
-import EmployeeFilters from "@/components/employees/EmployeeFilters";
-import { useEmployees } from "@/hooks/useEmployees";
-import EmployeeBreadcrumb from "@/components/employees/EmployeeBreadcrumb";
-import EmployeeHeader from "@/components/employees/EmployeeHeader";
-import EmployeeQuickFilters from "@/components/employees/EmployeeQuickFilters";
-import EmployeeTable from "@/components/employees/EmployeeTable";
-import EmployeeTableFooter from "@/components/employees/EmployeeTableFooter";
+import { useState } from "react";
+import { Search, Plus, ArrowLeft, RotateCcw, Settings, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const Employees = () => {
-  const { data: employees = [], isLoading, isError } = useEmployees();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
-
-  // Extraction des départements uniques
-  const departments = useMemo(() => {
-    return [...new Set(employees.map(emp => emp.department))];
-  }, [employees]);
-
-  // Filtrage des employés
-  const filteredEmployees = useMemo(() => {
-    return employees.filter((employee) => {
-      const matchesSearch = 
-        employee.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        employee.email.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === "all" || employee.status === statusFilter;
-      const matchesDepartment = departmentFilter === "all" || employee.department === departmentFilter;
-      
-      return matchesSearch && matchesStatus && matchesDepartment;
-    });
-  }, [employees, searchTerm, statusFilter, departmentFilter]);
+  const [employees] = useState([]);
+  
+  const handleAddEmployee = () => {
+    toast.info("Fonctionnalité à implémenter");
+  };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="flex items-center mb-6 py-2">
-        <EmployeeBreadcrumb />
+    <div className="container mx-auto px-4 py-6">
+      {/* Header avec le titre */}
+      <div className="mb-4">
+        <h1 className="text-2xl font-medium text-gray-700">Lister les employés</h1>
+        <div className="flex items-center gap-2 mt-3">
+          <span className="text-gray-500">Accueil</span>
+          <span className="text-gray-500">&gt;</span>
+          <span className="text-gray-700">Employés</span>
+        </div>
       </div>
 
-      <div className="bg-background rounded-lg border shadow-sm">
-        <EmployeeHeader />
+      {/* Barre d'actions principale */}
+      <div className="flex justify-between items-center mb-4 mt-6 bg-white border rounded-t-md p-2">
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-gray-700">
+            <ArrowLeft size={16} />
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 text-gray-700">
+            <RotateCcw size={16} />
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 text-gray-700">
+            <Settings size={16} />
+          </Button>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="gap-1 bg-blue-500 hover:bg-blue-600"
+            onClick={handleAddEmployee}
+          >
+            <Plus size={16} />
+            Ajouter
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 text-gray-700">
+            Actions
+          </Button>
+        </div>
+      </div>
 
-        <div className="p-4 border-b">
-          <EmployeeFilters 
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            departmentFilter={departmentFilter}
-            setDepartmentFilter={setDepartmentFilter}
-            departments={departments}
-          />
-          
-          <EmployeeQuickFilters />
+      {/* Entête de la liste */}
+      <div className="flex items-center bg-gray-200 p-3 rounded-t-md border border-gray-300">
+        <div className="text-lg font-medium text-gray-700">Employés</div>
+        <div className="ml-auto flex gap-2">
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="gap-1 bg-blue-500 hover:bg-blue-600"
+            onClick={handleAddEmployee}
+          >
+            Ajouter
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 bg-white">
+            Suspendus
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 bg-white">
+            Supprimés
+          </Button>
         </div>
-        
-        <div className="p-4">
-          <EmployeeTable 
-            employees={filteredEmployees}
-            isLoading={isLoading}
-            isError={isError}
+      </div>
+
+      {/* Barre de recherche */}
+      <div className="p-4 bg-white border-x border-b flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
+          <Input 
+            type="text" 
+            placeholder="Nom / Email" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full md:w-64 pr-10"
           />
-          
-          {!isLoading && (
-            <EmployeeTableFooter 
-              filteredCount={filteredEmployees.length}
-              totalCount={employees.length}
-              showAddButton={filteredEmployees.length === 0}
-            />
-          )}
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="absolute right-0 top-0 h-full rounded-l-none bg-amber-400 hover:bg-amber-500"
+          >
+            <Search size={16} />
+            Filtrer
+          </Button>
         </div>
+        <div className="flex justify-between items-center gap-2">
+          <select className="border rounded p-2 text-sm md:ml-auto">
+            <option>Action groupée</option>
+          </select>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="gap-1 bg-amber-400 hover:bg-amber-500"
+          >
+            Enregistrer
+          </Button>
+        </div>
+      </div>
+
+      {/* Contenu - Message "Aucun élément trouvé" */}
+      <div className="p-6 bg-yellow-50 border border-yellow-200 text-amber-800 flex justify-between items-center">
+        <div>Aucun élément trouvé.</div>
+        <Button variant="ghost" size="sm" className="text-amber-800 hover:bg-yellow-100">
+          <X size={16} />
+        </Button>
+      </div>
+
+      {/* Bouton pour ajouter un nouvel employé */}
+      <div className="flex justify-center mt-6">
+        <Button 
+          variant="default" 
+          className="gap-2 bg-blue-500 hover:bg-blue-600 px-5 py-2" 
+          onClick={handleAddEmployee}
+        >
+          <Plus size={16} />
+          Nouvel employé
+        </Button>
       </div>
     </div>
   );
