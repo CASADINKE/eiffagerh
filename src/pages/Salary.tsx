@@ -3,15 +3,19 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { useSalaryPayments } from "@/hooks/useSalaryPayments";
+import { useSalaryDetails } from "@/hooks/useSalaryDetails";
 import { SalaryPaymentsTable } from "@/components/salary/SalaryPaymentsTable";
+import { SalaryDetailsTable } from "@/components/salary/SalaryDetailsTable";
 import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
 import { Link } from "react-router-dom";
 
 const Salary = () => {
   const { data: salaryPayments, isLoading: isLoadingPayments } = useSalaryPayments();
+  const { data: salaryDetails, isLoading: isLoadingDetails } = useSalaryDetails();
   
   // Log de débogage pour vérifier les données récupérées
   console.log("Salary payments data:", salaryPayments);
+  console.log("Salary details data:", salaryDetails);
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -34,6 +38,11 @@ const Salary = () => {
       </div>
 
       <div className="grid gap-6">
+        <SalaryDetailsTable 
+          salaryDetails={salaryDetails || []} 
+          isLoading={isLoadingDetails} 
+        />
+        
         <SalaryPaymentsTable 
           payments={salaryPayments || []} 
           isLoading={isLoadingPayments} 

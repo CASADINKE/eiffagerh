@@ -254,6 +254,53 @@ export type Database = {
         }
         Relationships: []
       }
+      salary_details: {
+        Row: {
+          base_salary: number
+          contract_type: string
+          created_at: string
+          currency: string
+          employee_id: string
+          id: string
+          pay_grade: string | null
+          payment_frequency: string
+          tax_rate: number | null
+          updated_at: string
+        }
+        Insert: {
+          base_salary?: number
+          contract_type?: string
+          created_at?: string
+          currency?: string
+          employee_id: string
+          id?: string
+          pay_grade?: string | null
+          payment_frequency?: string
+          tax_rate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          base_salary?: number
+          contract_type?: string
+          created_at?: string
+          currency?: string
+          employee_id?: string
+          id?: string
+          pay_grade?: string | null
+          payment_frequency?: string
+          tax_rate?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_details_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salary_payments: {
         Row: {
           created_at: string
