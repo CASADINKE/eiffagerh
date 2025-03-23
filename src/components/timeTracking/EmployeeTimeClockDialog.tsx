@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEmployeesUI } from "@/hooks/useEmployees";
-import { useTimeEntries, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
+import { useEmployeePointages, useClockInMutation, useClockOutMutation, getActivePointage } from "@/hooks/useEmployeePointage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,8 +35,8 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   // Utiliser useEmployeesUI au lieu de useEmployees
   const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployeesUI();
   
-  // Fetch time entries to know which employees are already clocked in
-  const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
+  // Fetch pointage entries to know which employees are already clocked in
+  const { data: pointageEntries = [], isLoading: entriesLoading } = useEmployeePointages();
   
   // Mutations for clock in/out
   const clockInMutation = useClockInMutation();
@@ -55,16 +56,14 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   
   const handleClockInOut = (employeeId: string) => {
     // Check if employee is already clocked in
-    const activeEntry = getActiveTimeEntry(timeEntries, employeeId);
+    const activeEntry = getActivePointage(pointageEntries, employeeId);
     
     if (activeEntry) {
       // Clock out
       clockOutMutation.mutate(activeEntry.id);
-      toast.success("Pointage de sortie enregistré");
     } else {
       // Clock in
       clockInMutation.mutate({ employeeId });
-      toast.success("Pointage d'entrée enregistré");
     }
     
     setOpen(false);
@@ -125,7 +124,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
             <TableBody>
               {filteredEmployees.map((employee) => {
                 // Check if employee is currently clocked in
-                const activeEntry = getActiveTimeEntry(timeEntries, employee.id);
+                const activeEntry = getActivePointage(pointageEntries, employee.id);
                 const isActive = !!activeEntry;
                 
                 return (
