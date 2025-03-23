@@ -1,3 +1,4 @@
+
 import { FileDown, File, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -7,12 +8,34 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { generatePDFFromElement } from "@/utils/exportUtils";
+import { toast } from "sonner";
 
 interface SalaryHeaderProps {
   exportPayslips: (format?: string) => void;
 }
 
 export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
+  const handleExportPDF = async () => {
+    try {
+      const element = document.querySelector(".salary-content") as HTMLElement;
+      if (!element) {
+        toast.error("Impossible de générer le PDF. Élément non trouvé.");
+        return;
+      }
+      
+      await generatePDFFromElement(element, "salaires-export", {
+        orientation: "landscape",
+        format: "a4",
+      });
+      
+      toast.success("Export PDF généré avec succès");
+    } catch (error) {
+      console.error("Erreur lors de l'export PDF:", error);
+      toast.error("Erreur lors de la génération du PDF");
+    }
+  };
+
   return (
     <div className="flex justify-between items-center mb-6">
       <div>
@@ -32,7 +55,7 @@ export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
               <FileText className="mr-2 h-4 w-4" />
               Exporter en CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportPayslips('pdf')}>
+            <DropdownMenuItem onClick={handleExportPDF}>
               <File className="mr-2 h-4 w-4" />
               Exporter en PDF
             </DropdownMenuItem>

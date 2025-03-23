@@ -94,6 +94,13 @@ export async function generatePDFFromElement(
       scale = 2
     } = options;
     
+    // Préparer l'élément pour l'export
+    const originalDisplay = element.style.display;
+    const originalPosition = element.style.position;
+    const originalOverflow = element.style.overflow;
+    
+    element.style.overflow = 'visible';
+    
     // Generate the PDF
     const canvas = await html2canvas(element, {
       scale: scale,
@@ -101,6 +108,11 @@ export async function generatePDFFromElement(
       logging: false,
       backgroundColor: "#ffffff"
     });
+    
+    // Restaurer l'élément
+    element.style.display = originalDisplay;
+    element.style.position = originalPosition;
+    element.style.overflow = originalOverflow;
     
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({

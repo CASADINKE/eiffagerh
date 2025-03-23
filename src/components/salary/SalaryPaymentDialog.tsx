@@ -14,7 +14,7 @@ import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Calendar } from "lucide-react";
+import { Calendar, CreditCard } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { createSalaryPayment } from "@/services/salaryPaymentService";
@@ -24,9 +24,10 @@ import { paymentFormSchema, PaymentFormValues, defaultPaymentValues } from "./Pa
 interface SalaryPaymentDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  className?: string;
 }
 
-export function SalaryPaymentDialog({ open, onOpenChange }: SalaryPaymentDialogProps) {
+export function SalaryPaymentDialog({ open, onOpenChange, className }: SalaryPaymentDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -72,8 +73,8 @@ export function SalaryPaymentDialog({ open, onOpenChange }: SalaryPaymentDialogP
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {!isControlled && (
         <DialogTrigger asChild>
-          <Button className="gap-2" onClick={() => setIsOpen(true)}>
-            <Calendar className="h-4 w-4" />
+          <Button className={`gap-2 ${className || ''}`} onClick={() => setIsOpen(true)}>
+            <CreditCard className="h-4 w-4" />
             <span>Paiement Salaire</span>
           </Button>
         </DialogTrigger>
