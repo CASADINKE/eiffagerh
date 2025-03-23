@@ -39,7 +39,7 @@ export function SalaryDetailDialog({
   
   const [formData, setFormData] = React.useState({
     employee_id: '',
-    base_salary: 0,
+    base_salary: '',
     contract_type: 'CDI',
     pay_grade: '',
     currency: 'FCFA',
@@ -51,7 +51,7 @@ export function SalaryDetailDialog({
     if (salaryDetail) {
       setFormData({
         employee_id: salaryDetail.employee_id,
-        base_salary: salaryDetail.base_salary,
+        base_salary: salaryDetail.base_salary.toString(),
         contract_type: salaryDetail.contract_type,
         pay_grade: salaryDetail.pay_grade || '',
         currency: salaryDetail.currency,
@@ -65,7 +65,22 @@ export function SalaryDetailDialog({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // For base_salary, ensure only numeric input is accepted
+    if (name === "base_salary") {
+      // Only allow digits and decimal point
+      const numericValue = value.replace(/[^0-9.]/g, '');
+      
+      // Prevent multiple decimal points
+      const parts = numericValue.split('.');
+      const sanitizedValue = parts.length > 2 
+        ? parts[0] + '.' + parts.slice(1).join('') 
+        : numericValue;
+      
+      setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -78,7 +93,7 @@ export function SalaryDetailDialog({
     // Convert specific fields to numbers
     const numericData = {
       ...formData,
-      base_salary: Number(formData.base_salary),
+      base_salary: parseFloat(formData.base_salary) || 0,
       tax_rate: Number(formData.tax_rate),
     };
 
@@ -168,9 +183,11 @@ export function SalaryDetailDialog({
                 <Input
                   id="base_salary"
                   name="base_salary"
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={formData.base_salary}
                   onChange={handleInputChange}
+                  placeholder="0.00"
                   required
                 />
               </div>
