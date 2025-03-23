@@ -16,12 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, FileText, Timer } from "lucide-react";
+import { Calendar, Clock, FileText, User } from "lucide-react";
+import { Employee } from "@/hooks/useEmployees";
 
 type LeaveRequest = Tables<"leave_requests">;
 
 // Schema for leave request form validation
 const leaveRequestSchema = z.object({
+  employee_id: z.string().min(1, "Veuillez sélectionner un employé"),
   type: z.enum(["annual", "sick", "parental", "other"], {
     required_error: "Veuillez sélectionner un type de congé",
   }),
@@ -43,18 +45,21 @@ interface LeaveRequestFormProps {
   onSubmit: (values: LeaveRequestFormData) => Promise<void>;
   onCancel: () => void;
   isLoading: boolean;
+  employees: Employee[];
 }
 
 export function LeaveRequestForm({
   onSubmit,
   onCancel,
   isLoading,
+  employees,
 }: LeaveRequestFormProps) {
   const today = new Date().toISOString().split('T')[0];
   
   const form = useForm<LeaveRequestFormData>({
     resolver: zodResolver(leaveRequestSchema),
     defaultValues: {
+      employee_id: employees.length > 0 ? employees[0].id : "",
       type: "annual",
       start_date: today,
       end_date: today,
@@ -62,6 +67,13 @@ export function LeaveRequestForm({
     },
     mode: "onChange", // Validate on change to enable/disable submit button
   });
+
+  // Update the form when employees are loaded
+  useEffect(() => {
+    if (employees.length > 0 && !form.getValues("employee_id")) {
+      form.setValue("employee_id", employees[0].id);
+    }
+  }, [employees, form]);
 
   const { isValid, errors } = form.formState;
   const selectedType = form.watch("type");
@@ -90,6 +102,38 @@ export function LeaveRequestForm({
           {getTypeIcon()}
           <span className="ml-2 text-sm font-medium">Vous êtes sur le point de demander un congé. Veuillez remplir tous les champs requis.</span>
         </div>
+
+        <FormField
+          control={form.control}
+          name="employee_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Employé</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={isLoading}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionnez un employé" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {employees.map(employee => (
+                    <SelectItem key={employee.id} value={employee.id} className="flex items-center">
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 text-blue-500 mr-2" />
+                        <span>{employee.name} - {employee.matricule}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

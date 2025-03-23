@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import { LeaveRequestForm } from "./LeaveRequestForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
+import { useEmployees } from "@/hooks/useEmployees";
 
 interface LeaveRequestDialogProps {
   open: boolean;
@@ -22,20 +23,26 @@ export function LeaveRequestDialog({
   onOpenChange,
   onSuccess,
 }: LeaveRequestDialogProps) {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
+  const { data: employees, isLoading: employeesLoading } = useEmployees();
+  
   const handleSubmit = async (formData: {
     type: "annual" | "sick" | "parental" | "other";
     start_date: string;
     end_date: string;
     reason?: string;
+    employee_id?: string;
   }) => {
     setIsSubmitting(true);
     try {
-      // Get the current user - in a full implementation this would come from auth context
-      // For now we'll use a placeholder value or could get from a session
-      const employee_id = "00000000-0000-0000-0000-000000000000"; // Placeholder ID - in real app get from auth
+      // Get the selected employee or use the first one if none is selected
+      const employee_id = formData.employee_id || 
+        (employees && employees.length > 0 ? employees[0].id : null);
+      
+      if (!employee_id) {
+        throw new Error("Aucun employé sélectionné ou disponible");
+      }
 
       const { error } = await supabase.from("leave_requests").insert({
         type: formData.type,
@@ -43,7 +50,7 @@ export function LeaveRequestDialog({
         end_date: formData.end_date,
         reason: formData.reason || null,
         status: "pending",
-        employee_id: employee_id, // Add the required employee_id field
+        employee_id: employee_id,
       });
 
       if (error) throw error;
@@ -86,7 +93,8 @@ export function LeaveRequestDialog({
         <LeaveRequestForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}
-          isLoading={isSubmitting}
+          isLoading={isSubmitting || employeesLoading}
+          employees={employees || []}
         />
       </DialogContent>
     </Dialog>
