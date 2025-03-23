@@ -55,14 +55,18 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   );
   
   const handleClockInOut = (employeeId: string) => {
+    console.log("Handling clock in/out for employee:", employeeId);
+    
     // Check if employee is already clocked in
     const activeEntry = getActivePointage(pointageEntries, employeeId);
     
     if (activeEntry) {
       // Clock out
+      console.log("Clocking out employee, entry ID:", activeEntry.id);
       clockOutMutation.mutate(activeEntry.id);
     } else {
       // Clock in
+      console.log("Clocking in employee:", employeeId);
       clockInMutation.mutate({ employeeId });
     }
     

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -67,7 +66,7 @@ export const fetchEmployeePointages = async (): Promise<EmployeePointage[]> => {
       created_at: entry.created_at,
       updated_at: entry.updated_at,
       break_time: 0, // Default value to make it compatible with TimeEntry
-      notes: null, // Default value to make it compatible with TimeEntry
+      notes: entry.notes, // Now using the notes column from database
       employee: {
         id: profileData.id,
         name: profileData.full_name || "Sans nom",
@@ -100,8 +99,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     throw new Error(`Error clocking in employee: ${error.message}`);
   }
 
-  // Since the data returned from Supabase doesn't include a notes property by default,
-  // we need to handle this by creating a complete EmployeePointage object
+  // Create a complete EmployeePointage object
   return {
     id: data.id,
     employee_id: data.employee_id,
@@ -141,7 +139,7 @@ export const clockOutEmployee = async (entryId: string): Promise<EmployeePointag
     created_at: data.created_at,
     updated_at: data.updated_at,
     break_time: 0,
-    notes: null // Since we don't have notes data when clocking out, set to null
+    notes: data.notes // Now using the notes from the database
   };
 };
 
