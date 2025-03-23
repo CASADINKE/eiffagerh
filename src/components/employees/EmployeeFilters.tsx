@@ -2,6 +2,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EmployeeFiltersProps {
   searchTerm: string;
@@ -22,31 +23,54 @@ const EmployeeFilters = ({
   setDepartmentFilter,
   departments
 }: EmployeeFiltersProps) => {
-  const handleFilter = () => {
-    // Filtrage déjà géré par le composant parent via les états
-    console.log("Filtrer avec:", searchTerm, statusFilter, departmentFilter);
-  };
-
   return (
-    <div className="flex">
-      <div className="relative flex-1">
+    <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 items-start">
+      <div className="relative flex-1 w-full md:w-auto">
         <Input 
           type="search" 
-          placeholder="Nom / Email" 
-          className="w-[230px]"
+          placeholder="Rechercher un employé..." 
+          className="w-full md:w-[300px]"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          prefix={<Search size={16} className="text-muted-foreground" />}
         />
       </div>
       
-      <Button 
-        variant="default" 
-        className="ml-2 bg-amber-500 hover:bg-amber-600"
-        onClick={handleFilter}
-      >
-        <Search size={16} className="mr-1" />
-        Filtrer
-      </Button>
+      <div className="flex flex-wrap gap-2 w-full md:w-auto">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full md:w-[180px]">
+            <SelectValue placeholder="Statut" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="active">Actif</SelectItem>
+            <SelectItem value="on-leave">En congé</SelectItem>
+            <SelectItem value="terminated">Terminé</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+          <SelectTrigger className="w-full md:w-[180px]">
+            <SelectValue placeholder="Département" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les départements</SelectItem>
+            {departments.map((department) => (
+              <SelectItem key={department} value={department}>
+                {department}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button 
+          variant="default" 
+          className="bg-amber-500 hover:bg-amber-600"
+        >
+          <Search size={16} className="mr-1" />
+          Filtrer
+        </Button>
+      </div>
     </div>
   );
 };
