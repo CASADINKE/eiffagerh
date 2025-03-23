@@ -108,6 +108,7 @@ const TimeTracking = () => {
   };
 
   const handleExport = (format = 'csv') => {
+    // Pass EmployeePointage[] directly to handleExportTimeEntries which now supports this type
     handleExportTimeEntries(filteredPointages, activeTab, format);
   };
 
