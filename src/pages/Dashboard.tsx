@@ -148,32 +148,6 @@ const Dashboard = () => {
           </div>
         </Card>
       </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <Card className="p-5">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold">Activités récentes</h2>
-            <p className="text-sm text-muted-foreground">Dernières actions dans le système</p>
-          </div>
-          <ul className="space-y-4">
-            {[
-              { id: 1, action: "Nouvel employé ajouté", user: "Admin", time: "Il y a 2 heures" },
-              { id: 2, action: "Demande de congé approuvée", user: "Manager", time: "Il y a 4 heures" },
-              { id: 3, action: "Salaires mis à jour pour l'équipe de développement", user: "Responsable RH", time: "Hier" },
-              { id: 4, action: "Rapport de pointage généré", user: "Admin", time: "Hier" },
-              { id: 5, action: "Nouveau rôle ajouté au système", user: "Admin système", time: "Il y a 2 jours" },
-            ].map((activity) => (
-              <li key={activity.id} className="flex justify-between items-center border-b border-border pb-3 last:border-0 last:pb-0">
-                <div>
-                  <p className="font-medium">{activity.action}</p>
-                  <p className="text-sm text-muted-foreground">Par {activity.user}</p>
-                </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
     </div>
   );
 };
