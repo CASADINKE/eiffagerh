@@ -77,22 +77,37 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
           return;
         }
         
-        // Create a profile for this employee
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert({
-            id: employeeId,
-            full_name: employee.name,
-            role: 'employee'
-          });
+        // Create a profile for this employee with better error handling
+        try {
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert({
+              id: employeeId,
+              full_name: employee.name,
+              role: 'employee'
+            });
+            
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+            
+            // Provide more specific error message based on error type
+            if (insertError.code === '23505') {
+              toast.error("Un profil existe déjà pour cet employé.");
+            } else if (insertError.code === '42501') {
+              toast.error("Vous n'avez pas les permissions nécessaires pour créer un profil.");
+            } else {
+              toast.error(`Erreur lors de la création du profil: ${insertError.message}`);
+            }
+            return;
+          }
           
-        if (insertError) {
-          console.error("Error creating profile:", insertError);
-          toast.error("Erreur lors de la création du profil employé.");
+          console.log("Created profile for employee:", employee.name);
+          toast.success(`Profil créé pour ${employee.name}`);
+        } catch (e) {
+          console.error("Exception creating profile:", e);
+          toast.error("Erreur lors de la création du profil. Veuillez réessayer.");
           return;
         }
-        
-        console.log("Created profile for employee:", employee.name);
       }
       
       // Check if employee is already clocked in
