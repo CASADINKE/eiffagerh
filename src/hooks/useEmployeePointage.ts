@@ -100,11 +100,18 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     throw new Error(`Error clocking in employee: ${error.message}`);
   }
 
-  // Add the missing properties to match EmployeePointage type
+  // Since the data returned from Supabase doesn't include a notes property by default,
+  // we need to handle this by creating a complete EmployeePointage object
   return {
-    ...data,
+    id: data.id,
+    employee_id: data.employee_id,
+    clock_in: data.clock_in,
+    clock_out: data.clock_out,
+    date: data.date,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
     break_time: 0,
-    notes: data.notes || null
+    notes: notes || null // Use the notes we passed to the function
   };
 };
 
@@ -124,11 +131,17 @@ export const clockOutEmployee = async (entryId: string): Promise<EmployeePointag
     throw new Error(`Error clocking out employee: ${error.message}`);
   }
 
-  // Add the missing properties to match EmployeePointage type
+  // Create a complete EmployeePointage object
   return {
-    ...data,
+    id: data.id,
+    employee_id: data.employee_id,
+    clock_in: data.clock_in,
+    clock_out: data.clock_out,
+    date: data.date,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
     break_time: 0,
-    notes: data.notes || null
+    notes: null // Since we don't have notes data when clocking out, set to null
   };
 };
 
