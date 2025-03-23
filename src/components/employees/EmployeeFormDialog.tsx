@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import EmployeeForm from "./EmployeeForm";
-import { toast } from "sonner";
+import { useEmployeeOperations, EmployeeFormData } from "@/hooks/useEmployeeOperations";
 
 interface EmployeeFormDialogProps {
   open: boolean;
@@ -16,10 +16,14 @@ interface EmployeeFormDialogProps {
 }
 
 const EmployeeFormDialog = ({ open, onOpenChange }: EmployeeFormDialogProps) => {
-  const handleSubmit = (values: any) => {
+  const { createEmployee, isLoading } = useEmployeeOperations();
+
+  const handleSubmit = async (values: EmployeeFormData) => {
     console.log("Form submitted with values:", values);
-    toast.success("Employé ajouté avec succès!");
-    onOpenChange(false);
+    const result = await createEmployee(values);
+    if (result) {
+      onOpenChange(false);
+    }
   };
 
   const handleCancel = () => {
@@ -35,7 +39,7 @@ const EmployeeFormDialog = ({ open, onOpenChange }: EmployeeFormDialogProps) => 
             Remplissez tous les champs pour créer un nouvel employé.
           </DialogDescription>
         </DialogHeader>
-        <EmployeeForm onSubmit={handleSubmit} onCancel={handleCancel} />
+        <EmployeeForm onSubmit={handleSubmit} onCancel={handleCancel} isLoading={isLoading} />
       </DialogContent>
     </Dialog>
   );

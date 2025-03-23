@@ -148,6 +148,54 @@ export type Database = {
           },
         ]
       }
+      listes_employées: {
+        Row: {
+          adresse: string
+          affectation: string
+          created_at: string
+          date_naissance: string
+          employeur: string
+          id: string
+          matricule: string
+          nom: string
+          poste: string
+          prenom: string
+          site: string
+          telephone: string
+          updated_at: string
+        }
+        Insert: {
+          adresse: string
+          affectation: string
+          created_at?: string
+          date_naissance: string
+          employeur: string
+          id?: string
+          matricule: string
+          nom: string
+          poste: string
+          prenom: string
+          site: string
+          telephone: string
+          updated_at?: string
+        }
+        Update: {
+          adresse?: string
+          affectation?: string
+          created_at?: string
+          date_naissance?: string
+          employeur?: string
+          id?: string
+          matricule?: string
+          nom?: string
+          poste?: string
+          prenom?: string
+          site?: string
+          telephone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

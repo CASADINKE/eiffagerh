@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarIcon, User, Briefcase, MapPin, Phone, Mail } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
@@ -27,9 +26,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { EmployeeFormData } from "@/hooks/useEmployeeOperations";
 
 const employerOptions = [
   { value: "phoenix", label: "Phoenix Interim Suarl" },
@@ -60,15 +59,14 @@ const employeeFormSchema = z.object({
   site: z.string().min(1, { message: "Le site est requis" }),
 });
 
-type EmployeeFormValues = z.infer<typeof employeeFormSchema>;
-
 interface EmployeeFormProps {
-  onSubmit: (values: EmployeeFormValues) => void;
+  onSubmit: (values: EmployeeFormData) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-const EmployeeForm = ({ onSubmit, onCancel }: EmployeeFormProps) => {
-  const form = useForm<EmployeeFormValues>({
+const EmployeeForm = ({ onSubmit, onCancel, isLoading = false }: EmployeeFormProps) => {
+  const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
       matricule: "",
@@ -276,10 +274,12 @@ const EmployeeForm = ({ onSubmit, onCancel }: EmployeeFormProps) => {
         </div>
 
         <div className="flex justify-end space-x-2">
-          <Button variant="outline" type="button" onClick={onCancel}>
+          <Button variant="outline" type="button" onClick={onCancel} disabled={isLoading}>
             Annuler
           </Button>
-          <Button type="submit">Enregistrer</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Enregistrement..." : "Enregistrer"}
+          </Button>
         </div>
       </form>
     </Form>
