@@ -53,11 +53,11 @@ export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => exportPayslips('csv')}>
               <FileText className="mr-2 h-4 w-4" />
-              Exporter les paiements en CSV
+              Exporter en CSV
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleExportPDF}>
               <File className="mr-2 h-4 w-4" />
-              Exporter tout en PDF
+              Exporter en PDF
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
