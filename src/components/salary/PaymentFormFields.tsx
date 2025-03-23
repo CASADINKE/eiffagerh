@@ -1,7 +1,7 @@
 
 import { format } from "date-fns";
-import { Calendar } from "lucide-react";
-import { CalendarComponent } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import {
   FormControl,
   FormDescription,
@@ -73,12 +73,12 @@ export function PaymentFormFields({ form }: PaymentFormFieldsProps) {
                     ) : (
                       <span>Choisir une date</span>
                     )}
-                    <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
+                <Calendar
                   mode="single"
                   selected={field.value}
                   onSelect={field.onChange}
