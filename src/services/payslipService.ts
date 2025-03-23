@@ -24,9 +24,16 @@ export interface Payslip {
 // Function to create multiple payslips for a payment
 export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at' | 'updated_at' | 'generated_date'>[]): Promise<boolean> => {
   try {
+    // Add generated_date field to all payslips
+    const payslipsToInsert = payslips.map(payslip => ({
+      ...payslip,
+      generated_date: new Date().toISOString()
+    }));
+    
+    // Use the generic method with type assertion for custom tables
     const { error } = await supabase
       .from('payslips')
-      .insert(payslips);
+      .insert(payslipsToInsert as any);
 
     if (error) {
       console.error("Error creating payslips:", error);
@@ -58,7 +65,7 @@ export const updateSalaryPaymentTotal = async (paymentId: string, totalAmount: n
       .update({ 
         total_amount: totalAmount,
         status: 'completed'
-      })
+      } as any)
       .eq('id', paymentId);
 
     if (error) {
@@ -85,7 +92,7 @@ export const getPayslipsByPaymentId = async (paymentId: string): Promise<Payslip
         employee:profiles(full_name, role)
       `)
       .eq('salary_payment_id', paymentId)
-      .order('net_salary', { ascending: false });
+      .order('net_salary', { ascending: false }) as any;
 
     if (error) {
       console.error("Error fetching payslips:", error);
@@ -93,7 +100,7 @@ export const getPayslipsByPaymentId = async (paymentId: string): Promise<Payslip
       return [];
     }
     
-    return data || [];
+    return data as Payslip[];
   } catch (error) {
     console.error("Error fetching payslips:", error);
     toast.error("Erreur lors de la récupération des bulletins de paie");
@@ -111,7 +118,7 @@ export const getEmployeePayslips = async (employeeId: string): Promise<Payslip[]
         payment:salary_payments(payment_period, payment_date)
       `)
       .eq('employee_id', employeeId)
-      .order('generated_date', { ascending: false });
+      .order('generated_date', { ascending: false }) as any;
 
     if (error) {
       console.error("Error fetching employee payslips:", error);
@@ -119,7 +126,7 @@ export const getEmployeePayslips = async (employeeId: string): Promise<Payslip[]
       return [];
     }
     
-    return data || [];
+    return data as Payslip[];
   } catch (error) {
     console.error("Error fetching employee payslips:", error);
     toast.error("Erreur lors de la récupération des bulletins de paie");
@@ -137,7 +144,7 @@ export const getPayslipById = async (payslipId: string): Promise<Payslip | null>
         employee:profiles(full_name, role)
       `)
       .eq('id', payslipId)
-      .single();
+      .single() as any;
 
     if (error) {
       console.error("Error fetching payslip:", error);
@@ -145,7 +152,7 @@ export const getPayslipById = async (payslipId: string): Promise<Payslip | null>
       return null;
     }
     
-    return data || null;
+    return data as Payslip;
   } catch (error) {
     console.error("Error fetching payslip:", error);
     toast.error("Erreur lors de la récupération du bulletin de paie");

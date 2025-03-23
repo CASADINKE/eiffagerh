@@ -30,7 +30,7 @@ export const createSalaryPayment = async (paymentData: Omit<SalaryPayment, 'id' 
       .insert({
         ...paymentData,
         created_by: user.user.id
-      })
+      } as any)
       .select('id')
       .single();
 
@@ -54,7 +54,7 @@ export const getSalaryPayments = async (): Promise<SalaryPayment[]> => {
     const { data, error } = await supabase
       .from('salary_payments')
       .select('*')
-      .order('payment_date', { ascending: false });
+      .order('payment_date', { ascending: false }) as any;
 
     if (error) {
       console.error("Error fetching salary payments:", error);
@@ -62,7 +62,7 @@ export const getSalaryPayments = async (): Promise<SalaryPayment[]> => {
       return [];
     }
     
-    return data || [];
+    return data as SalaryPayment[];
   } catch (error) {
     console.error("Error fetching salary payments:", error);
     toast.error("Erreur lors de la récupération des paiements de salaire");
