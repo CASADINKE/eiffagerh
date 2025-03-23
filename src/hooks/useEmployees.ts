@@ -35,7 +35,7 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
     department: emp.affectation,
     site: emp.site,
     email: "non spécifié", // These fields don't exist in listes_employées
-    phone: emp.telephone || "non spécifié",
+    phone: emp.telephone,
     status: "active", // Default status
     avatar: undefined
   }));
