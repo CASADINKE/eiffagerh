@@ -9,6 +9,7 @@ import {
 import { LeaveRequestForm } from "./LeaveRequestForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 
 interface LeaveRequestDialogProps {
   open: boolean;
@@ -47,9 +48,15 @@ export function LeaveRequestDialog({
 
       if (error) throw error;
 
+      // Afficher les deux types de notifications
       toast({
         title: "Demande envoyée",
         description: "Votre demande de congé a été soumise avec succès",
+      });
+
+      sonnerToast.success("Demande de congé envoyée", {
+        description: "Vous recevrez une notification lorsque votre demande sera traitée.",
+        duration: 5000,
       });
 
       onOpenChange(false);
