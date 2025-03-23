@@ -59,7 +59,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <Card className="w-full">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl">GESTION DES RESOURCES HUMAINE EIFFAGE</CardTitle>
+            <CardTitle className="text-2xl">EIFFAGE</CardTitle>
             <CardDescription>
               Plateforme de gestion des ressources humaines
             </CardDescription>
