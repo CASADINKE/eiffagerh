@@ -40,13 +40,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { createSalaryPayment } from "@/services/salaryPaymentService";
 
 const paymentFormSchema = z.object({
-  period: z.string().min(1, { message: "La période est requise" }),
-  paymentDate: z.date({
+  payment_period: z.string().min(1, { message: "La période est requise" }),
+  payment_date: z.date({
     required_error: "La date de paiement est requise",
   }),
-  paymentMethod: z.string().min(1, { message: "La méthode de paiement est requise" }),
+  payment_method: z.string().min(1, { message: "La méthode de paiement est requise" }),
   description: z.string().optional(),
 });
 
@@ -55,11 +57,12 @@ type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 export function SalaryPaymentDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const defaultValues: Partial<PaymentFormValues> = {
-    period: format(new Date(), "MMMM yyyy"),
-    paymentDate: new Date(),
-    paymentMethod: "virement",
+    payment_period: format(new Date(), "MMMM yyyy"),
+    payment_date: new Date(),
+    payment_method: "virement",
     description: "",
   };
 
@@ -72,15 +75,21 @@ export function SalaryPaymentDialog() {
     setLoading(true);
     
     try {
-      // Here you would integrate with your backend to process the payment
-      console.log("Processing payment:", data);
+      const paymentId = await createSalaryPayment({
+        payment_period: data.payment_period,
+        payment_date: format(data.payment_date, 'yyyy-MM-dd'),
+        payment_method: data.payment_method,
+        description: data.description || null,
+        total_amount: 0, // This will be updated when payslips are generated
+        status: 'pending'
+      });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Paiement des salaires effectué avec succès!");
-      setOpen(false);
-      form.reset(defaultValues);
+      if (paymentId) {
+        toast.success("Paiement des salaires créé avec succès!");
+        setOpen(false);
+        form.reset(defaultValues);
+        navigate(`/salary-payment/${paymentId}`);
+      }
     } catch (error) {
       console.error("Error processing payment:", error);
       toast.error("Erreur lors du paiement des salaires");
@@ -108,7 +117,7 @@ export function SalaryPaymentDialog() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
             <FormField
               control={form.control}
-              name="period"
+              name="payment_period"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Période de paie</FormLabel>
@@ -125,7 +134,7 @@ export function SalaryPaymentDialog() {
             
             <FormField
               control={form.control}
-              name="paymentDate"
+              name="payment_date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Date de paiement</FormLabel>
@@ -170,7 +179,7 @@ export function SalaryPaymentDialog() {
             
             <FormField
               control={form.control}
-              name="paymentMethod"
+              name="payment_method"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Méthode de paiement</FormLabel>
@@ -222,7 +231,7 @@ export function SalaryPaymentDialog() {
                 Annuler
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? "Traitement..." : "Effectuer le paiement"}
+                {loading ? "Traitement..." : "Créer le paiement"}
               </Button>
             </DialogFooter>
           </form>

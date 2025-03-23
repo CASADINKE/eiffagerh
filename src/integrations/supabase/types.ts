@@ -164,6 +164,66 @@ export type Database = {
         }
         Relationships: []
       }
+      payslips: {
+        Row: {
+          allowances: number
+          base_salary: number
+          created_at: string
+          deductions: number
+          employee_id: string
+          generated_date: string
+          id: string
+          net_salary: number
+          salary_payment_id: string | null
+          status: string
+          tax_amount: number
+          updated_at: string
+        }
+        Insert: {
+          allowances?: number
+          base_salary: number
+          created_at?: string
+          deductions?: number
+          employee_id: string
+          generated_date?: string
+          id?: string
+          net_salary: number
+          salary_payment_id?: string | null
+          status?: string
+          tax_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          allowances?: number
+          base_salary?: number
+          created_at?: string
+          deductions?: number
+          employee_id?: string
+          generated_date?: string
+          id?: string
+          net_salary?: number
+          salary_payment_id?: string | null
+          status?: string
+          tax_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payslips_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payslips_salary_payment_id_fkey"
+            columns: ["salary_payment_id"]
+            isOneToOne: false
+            referencedRelation: "salary_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -193,6 +253,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      salary_payments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          payment_date: string
+          payment_method: string
+          payment_period: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          payment_date: string
+          payment_method: string
+          payment_period: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          payment_date?: string
+          payment_method?: string
+          payment_period?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       time_entries: {
         Row: {
