@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -49,7 +50,10 @@ export function LeaveRequestForm({
       end_date: "",
       reason: "",
     },
+    mode: "onChange", // Validate on change to enable/disable submit button
   });
+
+  const { isValid } = form.formState;
 
   const handleSubmit = async (values: LeaveRequestFormData) => {
     await onSubmit(values);
@@ -154,7 +158,10 @@ export function LeaveRequestForm({
           >
             Annuler
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            disabled={isLoading || !isValid}
+          >
             {isLoading ? "Envoi en cours..." : "Soumettre la demande"}
           </Button>
         </div>
