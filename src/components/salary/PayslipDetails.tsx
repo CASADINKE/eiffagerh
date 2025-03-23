@@ -1,11 +1,13 @@
 
-import React from "react";
-import { Printer, FileDown, X } from "lucide-react";
+import React, { useRef } from "react";
+import { Printer, FileDown, X, FilePdf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Payslip } from "@/services/salaryPaymentService";
 import { format } from "date-fns";
 import { exportToCSV } from "@/utils/exportUtils";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface PayslipDetailsProps {
   payslip: Payslip;
@@ -24,6 +26,8 @@ export function PayslipDetails({
   onPrint, 
   onDownload 
 }: PayslipDetailsProps) {
+  const payslipRef = useRef<HTMLDivElement>(null);
+
   const handleDownload = () => {
     // Prepare payslip data for download
     const payslipData = [{
@@ -61,6 +65,43 @@ export function PayslipDetails({
     onDownload();
   };
 
+  const handleDownloadPDF = async () => {
+    if (!payslipRef.current) {
+      toast.error("Impossible de générer le PDF");
+      return;
+    }
+
+    try {
+      toast.info("Génération du PDF en cours...");
+      
+      const canvas = await html2canvas(payslipRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff"
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Calculate dimensions to fit the content properly
+      const imgWidth = 210; // A4 width in mm (210mm)
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`bulletin-paie-${payslip.employee?.full_name || "employe"}-${paymentPeriod?.replace(/\s/g, "-") || "periode"}.pdf`);
+      
+      toast.success(`Bulletin PDF téléchargé`);
+    } catch (error) {
+      console.error("Erreur lors de la génération du PDF:", error);
+      toast.error("Erreur lors de la génération du PDF");
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-white max-w-3xl w-full rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
@@ -83,7 +124,16 @@ export function PayslipDetails({
               onClick={handleDownload}
             >
               <FileDown className="h-4 w-4 mr-2" />
-              Télécharger
+              CSV
+            </Button>
+            <Button 
+              size="sm" 
+              variant="default" 
+              className="bg-red-600 hover:bg-red-700 text-white font-bold" 
+              onClick={handleDownloadPDF}
+            >
+              <FilePdf className="h-4 w-4 mr-2" />
+              PDF
             </Button>
             <Button 
               size="sm" 
@@ -97,7 +147,7 @@ export function PayslipDetails({
         </div>
         
         <div className="overflow-y-auto p-6 bg-gray-100">
-          <div className="border rounded-md overflow-hidden shadow-lg bg-white">
+          <div ref={payslipRef} className="payslip-content border rounded-md overflow-hidden shadow-lg bg-white">
             {/* En-tête du bulletin */}
             <div className="text-center font-bold text-lg py-3 border-b bg-gray-900 text-white">
               BULLETIN DE PAIE

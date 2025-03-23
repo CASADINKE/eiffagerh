@@ -10,11 +10,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, FileDown } from "lucide-react";
+import { Eye, FileDown, FilePdf } from "lucide-react";
 import { toast } from "sonner";
 import { Payslip } from "@/services/payslipService";
 import { SalaryPayment } from "@/services/salaryPaymentService";
 import { exportToCSV } from "@/utils/exportUtils";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface PayslipsListProps {
   payslips: Payslip[] | undefined;
@@ -60,6 +62,52 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
     toast.success(`Bulletin téléchargé pour ${payslip.employee?.full_name || "l'employé"}`);
   };
 
+  // Function to handle PDF download
+  const handleDownloadPDF = async (payslip: Payslip) => {
+    // First we need to view the payslip to render it
+    onViewPayslip(payslip);
+    
+    // Wait a bit for the payslip modal to render
+    setTimeout(async () => {
+      try {
+        const payslipElement = document.querySelector(".payslip-content") as HTMLElement;
+        
+        if (!payslipElement) {
+          toast.error("Impossible de générer le PDF. Élément non trouvé.");
+          return;
+        }
+        
+        toast.info("Génération du PDF en cours...");
+        
+        const canvas = await html2canvas(payslipElement, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff"
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        // Calculate dimensions to fit the content properly
+        const imgWidth = 210; // A4 width in mm (210mm)
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`bulletin-paie-${payslip.employee?.full_name || "employe"}-${latestPayment?.payment_period?.replace(/\s/g, "-") || "periode"}.pdf`);
+        
+        toast.success(`Bulletin PDF téléchargé pour ${payslip.employee?.full_name || "l'employé"}`);
+      } catch (error) {
+        console.error("Erreur lors de la génération du PDF:", error);
+        toast.error("Erreur lors de la génération du PDF");
+      }
+    }, 500);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -101,6 +149,7 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
                           variant="outline" 
                           size="sm" 
                           className="h-8 w-8 p-0" 
+                          title="Voir"
                           onClick={() => onViewPayslip(payslip)}
                         >
                           <Eye className="h-4 w-4" />
@@ -109,9 +158,19 @@ export function PayslipsList({ payslips, latestPayment, onViewPayslip }: Payslip
                           variant="outline" 
                           size="sm" 
                           className="h-8 w-8 p-0"
+                          title="Télécharger CSV"
                           onClick={() => handleDownloadPayslip(payslip)}
                         >
                           <FileDown className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 w-8 p-0"
+                          title="Télécharger PDF"
+                          onClick={() => handleDownloadPDF(payslip)}
+                        >
+                          <FilePdf className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>

@@ -14,6 +14,8 @@ import { PayslipsList } from "@/components/salary/PayslipsList";
 import { PayslipDetails } from "@/components/salary/PayslipDetails";
 import { Payslip } from "@/services/payslipService";
 import { exportToCSV } from "@/utils/exportUtils";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const SalaryPayment = () => {
   const { data: employees, isLoading: isLoadingEmployees } = useEmployees();
