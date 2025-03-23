@@ -19,9 +19,11 @@ export function SalaryHeader({ exportPayslips }: SalaryHeaderProps) {
           <Download size={16} />
           <span>Exporter les bulletins</span>
         </Button>
-        <Button as={Link} to="/salary-payment">
-          Paiement des salaires
-        </Button>
+        <Link to="/salary-payment">
+          <Button>
+            Paiement des salaires
+          </Button>
+        </Link>
       </div>
     </div>
   );
