@@ -25,7 +25,8 @@ export function ExportLeaveButton({ data, isLoading = false }: ExportLeaveButton
       status: "Statut",
       comments: "Commentaires",
       created_at: "Créé le",
-      updated_at: "Mis à jour le"
+      updated_at: "Mis à jour le",
+      approved_by: "Approuvé par"
     };
 
     // Formater les données pour l'export
@@ -36,7 +37,8 @@ export function ExportLeaveButton({ data, isLoading = false }: ExportLeaveButton
       created_at: formatDateFR(leave.created_at),
       updated_at: formatDateFR(leave.updated_at),
       status: getStatusLabel(leave.status),
-      type: getTypeLabel(leave.type)
+      type: getTypeLabel(leave.type),
+      approved_by: leave.approved_by || ''
     }));
 
     // Export au format CSV
