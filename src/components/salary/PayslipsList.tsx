@@ -12,7 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye, FileDown } from "lucide-react";
 import { toast } from "sonner";
-import { Payslip, SalaryPayment } from "@/services/salaryPaymentService";
+import { Payslip } from "@/services/payslipService";
+import { SalaryPayment } from "@/services/salaryPaymentService";
 
 interface PayslipsListProps {
   payslips: Payslip[] | undefined;

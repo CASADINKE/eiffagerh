@@ -8,11 +8,12 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
-import { createPayslips, Payslip } from "@/services/salaryPaymentService";
+import { createPayslips } from "@/services/payslipService";
 import { useSalaryPayments, usePayslipsByPaymentId } from "@/hooks/useSalaryPayments";
 import { SalaryPaymentDialog } from "@/components/salary/SalaryPaymentDialog";
 import { PayslipsList } from "@/components/salary/PayslipsList";
 import { PayslipDetails } from "@/components/salary/PayslipDetails";
+import { Payslip } from "@/services/payslipService";
 
 const SalaryPayment = () => {
   const { data: employees, isLoading: isLoadingEmployees } = useEmployees();

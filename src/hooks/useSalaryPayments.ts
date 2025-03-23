@@ -1,6 +1,11 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { getSalaryPayments, getPayslipsByPaymentId, getPayslipById, SalaryPayment, Payslip } from "@/services/salaryPaymentService";
+import { getSalaryPayments, SalaryPayment } from "@/services/salaryPaymentService";
+import { 
+  getPayslipsByPaymentId, 
+  getPayslipById, 
+  Payslip 
+} from "@/services/payslipService";
 
 // Hook to fetch all salary payments
 export const useSalaryPayments = () => {
