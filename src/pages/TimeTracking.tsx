@@ -97,7 +97,7 @@ const timeTrackingData = [
     status: "active",
     date: "2023-09-19",
   },
-] as const;
+];
 
 // Weekly working hours data
 const workingHoursData = [
@@ -115,6 +115,7 @@ const TimeTracking = () => {
   const [dateFilter, setDateFilter] = useState("today");
   const [employeeFilter, setEmployeeFilter] = useState("all");
   
+  // Fixed type error by using correct equality check with string values
   const filteredTimeData = timeTrackingData.filter(
     record => 
       (dateFilter === "today" && record.date === "2023-09-19") ||
@@ -127,14 +128,21 @@ const TimeTracking = () => {
     record => record.status === "active" && record.date === "2023-09-19"
   ).length;
   
-  const averageHoursToday = 
-    timeTrackingData
-      .filter(record => record.status === "completed" && record.date === "2023-09-19")
-      .reduce((acc, curr) => {
+  // Fixed type error by providing a default for empty array and properly handling types
+  const completedRecordsToday = timeTrackingData.filter(
+    record => record.status === "completed" && record.date === "2023-09-19"
+  );
+  
+  const averageHoursToday = completedRecordsToday.length > 0
+    ? completedRecordsToday.reduce((acc, curr) => {
+        // Handle the ongoing case where workingTime might be a string "ongoing"
+        if (curr.workingTime === "ongoing") return acc;
+        
         const hours = parseFloat(curr.workingTime.split("h")[0]);
-        const minutes = parseFloat(curr.workingTime.split("h ")[1].split("m")[0]) / 60;
+        const minutes = parseFloat(curr.workingTime.split("h ")[1]?.split("m")[0] || "0") / 60;
         return acc + hours + minutes;
-      }, 0);
+      }, 0) / completedRecordsToday.length
+    : 0;
   
   return (
     <div className="container mx-auto">
@@ -310,7 +318,6 @@ const TimeTracking = () => {
           </TabsContent>
           
           <TabsContent value="yesterday" className="m-0">
-            {/* Similar content structure as "today" tab, but with yesterday's data */}
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
