@@ -53,33 +53,33 @@ const Index = () => {
   const features = [
     {
       icon: <Users className="w-10 h-10 text-primary" />,
-      title: "Employee Management",
-      description: "Comprehensive employee profiles with personal and professional information."
+      title: "Gestion des Employés",
+      description: "Profils complets des employés avec informations personnelles et professionnelles."
     },
     {
       icon: <Calendar className="w-10 h-10 text-primary" />,
-      title: "Leave Management",
-      description: "Simplified leave requests, approvals and tracking for the entire organization."
+      title: "Gestion des Congés",
+      description: "Demandes de congés, approbations et suivi simplifiés pour toute l'organisation."
     },
     {
       icon: <DollarSign className="w-10 h-10 text-primary" />,
-      title: "Salary Management",
-      description: "Streamlined salary administration with detailed compensation tracking."
+      title: "Gestion des Salaires",
+      description: "Administration des salaires simplifiée avec suivi détaillé des rémunérations."
     },
     {
       icon: <Clock className="w-10 h-10 text-primary" />,
-      title: "Time Tracking",
-      description: "Accurate time tracking with attendance monitoring and reporting."
+      title: "Suivi du Temps",
+      description: "Suivi précis du temps avec surveillance et rapports de présence."
     },
     {
       icon: <Shield className="w-10 h-10 text-primary" />,
-      title: "Role-Based Access",
-      description: "Secure access control with customizable permissions for different roles."
+      title: "Accès Basé sur les Rôles",
+      description: "Contrôle d'accès sécurisé avec permissions personnalisables pour différents rôles."
     },
     {
       icon: <Settings className="w-10 h-10 text-primary" />,
-      title: "Customizable Settings",
-      description: "Flexible system configuration to meet your organization's specific needs."
+      title: "Paramètres Personnalisables",
+      description: "Configuration flexible du système pour répondre aux besoins spécifiques de votre organisation."
     }
   ];
 
@@ -101,7 +101,7 @@ const Index = () => {
               transition={{ duration: 0.5 }}
             >
               <span className="px-3 py-1 text-sm font-medium rounded-full bg-primary/10 text-primary">
-                HR Management Solution
+                Solution de Gestion RH
               </span>
             </motion.div>
             
@@ -111,7 +111,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              Simplify Human Resources Management
+              Simplifiez la Gestion des Ressources Humaines
             </motion.h1>
             
             <motion.p 
@@ -120,7 +120,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              A comprehensive HR platform designed to streamline employee management, leave tracking, salary administration, and time management in one elegant interface.
+              Une plateforme RH complète conçue pour rationaliser la gestion du personnel, le suivi des congés, l'administration des salaires et la gestion du temps dans une interface élégante.
             </motion.p>
             
             <motion.div
@@ -133,7 +133,7 @@ const Index = () => {
                 className="mr-4 px-8"
                 onClick={() => navigate("/dashboard")}
               >
-                Get Started
+                Commencer
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </motion.div>
@@ -150,9 +150,9 @@ const Index = () => {
       >
         <div className="container mx-auto px-6">
           <motion.div variants={fadeIn} className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Comprehensive HR Features</h2>
+            <h2 className="text-3xl font-bold mb-4">Fonctionnalités RH Complètes</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              All the tools you need to manage your organization's human resources efficiently
+              Tous les outils dont vous avez besoin pour gérer efficacement les ressources humaines de votre organisation
             </p>
           </motion.div>
           
@@ -181,16 +181,16 @@ const Index = () => {
       >
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to transform your HR processes?</h2>
+            <h2 className="text-3xl font-bold mb-4">Prêt à transformer vos processus RH ?</h2>
             <p className="text-muted-foreground mb-8">
-              Start using our HR management solution and experience the difference in efficiency and employee satisfaction.
+              Commencez à utiliser notre solution de gestion RH et constatez la différence en termes d'efficacité et de satisfaction des employés.
             </p>
             <Button 
               size="lg" 
               className="px-8"
               onClick={() => navigate("/dashboard")}
             >
-              Explore the Dashboard
+              Explorer le Tableau de Bord
             </Button>
           </div>
         </div>
@@ -201,12 +201,12 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-4 md:mb-0">
-              <h2 className="text-xl font-semibold">HR Zenith</h2>
-              <p className="text-sm text-muted-foreground">Modern HR Management Solution</p>
+              <h2 className="text-xl font-semibold">RH Zénith</h2>
+              <p className="text-sm text-muted-foreground">Solution Moderne de Gestion RH</p>
             </div>
             
             <div className="text-center md:text-right text-sm text-muted-foreground">
-              <p>© 2023 HR Zenith. All rights reserved.</p>
+              <p>© 2023 RH Zénith. Tous droits réservés.</p>
             </div>
           </div>
         </div>
