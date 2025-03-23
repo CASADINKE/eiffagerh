@@ -26,11 +26,11 @@ export const createSalaryPayment = async (paymentData: Omit<SalaryPayment, 'id' 
     }
 
     const { data, error } = await supabase
-      .from('salary_payments' as any)
+      .from('salary_payments')
       .insert({
         ...paymentData,
         created_by: user.user.id
-      } as any)
+      })
       .select('id')
       .single();
 
@@ -40,8 +40,7 @@ export const createSalaryPayment = async (paymentData: Omit<SalaryPayment, 'id' 
       return null;
     }
     
-    // Type assertion to ensure we can access the id property
-    return (data as any).id;
+    return data.id;
   } catch (error) {
     console.error("Error creating salary payment:", error);
     toast.error("Erreur lors de la création du paiement de salaire");
@@ -53,9 +52,9 @@ export const createSalaryPayment = async (paymentData: Omit<SalaryPayment, 'id' 
 export const getSalaryPayments = async (): Promise<SalaryPayment[]> => {
   try {
     const { data, error } = await supabase
-      .from('salary_payments' as any)
+      .from('salary_payments')
       .select('*')
-      .order('payment_date', { ascending: false }) as any;
+      .order('payment_date', { ascending: false });
 
     if (error) {
       console.error("Error fetching salary payments:", error);
