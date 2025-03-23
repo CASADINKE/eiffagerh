@@ -48,9 +48,9 @@ const EmployeeTable = ({ employees, isLoading, isError }: EmployeeTableProps) =>
         <TableCell>{employee.position}</TableCell>
         <TableCell>
           <span className={`px-2 py-1 text-xs rounded-full ${
-            employee.status === 'active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
-            employee.status === 'on-leave' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
-            'bg-red-50 text-red-600 border border-red-200'
+            employee.status === 'active' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-800/50' :
+            employee.status === 'on-leave' ? 'bg-amber-900/30 text-amber-400 border border-amber-800/50' :
+            'bg-red-900/30 text-red-400 border border-red-800/50'
           }`}>
             {employee.status === 'active' ? 'Actif' : 
              employee.status === 'on-leave' ? 'En congé' : 'Terminé'}
@@ -61,28 +61,30 @@ const EmployeeTable = ({ employees, isLoading, isError }: EmployeeTableProps) =>
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nom</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Département</TableHead>
-          <TableHead>Poste</TableHead>
-          <TableHead>Statut</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {isError ? (
-          <TableRow>
-            <TableCell colSpan={5} className="h-24 text-center text-destructive">
-              Erreur lors du chargement des données. Veuillez réessayer.
-            </TableCell>
+    <div className="border border-border rounded-md overflow-hidden bg-card">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-secondary/50">
+            <TableHead className="font-semibold text-foreground">MATRICULE</TableHead>
+            <TableHead className="font-semibold text-foreground">NOM & PRÉNOM</TableHead>
+            <TableHead className="font-semibold text-foreground">POSTE</TableHead>
+            <TableHead className="font-semibold text-foreground">SITE</TableHead>
+            <TableHead className="font-semibold text-foreground">TÉLÉPHONE</TableHead>
           </TableRow>
-        ) : (
-          renderTableContent()
-        )}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {isError ? (
+            <TableRow>
+              <TableCell colSpan={5} className="h-24 text-center text-destructive">
+                Erreur lors du chargement des données. Veuillez réessayer.
+              </TableCell>
+            </TableRow>
+          ) : (
+            renderTableContent()
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

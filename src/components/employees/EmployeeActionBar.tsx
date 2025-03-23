@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ArrowLeft, RotateCcw, Settings, Plus } from "lucide-react";
+import { ArrowLeft, RotateCcw, Settings, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -20,44 +20,21 @@ const EmployeeActionBar = ({ onAddEmployee, onRefresh }: EmployeeActionBarProps)
     // Logique pour ouvrir les paramètres ici
   };
 
-  const handleBulkAction = () => {
-    toast.info("Action groupée sélectionnée");
-    // Logique pour les actions groupées ici
+  const handleDeleteRecent = () => {
+    toast.info("Supprimer récents");
+    // Logique pour supprimer les récents
   };
 
   return (
-    <div className="flex justify-between items-center mb-4 mt-6 bg-white border rounded-t-md p-2">
-      <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-1 text-gray-700"
-          onClick={handleBack}
-        >
-          <ArrowLeft size={16} />
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-1 text-gray-700"
-          onClick={onRefresh}
-        >
-          <RotateCcw size={16} />
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-1 text-gray-700"
-          onClick={handleSettings}
-        >
-          <Settings size={16} />
-        </Button>
+    <div className="flex justify-between items-center mb-4 mt-6">
+      <div className="py-3 px-4 bg-card rounded-t-md border border-border flex-1">
+        <h1 className="text-lg font-medium">Employés</h1>
       </div>
       <div className="flex gap-2">
         <Button 
           variant="default" 
-          size="sm" 
-          className="gap-1"
+          size="default" 
+          className="gap-1 rounded-md"
           onClick={onAddEmployee}
         >
           <Plus size={16} />
@@ -65,11 +42,20 @@ const EmployeeActionBar = ({ onAddEmployee, onRefresh }: EmployeeActionBarProps)
         </Button>
         <Button 
           variant="outline" 
-          size="sm" 
-          className="gap-1 text-gray-700"
-          onClick={handleBulkAction}
+          size="icon" 
+          className="gap-1 bg-secondary text-foreground border-border"
+          onClick={onRefresh}
         >
-          Actions
+          <RotateCcw size={16} />
+        </Button>
+        <Button 
+          variant="destructive" 
+          size="default" 
+          className="gap-1"
+          onClick={handleDeleteRecent}
+        >
+          <Trash2 size={16} />
+          Supprimer récents
         </Button>
       </div>
     </div>
