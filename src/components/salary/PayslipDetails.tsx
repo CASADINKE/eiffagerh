@@ -1,343 +1,324 @@
-import React, { useRef } from "react";
-import { Printer, FileDown, X, FileText } from "lucide-react";
+
+import { useState } from "react";
+import { X, Printer, FileDownload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Payslip } from "@/services/salaryPaymentService";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Payslip } from "@/services/payslipService";
+import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { exportToCSV } from "@/utils/exportUtils";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { fr } from "date-fns/locale";
 
 interface PayslipDetailsProps {
   payslip: Payslip;
-  paymentPeriod?: string;
-  paymentMethod?: string;
+  paymentPeriod: string;
+  paymentMethod: string;
   onClose: () => void;
   onPrint: () => void;
   onDownload: () => void;
 }
 
-export function PayslipDetails({ 
-  payslip, 
-  paymentPeriod, 
-  paymentMethod = "virement bancaire",
-  onClose, 
-  onPrint, 
-  onDownload 
+export function PayslipDetails({
+  payslip,
+  paymentPeriod,
+  paymentMethod,
+  onClose,
+  onPrint,
+  onDownload,
 }: PayslipDetailsProps) {
-  const payslipRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleDownload = () => {
-    const payslipData = [{
-      id: payslip.id,
-      employee: payslip.employee?.full_name || "Employé",
-      poste: payslip.employee?.role || "N/A",
-      periode: paymentPeriod || format(new Date(), 'MMMM yyyy'),
-      salaire_base: payslip.base_salary,
-      indemnites: payslip.allowances,
-      deductions: payslip.deductions,
-      impots: payslip.tax_amount,
-      salaire_net: payslip.net_salary,
-      mode_paiement: paymentMethod
-    }];
-
-    exportToCSV(
-      payslipData,
-      `bulletin-paie-${payslip.employee?.full_name || "employe"}-${paymentPeriod?.replace(/\s/g, "-") || "periode"}`,
-      {
-        id: "Identifiant",
-        employee: "Employé",
-        poste: "Poste",
-        periode: "Période",
-        salaire_base: "Salaire de base",
-        indemnites: "Indemnités",
-        deductions: "Déductions",
-        impots: "Impôts",
-        salaire_net: "Salaire net",
-        mode_paiement: "Mode de paiement"
-      }
-    );
-    
-    onDownload();
-  };
-
-  const handleDownloadPDF = async () => {
-    if (!payslipRef.current) {
-      toast.error("Impossible de générer le PDF");
-      return;
-    }
-
-    try {
-      toast.info("Génération du PDF en cours...");
-      
-      const canvas = await html2canvas(payslipRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff"
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const imgWidth = 210;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save(`bulletin-paie-${payslip.employee?.full_name || "employe"}-${paymentPeriod?.replace(/\s/g, "-") || "periode"}.pdf`);
-      
-      toast.success(`Bulletin PDF téléchargé`);
-    } catch (error) {
-      console.error("Erreur lors de la génération du PDF:", error);
-      toast.error("Erreur lors de la génération du PDF");
-    }
-  };
-
+  // Extraire les métadonnées du payslip ou utiliser des valeurs par défaut
+  const metadata = payslip.employee_metadata || {};
+  const matricule = metadata.matricule || "00115";
+  const convention = metadata.convention || "Convention Collective Nationale";
+  const statut = metadata.statut || "C.D.I";
+  const parts_IR = metadata.parts_IR || 1;
+  const qualification = metadata.qualification || "CONDUCTEUR ENGINS";
+  const date_naissance = metadata.date_naissance || "10/10/1988";
+  const employer = metadata.employer || "EIFFAGE ENERGIE T&D Sénégal";
+  const site = metadata.site || "AV PETIT MBAO X RTE DES BRAS BP 29389 DAKAR SÉNÉGAL";
+  const transportAllowance = metadata.transport_allowance || 26000;
+  const displacementAllowance = metadata.displacement_allowance || 197000;
+  
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white max-w-3xl w-full rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center bg-blue-800">
-          <h2 className="text-xl font-bold text-white">Bulletin de paie</h2>
-          <div className="flex space-x-2">
-            <Button 
-              size="sm" 
-              variant="default" 
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold" 
-              onClick={onPrint}
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimer
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto payslip-content">
+        <CardHeader className="flex flex-row items-center justify-between sticky top-0 bg-card z-10 border-b">
+          <CardTitle className="text-xl">Bulletin de Paie</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" onClick={onPrint}>
+              <Printer className="h-4 w-4" />
             </Button>
-            <Button 
-              size="sm" 
-              variant="default" 
-              className="bg-green-600 hover:bg-green-700 text-white font-bold" 
-              onClick={handleDownload}
-            >
-              <FileDown className="h-4 w-4 mr-2" />
-              CSV
+            <Button variant="outline" size="icon" onClick={onDownload}>
+              <FileDownload className="h-4 w-4" />
             </Button>
-            <Button 
-              size="sm" 
-              variant="default" 
-              className="bg-red-600 hover:bg-red-700 text-white font-bold" 
-              onClick={handleDownloadPDF}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              PDF
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="bg-white border-gray-400 hover:bg-gray-100 font-medium"
-              onClick={onClose}
-            >
+            <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
-        </div>
-        
-        <div className="overflow-y-auto p-6 bg-gray-100">
-          <div ref={payslipRef} className="payslip-content border rounded-md overflow-hidden shadow-lg bg-white">
-            <div className="text-center font-bold text-lg py-3 border-b bg-gray-900 text-white">
-              BULLETIN DE PAIE
-            </div>
-            
-            <div className="flex border-b">
-              <div className="w-1/2 p-4 border-r bg-gray-100">
-                <div className="font-bold text-gray-900 text-base">Employeur</div>
-                <div className="flex items-center mt-2">
-                  <img 
-                    src="/lovable-uploads/5bf70fa7-08a9-4818-b349-27239b6e83cf.png" 
-                    alt="EIFFAGE" 
-                    className="h-8 mr-2"
-                  />
-                  <div>
-                    <div className="font-bold text-gray-900">EIFFAGE</div>
-                    <div className="text-gray-800 font-medium">ÉNERGIE</div>
-                    <div className="text-sm text-gray-700 font-medium">T&D Sénégal</div>
-                  </div>
-                </div>
-                <div className="mt-2 text-sm text-gray-800 font-medium">
-                  AV FÉLIX EBOUÉ 5 KM DES BRAS<br />
-                  BP<br />
-                  DAKAR SÉNÉGAL
-                </div>
-              </div>
-              
-              <div className="w-1/2 p-4 bg-gray-100">
-                <div className="text-right">
-                  <div className="text-gray-900 font-medium">Période de paie: <span className="font-bold">{paymentPeriod || format(new Date(), 'MMMM yyyy')}</span></div>
-                  <div className="mt-2">
-                    <div className="text-gray-800 font-medium">Matricule: <span className="font-bold">{payslip.employee_id.substring(0, 5)}</span></div>
-                    <div className="font-bold text-gray-900">{payslip.employee?.full_name || "Employé"}</div>
-                  </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold border-2 border-gray-300 py-2 mb-4">BULLETIN DE PAIE</h2>
+            <p className="text-right mb-4">Période de paie: mai 2024</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="border-2 border-gray-300 p-4">
+              <p className="font-semibold">Employeur</p>
+              <div className="flex justify-center items-center h-20">
+                <div className="flex flex-col items-center">
+                  <div className="font-bold">{employer}</div>
+                  <div className="text-sm text-center mt-2">{site}</div>
                 </div>
               </div>
             </div>
             
-            <div className="px-4 py-2 border-b bg-blue-800 text-white font-semibold">
-              Convention Collective Nationale
-            </div>
-            
-            <div className="border-b">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-200 text-sm">
-                    <th className="border-r px-2 py-1 text-left font-bold text-gray-900">Rubrique</th>
-                    <th className="border-r px-2 py-1 text-center font-bold text-gray-900">Statut</th>
-                    <th className="border-r px-2 py-1 text-center font-bold text-gray-900">Parts IR</th>
-                    <th className="border-r px-2 py-1 text-center font-bold text-gray-900">Qualification</th>
-                    <th className="px-2 py-1 text-center font-bold text-gray-900">Date Naissance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="text-sm bg-white">
-                    <td className="border-r px-2 py-1 font-medium text-gray-800">10/10/23</td>
-                    <td className="border-r px-2 py-1 text-center font-medium text-gray-800">E.R</td>
-                    <td className="border-r px-2 py-1 text-center font-medium text-gray-800">1</td>
-                    <td className="border-r px-2 py-1 text-center font-medium text-gray-800">{payslip.employee?.role || "EMPLOYE"}</td>
-                    <td className="px-2 py-1 text-center font-medium text-gray-800">10/10/1988</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-300 text-sm">
-                  <th className="border-r px-2 py-2 text-left font-bold text-gray-900">Libellé</th>
-                  <th className="border-r px-2 py-2 text-center font-bold text-gray-900">Nombre ou Base</th>
-                  <th className="border-r px-2 py-2 text-center font-bold text-gray-900">Taux</th>
-                  <th className="border-r px-2 py-2 text-center font-bold text-gray-900">Retenue Salariale</th>
-                  <th className="border-r px-2 py-2 text-center font-bold text-gray-900">Gain</th>
-                  <th className="border-r px-2 py-2 text-center font-bold text-gray-900">Taux Employeur</th>
-                  <th className="px-2 py-2 text-center font-bold text-gray-900">Montant Employeur</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="text-sm bg-white hover:bg-gray-50">
-                  <td className="border-r px-2 py-2 font-medium text-gray-800">101 Salaire de base du mois</td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{payslip.base_salary.toLocaleString()}</td>
-                  <td className="border-r px-2 py-2 text-center font-medium text-gray-800">1.00</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{payslip.base_salary.toLocaleString()}</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="px-2 py-2"></td>
-                </tr>
-                <tr className="text-sm bg-blue-100 hover:bg-blue-200">
-                  <td className="border-r px-2 py-2 font-medium text-gray-800">105 IPRES</td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{payslip.base_salary.toLocaleString()}</td>
-                  <td className="border-r px-2 py-2 text-center font-medium text-gray-800">0.0580</td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{Math.floor(payslip.base_salary * 0.058).toLocaleString()}</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-center font-medium text-gray-800">0.0870</td>
-                  <td className="px-2 py-2 text-right font-medium text-gray-800">{Math.floor(payslip.base_salary * 0.087).toLocaleString()}</td>
-                </tr>
-                <tr className="text-sm bg-white hover:bg-gray-50">
-                  <td className="border-r px-2 py-2 font-medium text-gray-800">317 Indemnité de déplacement</td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{Math.floor(payslip.allowances * 0.7).toLocaleString()}</td>
-                  <td className="border-r px-2 py-2 text-center font-medium text-gray-800">1.000</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{Math.floor(payslip.allowances * 0.7).toLocaleString()}</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="px-2 py-2"></td>
-                </tr>
-                <tr className="text-sm bg-blue-100 hover:bg-blue-200">
-                  <td className="border-r px-2 py-2 font-medium text-gray-800">420 Prime de transport</td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">26 000</td>
-                  <td className="border-r px-2 py-2 text-center font-medium text-gray-800">1.000</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">26 000</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="px-2 py-2"></td>
-                </tr>
-                <tr className="text-sm bg-white hover:bg-gray-50">
-                  <td className="border-r px-2 py-2 font-medium text-gray-800">401 Impôt général</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{payslip.tax_amount.toLocaleString()}</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="px-2 py-2"></td>
-                </tr>
-                <tr className="text-sm bg-blue-100 hover:bg-blue-200">
-                  <td className="border-r px-2 py-2 font-medium text-gray-800">410 TRIMF</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">3 000</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="px-2 py-2"></td>
-                </tr>
-                <tr className="text-sm bg-white hover:bg-gray-50">
-                  <td className="border-r px-2 py-2 font-medium text-gray-800">6673 Acompte sur prêt</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-right font-medium text-gray-800">{Math.floor(payslip.deductions - 3000).toLocaleString()}</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="px-2 py-2"></td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr className="bg-gray-900 text-sm font-bold text-white">
-                  <td className="border-r px-2 py-2 text-right" colSpan={2}>TOTAUX</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="border-r px-2 py-2 text-right">{(payslip.deductions + payslip.tax_amount).toLocaleString()}</td>
-                  <td className="border-r px-2 py-2 text-right">{(payslip.base_salary + payslip.allowances).toLocaleString()}</td>
-                  <td className="border-r px-2 py-2"></td>
-                  <td className="px-2 py-2 text-right">{Math.floor(payslip.base_salary * 0.087).toLocaleString()}</td>
-                </tr>
-              </tfoot>
-            </table>
-            
-            <div className="border-t">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-300 text-sm">
-                    <th className="border-r px-2 py-2 text-center font-bold text-gray-900" colSpan={2}>Brut Social</th>
-                    <th className="border-r px-2 py-2 text-center font-bold text-gray-900" colSpan={2}>Base IR</th>
-                    <th className="border-r px-2 py-2 text-center font-bold text-gray-900">IPRES Gén.</th>
-                    <th className="border-r px-2 py-2 text-center font-bold text-gray-900">IPRES Cad.</th>
-                    <th className="border-r px-2 py-2 text-center font-bold text-gray-900">IR</th>
-                    <th className="border-r px-2 py-2 text-center font-bold text-gray-900">TRIMF</th>
-                    <th className="px-2 py-2 text-center font-bold text-gray-900">NET A PAYER<br />EN FRANCS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="text-sm bg-white">
-                    <td className="border-r px-2 py-2 text-center font-medium text-gray-800" colSpan={2}>{(payslip.base_salary).toLocaleString()}</td>
-                    <td className="border-r px-2 py-2 text-center font-medium text-gray-800" colSpan={2}>{(payslip.base_salary - Math.floor(payslip.base_salary * 0.058)).toLocaleString()}</td>
-                    <td className="border-r px-2 py-2 text-center font-medium text-gray-800">{Math.floor(payslip.base_salary * 0.058).toLocaleString()}</td>
-                    <td className="border-r px-2 py-2 text-center font-medium text-gray-800"></td>
-                    <td className="border-r px-2 py-2 text-center font-medium text-gray-800">{(payslip.tax_amount - 3000).toLocaleString()}</td>
-                    <td className="border-r px-2 py-2 text-center font-medium text-gray-800">3 000</td>
-                    <td className="px-2 py-2 text-center font-bold bg-blue-700 text-white text-lg">{payslip.net_salary.toLocaleString()}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <div className="border-t p-3 text-sm grid grid-cols-2 gap-4 bg-gray-100">
-              <div className="text-gray-800">
-                <div><span className="font-bold text-gray-900">CONGES PAYES:</span> {Math.floor(payslip.base_salary / 12).toLocaleString()}</div>
-                <div><span className="font-bold text-gray-900">Règlement:</span> {paymentMethod}</div>
-                <div><span className="font-bold text-gray-900">Montant:</span> {payslip.net_salary.toLocaleString()}</div>
+            <div className="border-2 border-gray-300 p-4">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="font-semibold">Matricule:</p>
+                  <p>{matricule}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">NIDCHM</p>
+                  <p></p>
+                </div>
               </div>
-              <div className="text-right text-gray-800">
-                <div className="font-bold text-gray-900">PRIX DIV ENTREPRISE</div>
-                <div className="font-medium">Mois: {Math.floor(payslip.net_salary * 0.02).toLocaleString()}</div>
-                <div className="font-medium">Cumul: {Math.floor(payslip.net_salary * 0.06).toLocaleString()}</div>
+              <div className="mt-4">
+                <p className="font-semibold">SEIDOU SOULEYMANE</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+          
+          <div className="mb-6">
+            <p className="font-semibold border-2 border-gray-300 p-2">{convention}</p>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full border-2 border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2 text-left">Embauche</th>
+                  <th className="border p-2 text-left">Statut</th>
+                  <th className="border p-2 text-left">Parts IR</th>
+                  <th className="border p-2 text-left">Qualification</th>
+                  <th className="border p-2 text-left">Date Naissance</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border p-2">10/10/23</td>
+                  <td className="border p-2">{statut}</td>
+                  <td className="border p-2">{parts_IR}</td>
+                  <td className="border p-2">{qualification}</td>
+                  <td className="border p-2">{date_naissance}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <table className="w-full border-2 border-gray-300 mt-2">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2 text-left">Libellé</th>
+                  <th className="border p-2 text-left">Nombre ou Base</th>
+                  <th className="border p-2 text-left">Taux</th>
+                  <th className="border p-2 text-left">Gain</th>
+                  <th className="border p-2 text-left">Taux Salarial</th>
+                  <th className="border p-2 text-left">Montant Employé</th>
+                  <th className="border p-2 text-left">Montant Employeur</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">102</span>
+                      <span>Salaire de base du mois</span>
+                    </div>
+                  </td>
+                  <td className="border p-2">30 H 00</td>
+                  <td className="border p-2">1.00</td>
+                  <td className="border p-2">{payslip.base_salary.toLocaleString()}</td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">315</span>
+                      <span>Salaire Brut</span>
+                    </div>
+                  </td>
+                  <td className="border p-2">180 000</td>
+                  <td className="border p-2">1.0000</td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">317</span>
+                      <span>Indemnité de déplacement</span>
+                    </div>
+                  </td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">{displacementAllowance.toLocaleString()}</td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">411</span>
+                      <span>Retenue I.R</span>
+                    </div>
+                  </td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">37 255</td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">435</span>
+                      <span>TRIM général</span>
+                    </div>
+                  </td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">89 308</td>
+                  <td className="border p-2">24 836</td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">430</span>
+                      <span>TRIMF</span>
+                    </div>
+                  </td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">3 000</td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">420</span>
+                      <span>Prime de transport</span>
+                    </div>
+                  </td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">{transportAllowance.toLocaleString()}</td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">26 000</td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">9672</span>
+                      <span>Arrondi mois précédent</span>
+                    </div>
+                  </td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">71</td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr>
+                  <td className="border p-2">
+                    <div className="flex">
+                      <span className="w-8">9699</span>
+                      <span>Arrondi du mois</span>
+                    </div>
+                  </td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2"></td>
+                </tr>
+                <tr className="bg-gray-100 font-bold">
+                  <td className="border p-2 text-right" colSpan={3}>TOTAUX</td>
+                  <td className="border p-2">{(payslip.base_salary + transportAllowance + displacementAllowance).toLocaleString()}</td>
+                  <td className="border p-2"></td>
+                  <td className="border p-2">{(payslip.deductions + payslip.tax_amount).toLocaleString()}</td>
+                  <td className="border p-2">37 255</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <table className="w-full border-2 border-gray-300 mt-4">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2 text-center" colSpan={2}>Brut Social</th>
+                  <th className="border p-2 text-center" colSpan={2}>Base IR</th>
+                  <th className="border p-2 text-center">TRIMF Gén</th>
+                  <th className="border p-2 text-center">TRIMF</th>
+                  <th className="border p-2 text-center">NET A PAYER EN FRANCS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border p-2 text-center" colSpan={2}>443 511</td>
+                  <td className="border p-2 text-center" colSpan={2}>443 511</td>
+                  <td className="border p-2 text-center">24 836</td>
+                  <td className="border p-2 text-center">89 308</td>
+                  <td className="border p-2 text-center font-bold">{payslip.net_salary.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td className="border p-2 text-center" colSpan={2}>CUMUL: 1 716 057</td>
+                  <td className="border p-2 text-center" colSpan={2}>1 716 057</td>
+                  <td className="border p-2 text-center">96 059</td>
+                  <td className="border p-2 text-center">312 731</td>
+                  <td className="border p-2 text-center">4 450</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div className="grid grid-cols-2 mt-4">
+              <div className="border-2 border-gray-300 p-2">
+                <p className="font-bold">CONGES PAYES</p>
+                <p>Restant: 143 025</p>
+              </div>
+              <div className="border-2 border-gray-300 p-2">
+                <p className="font-bold">PRIX PAR ENTREPRISE</p>
+                <p>Mois: 507 131</p>
+                <p>Cumul: 1 978 988</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-8 flex justify-end">
+            <Button variant="default" onClick={onPrint} className="mr-2">
+              <Printer className="mr-2 h-4 w-4" />
+              Imprimer
+            </Button>
+            <Button variant="outline" onClick={onDownload}>
+              <FileDownload className="mr-2 h-4 w-4" />
+              Télécharger
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

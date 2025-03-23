@@ -19,6 +19,22 @@ export interface Payslip {
     full_name: string;
     role: string;
   };
+  employee_metadata?: {
+    [key: string]: any;
+    matricule?: string;
+    convention?: string;
+    statut?: string;
+    parts_IR?: number;
+    qualification?: string;
+    date_naissance?: string;
+    transport_allowance?: number;
+    displacement_allowance?: number;
+    employer?: string;
+    site?: string;
+    social_gross?: number;
+    ir_base?: number;
+    total_deductions?: number;
+  };
 }
 
 // Function to create multiple payslips for a payment

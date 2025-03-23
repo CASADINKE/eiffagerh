@@ -78,10 +78,13 @@ const SalaryPayment = () => {
       await Promise.all(profilePromises);
       
       const newPayslips = employees.map(employee => {
-        const baseSalary = Math.floor(Math.random() * 300000) + 150000;
-        const allowances = Math.floor(baseSalary * 0.2);
-        const deductions = Math.floor(baseSalary * 0.1);
-        const taxAmount = Math.floor(baseSalary * 0.15);
+        const baseSalary = 150000;
+        const transportAllowance = 26000;
+        const displacementAllowance = 197000;
+        const allowances = transportAllowance + displacementAllowance;
+        const socialContributions = 24836;
+        const taxAmount = 89308;
+        const deductions = socialContributions;
         const netSalary = baseSalary + allowances - deductions - taxAmount;
         
         return {
@@ -92,7 +95,22 @@ const SalaryPayment = () => {
           deductions,
           tax_amount: taxAmount,
           net_salary: netSalary,
-          status: 'generated'
+          status: 'generated',
+          employee_metadata: {
+            matricule: employee.matricule || "00115",
+            convention: "Convention Collective Nationale",
+            statut: "C.D.I",
+            parts_IR: 1,
+            qualification: "CONDUCTEUR ENGINS",
+            date_naissance: employee.date_naissance || "10/10/1988",
+            transport_allowance: transportAllowance,
+            displacement_allowance: displacementAllowance,
+            employer: employee.employeur || "EIFFAGE ENERGIE T&D Sénégal",
+            site: employee.site || "AV PETIT MBAO X RTE DES BRAS BP 29389 DAKAR SÉNÉGAL",
+            social_gross: 443511,
+            ir_base: 483511,
+            total_deductions: 354350
+          }
         };
       });
       
