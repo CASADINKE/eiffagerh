@@ -17,6 +17,8 @@ import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { exportToCSV } from "@/utils/exportUtils";
+import { toast } from "sonner";
 
 interface SalaryPaymentsTableProps {
   payments: SalaryPayment[];
@@ -55,6 +57,36 @@ export function SalaryPaymentsTable({ payments, isLoading }: SalaryPaymentsTable
       </Card>
     );
   }
+
+  const handleExportPayment = (payment: SalaryPayment) => {
+    const paymentData = [{
+      periode: payment.payment_period,
+      date_paiement: payment.payment_date ? format(parseISO(payment.payment_date), 'dd MMMM yyyy', { locale: fr }) : "Non définie",
+      methode: payment.payment_method === 'virement' ? 'Virement bancaire' :
+               payment.payment_method === 'cheque' ? 'Chèque' :
+               payment.payment_method === 'especes' ? 'Espèces' : 
+               payment.payment_method === 'mobile' ? 'Paiement mobile' : 
+               payment.payment_method,
+      montant_total: payment.total_amount,
+      statut: payment.status === 'completed' ? 'Terminé' : 
+              payment.status === 'pending' ? 'En attente' : 
+              payment.status
+    }];
+
+    exportToCSV(
+      paymentData,
+      `paiement-salaire-${payment.payment_period.replace(/\s/g, "-")}`,
+      {
+        periode: "Période",
+        date_paiement: "Date de paiement",
+        methode: "Méthode de paiement",
+        montant_total: "Montant total",
+        statut: "Statut"
+      }
+    );
+    
+    toast.success(`Détails du paiement pour ${payment.payment_period} exportés avec succès`);
+  };
 
   return (
     <Card>
@@ -107,24 +139,21 @@ export function SalaryPaymentsTable({ payments, isLoading }: SalaryPaymentsTable
                   <div className="flex justify-end space-x-2">
                     <Button 
                       variant="outline" 
-                      size="sm" 
+                      size="icon"
                       asChild
+                      title="Voir les détails"
                     >
                       <Link to={`/salary-payment/${payment.id}`}>
-                        <Eye className="h-4 w-4 mr-1" />
-                        <span>Détails</span>
+                        <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
                     <Button 
                       variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        // This would be replaced with actual export functionality
-                        alert(`Export des bulletins pour ${payment.payment_period}`);
-                      }}
+                      size="icon"
+                      title="Exporter"
+                      onClick={() => handleExportPayment(payment)}
                     >
-                      <FileDown className="h-4 w-4 mr-1" />
-                      <span>Exporter</span>
+                      <FileDown className="h-4 w-4" />
                     </Button>
                   </div>
                 </TableCell>
