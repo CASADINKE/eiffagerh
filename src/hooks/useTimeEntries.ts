@@ -34,10 +34,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       profiles:employee_id (
         id,
         full_name,
-        avatar_url,
-        departments!profiles_department_id_fkey (
-          name
-        )
+        avatar_url
       )
     `)
     .order("date", { ascending: false })
@@ -51,7 +48,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   // Process and format the data
   return data.map((entry) => {
     // Create an empty profile object if profiles is null
-    const profileData = entry.profiles ? (entry.profiles as ProfileData) : {} as ProfileData;
+    const profileData = entry.profiles as ProfileData | null;
     
     return {
       id: entry.id,
@@ -62,10 +59,10 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       date: entry.date,
       notes: entry.notes,
       employee: {
-        id: profileData.id || entry.employee_id,
-        name: profileData.full_name || "Sans nom",
-        department: profileData.departments?.name || "Département non assigné",
-        avatar: profileData.avatar_url || undefined,
+        id: profileData?.id || entry.employee_id,
+        name: profileData?.full_name || "Sans nom",
+        department: "Département non assigné", // Fixed: Use a default value instead of trying to access the nested relation
+        avatar: profileData?.avatar_url || undefined,
         // Add other employee fields with default values
         position: "Poste non spécifié",
         email: "Email non spécifié",

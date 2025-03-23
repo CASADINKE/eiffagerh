@@ -32,17 +32,14 @@ const mapStatusFromDB = (dbStatus: string | null): EmployeeStatus => {
 // Fonction pour récupérer les employés depuis Supabase
 export const fetchEmployees = async (): Promise<Employee[]> => {
   try {
-    // Modifié pour utiliser la relation specifique, en fonction de l'erreur
+    // Récupération des profils sans la jointure qui pose problème
     const { data: profilesData, error: profilesError } = await supabase
       .from("profiles")
       .select(`
         id,
         full_name,
         avatar_url,
-        department_id,
-        departments!profiles_department_id_fkey (
-          name
-        )
+        department_id
       `);
 
     if (profilesError) {
@@ -81,7 +78,7 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
         id: profile.id,
         name: profile.full_name || "Sans nom",
         position: employeeData.position || "Poste non spécifié",
-        department: profile.departments?.name || "Département non assigné",
+        department: "Département non assigné", // Fixed: Use a default value instead of trying to access the nested relation
         email: employeeData.contact_email || "Email non spécifié",
         phone: employeeData.contact_phone || "Téléphone non spécifié",
         avatar: profile.avatar_url,
