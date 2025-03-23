@@ -35,7 +35,7 @@ const StatCard = ({ title, value, icon, trend, className }: StatCardProps) => {
             <span className="mr-1">
               {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}%
             </span>
-            from last month
+            par rapport au mois dernier
           </span>
         </div>
       )}

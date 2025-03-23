@@ -17,13 +17,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-// Mock employee data
+// Données employés simulées
 const employeesData = [
   {
     id: "1",
     name: "Alex Johnson",
-    position: "Frontend Developer",
-    department: "Engineering",
+    position: "Développeur Frontend",
+    department: "Ingénierie",
     email: "alex.johnson@company.com",
     phone: "+1 234 567 890",
     status: "active",
@@ -31,8 +31,8 @@ const employeesData = [
   {
     id: "2",
     name: "Sarah Williams",
-    position: "HR Manager",
-    department: "Human Resources",
+    position: "Responsable RH",
+    department: "Ressources Humaines",
     email: "sarah.williams@company.com",
     phone: "+1 234 567 891",
     status: "active",
@@ -40,8 +40,8 @@ const employeesData = [
   {
     id: "3",
     name: "Michael Brown",
-    position: "Product Manager",
-    department: "Product",
+    position: "Chef de produit",
+    department: "Produit",
     email: "michael.brown@company.com",
     phone: "+1 234 567 892",
     status: "on-leave",
@@ -49,7 +49,7 @@ const employeesData = [
   {
     id: "4",
     name: "Emily Davis",
-    position: "UI/UX Designer",
+    position: "Designer UI/UX",
     department: "Design",
     email: "emily.davis@company.com",
     phone: "+1 234 567 893",
@@ -58,8 +58,8 @@ const employeesData = [
   {
     id: "5",
     name: "Daniel Wilson",
-    position: "Backend Developer",
-    department: "Engineering",
+    position: "Développeur Backend",
+    department: "Ingénierie",
     email: "daniel.wilson@company.com",
     phone: "+1 234 567 894",
     status: "active",
@@ -67,7 +67,7 @@ const employeesData = [
   {
     id: "6",
     name: "Olivia Taylor",
-    position: "Marketing Specialist",
+    position: "Spécialiste Marketing",
     department: "Marketing",
     email: "olivia.taylor@company.com",
     phone: "+1 234 567 895",
@@ -76,8 +76,8 @@ const employeesData = [
   {
     id: "7",
     name: "James Martinez",
-    position: "DevOps Engineer",
-    department: "Engineering",
+    position: "Ingénieur DevOps",
+    department: "Ingénierie",
     email: "james.martinez@company.com",
     phone: "+1 234 567 896",
     status: "active",
@@ -85,7 +85,7 @@ const employeesData = [
   {
     id: "8",
     name: "Sophia Anderson",
-    position: "Content Writer",
+    position: "Rédactrice de contenu",
     department: "Marketing",
     email: "sophia.anderson@company.com",
     phone: "+1 234 567 897",
@@ -115,12 +115,12 @@ const Employees = () => {
     <div className="container mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-semibold">Employees</h1>
-          <p className="text-muted-foreground">Manage your employee records and information</p>
+          <h1 className="text-3xl font-semibold">Employés</h1>
+          <p className="text-muted-foreground">Gérez les dossiers et informations de vos employés</p>
         </div>
         <Button className="gap-2">
           <Plus size={16} />
-          <span>Add Employee</span>
+          <span>Ajouter un employé</span>
         </Button>
       </div>
       
@@ -129,7 +129,7 @@ const Employees = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
           <Input 
             type="search" 
-            placeholder="Search employees..." 
+            placeholder="Rechercher des employés..." 
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -140,40 +140,40 @@ const Employees = () => {
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter size={16} />
-              <span>Filter</span>
+              <span>Filtrer</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80">
             <div className="space-y-4">
               <div>
-                <h4 className="text-sm font-medium mb-2">Status</h4>
+                <h4 className="text-sm font-medium mb-2">Statut</h4>
                 <Select 
                   value={statusFilter} 
                   onValueChange={setStatusFilter}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Sélectionner un statut" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="on-leave">On Leave</SelectItem>
-                    <SelectItem value="terminated">Terminated</SelectItem>
+                    <SelectItem value="all">Tous les statuts</SelectItem>
+                    <SelectItem value="active">Actif</SelectItem>
+                    <SelectItem value="on-leave">En congé</SelectItem>
+                    <SelectItem value="terminated">Terminé</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div>
-                <h4 className="text-sm font-medium mb-2">Department</h4>
+                <h4 className="text-sm font-medium mb-2">Département</h4>
                 <Select 
                   value={departmentFilter} 
                   onValueChange={setDepartmentFilter}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
+                    <SelectValue placeholder="Sélectionner un département" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Departments</SelectItem>
+                    <SelectItem value="all">Tous les départements</SelectItem>
                     {departments.map((dept) => (
                       <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                     ))}
@@ -192,7 +192,7 @@ const Employees = () => {
           ))
         ) : (
           <div className="col-span-full py-10 text-center">
-            <p className="text-muted-foreground">No employees found matching the search criteria.</p>
+            <p className="text-muted-foreground">Aucun employé ne correspond aux critères de recherche.</p>
           </div>
         )}
       </div>

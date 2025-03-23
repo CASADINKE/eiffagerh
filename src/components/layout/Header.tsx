@@ -19,7 +19,7 @@ const Header = () => {
   const handleNotificationClick = () => {
     toast({
       title: "Notifications",
-      description: "You have no new notifications",
+      description: "Vous n'avez pas de nouvelles notifications",
     });
   };
 
@@ -29,7 +29,7 @@ const Header = () => {
         <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
         <Input 
           type="search" 
-          placeholder="Search..." 
+          placeholder="Rechercher..." 
           className="pl-9 h-9 bg-secondary border-none w-full" 
         />
       </div>
@@ -59,13 +59,13 @@ const Header = () => {
               <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white">
                 <span className="text-xs font-semibold">AD</span>
               </div>
-              <span className="hidden sm:inline">Admin User</span>
+              <span className="hidden sm:inline">Administrateur</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Sign out</DropdownMenuItem>
+            <DropdownMenuItem>Profil</DropdownMenuItem>
+            <DropdownMenuItem>Paramètres</DropdownMenuItem>
+            <DropdownMenuItem>Déconnexion</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -26,9 +26,9 @@ const EmployeeCard = ({ employee, className }: EmployeeCardProps) => {
   };
 
   const statusText = {
-    "active": "Active",
-    "on-leave": "On Leave",
-    "terminated": "Terminated",
+    "active": "Actif",
+    "on-leave": "En congé",
+    "terminated": "Terminé",
   };
 
   return (
@@ -60,10 +60,10 @@ const EmployeeCard = ({ employee, className }: EmployeeCardProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>View Profile</DropdownMenuItem>
-            <DropdownMenuItem>Edit Employee</DropdownMenuItem>
+            <DropdownMenuItem>Voir le profil</DropdownMenuItem>
+            <DropdownMenuItem>Modifier l'employé</DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">
-              {employee.status === "terminated" ? "Delete Employee" : "Terminate Employee"}
+              {employee.status === "terminated" ? "Supprimer l'employé" : "Mettre fin au contrat"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

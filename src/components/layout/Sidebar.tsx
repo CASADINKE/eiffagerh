@@ -26,12 +26,12 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navigationItems = [
-  { path: "/dashboard", title: "Dashboard", icon: LayoutDashboard },
-  { path: "/employees", title: "Employees", icon: Users },
-  { path: "/leave", title: "Leave Management", icon: Calendar },
-  { path: "/salary", title: "Salary", icon: DollarSign },
-  { path: "/time-tracking", title: "Time Tracking", icon: Clock },
-  { path: "/settings", title: "Settings", icon: Settings },
+  { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
+  { path: "/employees", title: "Employés", icon: Users },
+  { path: "/leave", title: "Gestion des congés", icon: Calendar },
+  { path: "/salary", title: "Salaires", icon: DollarSign },
+  { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
+  { path: "/settings", title: "Paramètres", icon: Settings },
 ];
 
 const Sidebar = () => {
@@ -49,11 +49,11 @@ const Sidebar = () => {
         <div className={cn("flex items-center", collapsed ? "justify-center w-full" : "")}>
           {!collapsed && (
             <span className="font-semibold text-lg text-sidebar-foreground animate-fade-in">
-              HR Zenith
+              RH Zénith
             </span>
           )}
           {collapsed && (
-            <span className="font-bold text-lg text-primary animate-fade-in">HZ</span>
+            <span className="font-bold text-lg text-primary animate-fade-in">RH</span>
           )}
         </div>
         
@@ -70,7 +70,7 @@ const Sidebar = () => {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className={cn(collapsed && "sr-only")}>
-            Main Navigation
+            Navigation principale
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -108,7 +108,7 @@ const Sidebar = () => {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Admin User</span>
+              <span className="text-sm font-medium">Administrateur</span>
               <span className="text-xs text-sidebar-foreground/70">Admin</span>
             </div>
           )}
