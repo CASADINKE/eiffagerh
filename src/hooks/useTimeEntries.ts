@@ -15,6 +15,16 @@ export interface TimeEntry {
   employee?: Employee;
 }
 
+// Define a type for the profile data returned from Supabase
+interface ProfileData {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  departments?: {
+    name: string | null;
+  } | null;
+}
+
 // Fetch all time entries with employee details
 export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   const { data, error } = await supabase
@@ -40,7 +50,8 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
 
   // Process and format the data
   return data.map((entry) => {
-    const profileData = entry.profiles || {};
+    // Safely cast the profiles data to our typed interface or use empty object if null
+    const profileData = entry.profiles as ProfileData || {};
     
     return {
       id: entry.id,
@@ -51,10 +62,10 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       date: entry.date,
       notes: entry.notes,
       employee: profileData ? {
-        id: profileData.id,
+        id: profileData.id || entry.employee_id,
         name: profileData.full_name || "Sans nom",
         department: profileData.departments?.name || "Département non assigné",
-        avatar: profileData.avatar_url,
+        avatar: profileData.avatar_url || undefined,
         // Add other employee fields with default values
         position: "Poste non spécifié",
         email: "Email non spécifié",
