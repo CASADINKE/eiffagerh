@@ -25,7 +25,11 @@ const EmployeeTableFooter = ({
   if (showAddButton) {
     return (
       <div className="flex justify-center mt-6">
-        <Button variant="default" className="gap-1" onClick={handleAddEmployee}>
+        <Button 
+          variant="default" 
+          className="gap-1 bg-blue-600 hover:bg-blue-700" 
+          onClick={handleAddEmployee}
+        >
           <Plus size={16} />
           Nouvel employé
         </Button>
@@ -42,7 +46,12 @@ const EmployeeTableFooter = ({
         <select className="border rounded p-1 text-sm">
           <option>Action groupée</option>
         </select>
-        <Button variant="default" size="sm" className="gap-1" onClick={handleExport}>
+        <Button 
+          variant="default" 
+          size="sm" 
+          className="gap-1 bg-amber-500 hover:bg-amber-600" 
+          onClick={handleExport}
+        >
           Enregistrer
         </Button>
       </div>

@@ -1,5 +1,5 @@
 
-import { Plus, RotateCcw, ExternalLink } from "lucide-react";
+import { ArrowLeft, RotateCcw, Settings, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -12,11 +12,14 @@ const EmployeeHeader = () => {
     <div className="flex justify-between items-center p-4 border-b">
       <h1 className="text-lg font-medium">Employés</h1>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" className="gap-1">
+        <Button variant="outline" size="sm" className="gap-1 text-gray-700">
+          <ArrowLeft size={14} />
+        </Button>
+        <Button variant="outline" size="sm" className="gap-1 text-gray-700">
           <RotateCcw size={14} />
         </Button>
-        <Button variant="outline" size="sm" className="gap-1">
-          <ExternalLink size={14} />
+        <Button variant="outline" size="sm" className="gap-1 text-gray-700">
+          <Settings size={14} />
         </Button>
         <Button variant="default" size="sm" className="gap-1" onClick={handleAddEmployee}>
           <Plus size={14} />
