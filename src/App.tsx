@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import Leave from "./pages/Leave";
 import Salary from "./pages/Salary";
+import SalaryPayment from "./pages/SalaryPayment";
 import TimeTracking from "./pages/TimeTracking";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
@@ -53,6 +54,13 @@ const App = () => (
               <ProtectedRoute allowedRoles={['super_admin', 'admin', 'manager']}>
                 <Layout>
                   <Salary />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/salary-payment" element={
+              <ProtectedRoute allowedRoles={['super_admin', 'admin', 'manager']}>
+                <Layout>
+                  <SalaryPayment />
                 </Layout>
               </ProtectedRoute>
             } />

@@ -102,6 +102,7 @@ const Sidebar = () => {
                           : "text-gray-300 hover:text-white hover:bg-blue-600/90",
                         collapsed && "justify-center"
                       )}
+                      end={item.path === "/salary-payment" || item.path === "/salary"}
                     >
                       <item.icon size={18} />
                       {!collapsed && <span>{item.title}</span>}
