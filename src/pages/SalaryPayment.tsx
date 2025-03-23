@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +26,7 @@ const SalaryPayment = () => {
   const [generatingPayslips, setGeneratingPayslips] = useState(false);
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   
   const queryClient = useQueryClient();
   const currentDate = new Date();
@@ -52,7 +52,6 @@ const SalaryPayment = () => {
         return;
       }
       
-      // Ensure employee profiles exist before creating payslips
       const profilePromises = employees.map(async (employee) => {
         const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
@@ -78,7 +77,6 @@ const SalaryPayment = () => {
       
       await Promise.all(profilePromises);
       
-      // Create payslips for each employee
       const newPayslips = employees.map(employee => {
         const baseSalary = Math.floor(Math.random() * 300000) + 150000;
         const allowances = Math.floor(baseSalary * 0.2);
@@ -98,12 +96,10 @@ const SalaryPayment = () => {
         };
       });
       
-      // Create the payslips in the database
       const success = await createPayslips(newPayslips);
       
       if (success) {
         setSelectedPaymentId(latestPayment.id);
-        // Refresh data after creating payslips
         queryClient.invalidateQueries({queryKey: ["payslips", latestPayment.id]});
         queryClient.invalidateQueries({queryKey: ["salary-payments"]});
         toast.success(`${newPayslips.length} bulletins de paie générés avec succès`);
@@ -184,12 +180,7 @@ const SalaryPayment = () => {
         <div className="flex gap-2 mt-4 md:mt-0">
           <Button 
             variant="outline"
-            onClick={() => {
-              const salaryPaymentDialog = document.querySelector('[data-salary-payment-dialog]');
-              if (salaryPaymentDialog) {
-                (salaryPaymentDialog as HTMLButtonElement).click();
-              }
-            }}
+            onClick={() => setIsPaymentDialogOpen(true)}
           >
             Paiement Salaire
           </Button>
@@ -239,7 +230,6 @@ const SalaryPayment = () => {
             </CardContent>
           </Card>
           
-          {/* Display payslips if available, otherwise show a message */}
           {payslips && payslips.length > 0 ? (
             <PayslipsList 
               payslips={payslips} 
@@ -269,10 +259,11 @@ const SalaryPayment = () => {
         </>
       )}
       
-      {/* Hidden SalaryPaymentDialog that can be triggered programmatically */}
-      <div className="hidden">
-        <SalaryPaymentDialog />
-      </div>
+      <SalaryPaymentDialog 
+        open={isPaymentDialogOpen} 
+        onOpenChange={setIsPaymentDialogOpen} 
+        data-salary-payment-dialog
+      />
     </div>
   );
 };
