@@ -27,7 +27,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <Routes>
-            <Route path="/" element={<Navigate to="/auth" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -58,6 +58,13 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/salary-payment" element={
+              <ProtectedRoute allowedRoles={['super_admin', 'admin', 'manager']}>
+                <Layout>
+                  <SalaryPayment />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/salary-payment/:id" element={
               <ProtectedRoute allowedRoles={['super_admin', 'admin', 'manager']}>
                 <Layout>
                   <SalaryPayment />
