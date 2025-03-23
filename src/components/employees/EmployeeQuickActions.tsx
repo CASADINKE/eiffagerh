@@ -2,6 +2,7 @@
 import React from "react";
 import { Plus, RotateCw, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EmployeeQuickActionsProps {
   onAddEmployee: () => void;
@@ -20,17 +21,33 @@ const EmployeeQuickActions = ({
         <Plus size={16} />
         Ajouter
       </Button>
+      
       {onRefresh && (
         <Button variant="outline" size="sm" className="gap-1" onClick={onRefresh}>
           <RotateCw size={16} />
           Rafraîchir
         </Button>
       )}
+      
       {onDeleteRecent && (
-        <Button variant="outline" size="sm" className="gap-1 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={onDeleteRecent}>
-          <Trash size={16} />
-          Supprimer récents
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1 text-red-500 hover:text-red-600 hover:bg-red-50" 
+                onClick={onDeleteRecent}
+              >
+                <Trash size={16} />
+                Supprimer récents
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Supprimer les employés récemment ajoutés</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );

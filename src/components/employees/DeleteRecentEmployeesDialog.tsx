@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEmployeeOperations } from "@/hooks/useEmployeeOperations";
+import { toast } from "sonner";
 
 interface DeleteRecentEmployeesDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ const DeleteRecentEmployeesDialog = ({
   const [recentEmployees, setRecentEmployees] = useState<any[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<Record<string, boolean>>({});
   const [isAllSelected, setIsAllSelected] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -40,16 +42,22 @@ const DeleteRecentEmployeesDialog = ({
   }, [open]);
 
   const loadRecentEmployees = async () => {
-    const employees = await fetchRecentEmployees(20);
-    setRecentEmployees(employees);
-    
-    // Initialize selected state
-    const initialSelected: Record<string, boolean> = {};
-    employees.forEach(emp => {
-      initialSelected[emp.id] = false;
-    });
-    setSelectedEmployees(initialSelected);
-    setIsAllSelected(false);
+    try {
+      const employees = await fetchRecentEmployees(20);
+      console.log("Employés récents chargés:", employees);
+      setRecentEmployees(employees);
+      
+      // Initialize selected state
+      const initialSelected: Record<string, boolean> = {};
+      employees.forEach(emp => {
+        initialSelected[emp.id] = false;
+      });
+      setSelectedEmployees(initialSelected);
+      setIsAllSelected(false);
+    } catch (error) {
+      console.error("Erreur lors du chargement des employés récents:", error);
+      toast.error("Erreur lors du chargement des employés récents");
+    }
   };
 
   const handleEmployeeSelect = (id: string, checked: boolean) => {
@@ -76,14 +84,24 @@ const DeleteRecentEmployeesDialog = ({
 
   const handleDelete = async () => {
     const selectedIds = getSelectedEmployeeIds();
-    if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) {
+      toast.error("Veuillez sélectionner au moins un employé");
+      return;
+    }
 
+    setDeleting(true);
     try {
-      await deleteMultipleEmployees(selectedIds);
-      onOpenChange(false);
-      onSuccess();
+      console.log("Suppression des employés:", selectedIds);
+      const success = await deleteMultipleEmployees(selectedIds);
+      if (success) {
+        onOpenChange(false);
+        onSuccess();
+      }
     } catch (error) {
-      console.error("Failed to delete employees:", error);
+      console.error("Erreur lors de la suppression des employés:", error);
+      toast.error("Échec de la suppression des employés");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -155,9 +173,16 @@ const DeleteRecentEmployeesDialog = ({
           <AlertDialogAction
             onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            disabled={selectedCount === 0 || isLoading}
+            disabled={selectedCount === 0 || isLoading || deleting}
           >
-            {isLoading ? "Suppression..." : `Supprimer ${selectedCount} employé${selectedCount > 1 ? 's' : ''}`}
+            {deleting ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Suppression en cours...
+              </div>
+            ) : (
+              `Supprimer ${selectedCount} employé${selectedCount > 1 ? 's' : ''}`
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

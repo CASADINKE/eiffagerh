@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -22,7 +21,6 @@ export const useEmployeeOperations = () => {
   const createEmployee = async (employeeData: EmployeeFormData) => {
     setIsLoading(true);
     try {
-      // Convert the Date object to ISO string for the database
       const formattedData = {
         ...employeeData,
         date_naissance: employeeData.date_naissance.toISOString().split('T')[0],
@@ -101,7 +99,6 @@ export const useEmployeeOperations = () => {
   const updateEmployee = async (employeeId: string, employeeData: Partial<EmployeeFormData>) => {
     setIsLoading(true);
     try {
-      // Format date if present
       const formattedData: any = { ...employeeData };
       if (formattedData.date_naissance) {
         formattedData.date_naissance = formattedData.date_naissance.toISOString().split('T')[0];
@@ -130,33 +127,38 @@ export const useEmployeeOperations = () => {
     }
   };
 
-  // Add a function to batch delete multiple employees
   const deleteMultipleEmployees = async (employeeIds: string[]) => {
+    if (employeeIds.length === 0) {
+      toast.error("Aucun employé sélectionné");
+      return false;
+    }
+    
     setIsLoading(true);
     try {
+      console.log("Suppression de plusieurs employés:", employeeIds);
+      
       const { error } = await supabase
         .from('listes_employées')
         .delete()
         .in('id', employeeIds);
 
       if (error) {
-        console.error("Error deleting multiple employees:", error);
+        console.error("Erreur lors de la suppression de plusieurs employés:", error);
         toast.error(`Erreur: ${error.message}`);
-        throw error;
+        return false;
       }
 
       toast.success(`${employeeIds.length} employé(s) supprimé(s) avec succès!`);
       return true;
     } catch (err: any) {
-      console.error("Exception when deleting multiple employees:", err);
+      console.error("Exception lors de la suppression de plusieurs employés:", err);
       toast.error(`Erreur: ${err.message}`);
-      throw err;
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Add a function to get recently added employees
   const fetchRecentEmployees = async (limit = 10) => {
     setIsLoading(true);
     try {
