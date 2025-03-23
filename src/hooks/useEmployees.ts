@@ -95,9 +95,6 @@ export const fetchEmployees = async (): Promise<Employee[]> => {
 export const useEmployees = () => {
   return useQuery({
     queryKey: ["employees"],
-    queryFn: fetchEmployees,
-    onError: (error: Error) => {
-      toast.error(`Erreur: ${error.message}`);
-    }
+    queryFn: fetchEmployees
   });
 };
