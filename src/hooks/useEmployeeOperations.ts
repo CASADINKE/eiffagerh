@@ -74,9 +74,67 @@ export const useEmployeeOperations = () => {
     }
   };
 
+  const deleteEmployee = async (employeeId: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('listes_employées')
+        .delete()
+        .eq('id', employeeId);
+
+      if (error) {
+        console.error("Error deleting employee:", error);
+        toast.error(`Erreur: ${error.message}`);
+        throw error;
+      }
+
+      return true;
+    } catch (err: any) {
+      console.error("Exception when deleting employee:", err);
+      toast.error(`Erreur: ${err.message}`);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateEmployee = async (employeeId: string, employeeData: Partial<EmployeeFormData>) => {
+    setIsLoading(true);
+    try {
+      // Format date if present
+      const formattedData = { ...employeeData };
+      if (formattedData.date_naissance) {
+        formattedData.date_naissance = (formattedData.date_naissance as Date).toISOString().split('T')[0];
+      }
+
+      const { data, error } = await supabase
+        .from('listes_employées')
+        .update(formattedData)
+        .eq('id', employeeId)
+        .select();
+
+      if (error) {
+        console.error("Error updating employee:", error);
+        toast.error(`Erreur: ${error.message}`);
+        throw error;
+      }
+
+      toast.success("Employé mis à jour avec succès!");
+      return data[0];
+    } catch (err: any) {
+      console.error("Exception when updating employee:", err);
+      toast.error(`Erreur: ${err.message}`);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     createEmployee,
     fetchEmployees,
+    deleteEmployee,
+    updateEmployee,
     isLoading
   };
 };

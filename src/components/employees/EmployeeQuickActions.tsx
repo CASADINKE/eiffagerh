@@ -1,50 +1,27 @@
 
 import React from "react";
+import { Plus, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 interface EmployeeQuickActionsProps {
   onAddEmployee: () => void;
+  onRefresh?: () => void;
 }
 
-const EmployeeQuickActions = ({ onAddEmployee }: EmployeeQuickActionsProps) => {
-  const handleSuspended = () => {
-    toast.info("Affichage des employés suspendus");
-    // Logique pour afficher les employés suspendus
-  };
-
-  const handleDeleted = () => {
-    toast.info("Affichage des employés supprimés");
-    // Logique pour afficher les employés supprimés
-  };
-
+const EmployeeQuickActions = ({ onAddEmployee, onRefresh }: EmployeeQuickActionsProps) => {
   return (
-    <>
-      <Button 
-        variant="default" 
-        size="sm" 
-        className="gap-1"
-        onClick={onAddEmployee}
-      >
+    <div className="flex gap-2">
+      <Button variant="outline" size="sm" className="gap-1" onClick={onAddEmployee}>
+        <Plus size={16} />
         Ajouter
       </Button>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="gap-1 bg-white"
-        onClick={handleSuspended}
-      >
-        Suspendus
-      </Button>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        className="gap-1 bg-white"
-        onClick={handleDeleted}
-      >
-        Supprimés
-      </Button>
-    </>
+      {onRefresh && (
+        <Button variant="outline" size="sm" className="gap-1" onClick={onRefresh}>
+          <RotateCw size={16} />
+          Rafraîchir
+        </Button>
+      )}
+    </div>
   );
 };
 

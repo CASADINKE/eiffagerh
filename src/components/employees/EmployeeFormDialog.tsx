@@ -9,20 +9,53 @@ import {
 } from "@/components/ui/dialog";
 import EmployeeForm from "./EmployeeForm";
 import { useEmployeeOperations, EmployeeFormData } from "@/hooks/useEmployeeOperations";
+import { useEffect, useState } from "react";
 
 interface EmployeeFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
+  employeeToEdit?: any;
+  mode?: "create" | "edit";
 }
 
-const EmployeeFormDialog = ({ open, onOpenChange }: EmployeeFormDialogProps) => {
-  const { createEmployee, isLoading } = useEmployeeOperations();
+const EmployeeFormDialog = ({ 
+  open, 
+  onOpenChange, 
+  onSuccess,
+  employeeToEdit, 
+  mode = "create" 
+}: EmployeeFormDialogProps) => {
+  const { createEmployee, updateEmployee, isLoading } = useEmployeeOperations();
+  const [initialValues, setInitialValues] = useState<Partial<EmployeeFormData> | null>(null);
+
+  useEffect(() => {
+    if (mode === "edit" && employeeToEdit) {
+      // Format the data for the form
+      setInitialValues({
+        ...employeeToEdit,
+        date_naissance: employeeToEdit.date_naissance ? new Date(employeeToEdit.date_naissance) : new Date(),
+      });
+    } else {
+      setInitialValues(null);
+    }
+  }, [mode, employeeToEdit]);
 
   const handleSubmit = async (values: EmployeeFormData) => {
     console.log("Form submitted with values:", values);
-    const result = await createEmployee(values);
+    
+    let result;
+    if (mode === "edit" && employeeToEdit) {
+      result = await updateEmployee(employeeToEdit.id, values);
+    } else {
+      result = await createEmployee(values);
+    }
+    
     if (result) {
       onOpenChange(false);
+      if (onSuccess) {
+        onSuccess();
+      }
     }
   };
 
@@ -30,16 +63,27 @@ const EmployeeFormDialog = ({ open, onOpenChange }: EmployeeFormDialogProps) => 
     onOpenChange(false);
   };
 
+  const dialogTitle = mode === "create" ? "Ajouter un nouvel employé" : "Modifier l'employé";
+  const dialogDescription = mode === "create" 
+    ? "Remplissez tous les champs pour créer un nouvel employé."
+    : "Modifiez les informations de l'employé.";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[900px] w-[95%] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Ajouter un nouvel employé</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
-            Remplissez tous les champs pour créer un nouvel employé.
+            {dialogDescription}
           </DialogDescription>
         </DialogHeader>
-        <EmployeeForm onSubmit={handleSubmit} onCancel={handleCancel} isLoading={isLoading} />
+        <EmployeeForm 
+          onSubmit={handleSubmit} 
+          onCancel={handleCancel} 
+          isLoading={isLoading}
+          initialValues={initialValues}
+          mode={mode}
+        />
       </DialogContent>
     </Dialog>
   );
