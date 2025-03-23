@@ -96,8 +96,10 @@ export const useEmployees = () => {
   return useQuery({
     queryKey: ["employees"],
     queryFn: fetchEmployees,
-    onError: (error: Error) => {
-      toast.error(`Erreur: ${error.message}`);
+    onSettled: (data, error) => {
+      if (error) {
+        toast.error(`Erreur: ${(error as Error).message}`);
+      }
     }
   });
 };
