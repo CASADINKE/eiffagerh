@@ -50,8 +50,8 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
 
   // Process and format the data
   return data.map((entry) => {
-    // Safely cast the profiles data to our typed interface or use empty object if null
-    const profileData = entry.profiles as ProfileData || {};
+    // Create an empty profile object if profiles is null
+    const profileData = entry.profiles ? (entry.profiles as ProfileData) : {} as ProfileData;
     
     return {
       id: entry.id,
@@ -61,7 +61,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       break_time: entry.break_time || 0,
       date: entry.date,
       notes: entry.notes,
-      employee: profileData ? {
+      employee: {
         id: profileData.id || entry.employee_id,
         name: profileData.full_name || "Sans nom",
         department: profileData.departments?.name || "Département non assigné",
@@ -71,7 +71,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
         email: "Email non spécifié",
         phone: "Téléphone non spécifié",
         status: "active"
-      } : undefined
+      }
     };
   });
 };

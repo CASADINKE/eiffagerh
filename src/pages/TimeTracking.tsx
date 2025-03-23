@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Calendar, Clock, Download, Filter, Play, Square, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,12 +36,18 @@ import {
 import { EmployeeTimeClockDialog } from "@/components/timeTracking/EmployeeTimeClockDialog";
 import { useTimeEntries, useClockOutMutation, calculateDuration, getActiveTimeEntry } from "@/hooks/useTimeEntries";
 import { useEmployees } from "@/hooks/useEmployees";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { exportToCSV, formatDateFR } from "@/utils/exportUtils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-// Weekly working hours data
 const workingHoursData = [
   { day: "Lun", hours: 8.2 },
   { day: "Mar", hours: 8.5 },
@@ -57,30 +62,23 @@ const TimeTracking = () => {
   const [activeTab, setActiveTab] = useState("today");
   const [dateFilter, setDateFilter] = useState("today");
   const [employeeFilter, setEmployeeFilter] = useState("all");
-  
-  // Fetch employees for the filter dropdown
+  const [periodFilter, setPeriodFilter] = useState("month");
+
   const { data: employees = [], isLoading: employeesLoading } = useEmployees();
-  
-  // Fetch time entries with optional employee filter
   const { 
     data: timeEntries = [], 
     isLoading: entriesLoading,
     isError: entriesError
   } = useTimeEntries(employeeFilter !== "all" ? employeeFilter : undefined);
-  
-  // Clock out mutation
   const clockOutMutation = useClockOutMutation();
-  
-  // Format date to match the filter needs
+
   const getFilterDate = (date: string) => {
     return format(new Date(date), "yyyy-MM-dd");
   };
-  
-  // Get today and yesterday dates for filtering
+
   const today = format(new Date(), "yyyy-MM-dd");
   const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
-  
-  // Filter time entries by date
+
   const filteredTimeEntries = timeEntries.filter(entry => {
     const entryDate = getFilterDate(entry.date);
     return (
@@ -89,17 +87,15 @@ const TimeTracking = () => {
       dateFilter === "all"
     );
   });
-  
-  // Calculate metrics for the stats cards
+
   const activeEmployeeCount = timeEntries.filter(
     entry => !entry.clock_out && getFilterDate(entry.date) === today
   ).length;
-  
+
   const completedEntriesForToday = timeEntries.filter(
     entry => entry.clock_out && getFilterDate(entry.date) === today
   );
-  
-  // Calculate average hours for completed entries today
+
   const totalCompletedHours = completedEntriesForToday.reduce((acc, entry) => {
     const duration = calculateDuration(entry.clock_in, entry.clock_out, entry.break_time);
     if (duration === "en cours") return acc;
@@ -107,23 +103,80 @@ const TimeTracking = () => {
     const [hours, minutes] = duration.split("h ").map(part => parseFloat(part.replace("m", "")));
     return acc + hours + (minutes / 60 || 0);
   }, 0);
-  
+
   const averageHours = completedEntriesForToday.length 
     ? (totalCompletedHours / completedEntriesForToday.length).toFixed(1) 
     : 0;
-  
-  // Handle clock out action
+
   const handleClockOut = (entryId: string) => {
     clockOutMutation.mutate(entryId);
   };
-  
-  // Helper to get initials for avatar
+
   const getInitials = (name: string = "") => {
     return name.split(" ").map(n => n[0]).join("");
   };
-  
+
   const isLoading = employeesLoading || entriesLoading;
-  
+
+  const getExportFilename = () => {
+    const today = new Date();
+    const month = today.toLocaleString('fr', { month: 'long' });
+    const year = today.getFullYear();
+    
+    if (dateFilter === "today") {
+      return `pointages_${format(today, 'yyyy-MM-dd')}`;
+    } else if (dateFilter === "yesterday") {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      return `pointages_${format(yesterday, 'yyyy-MM-dd')}`;
+    } else {
+      if (periodFilter === "month") {
+        return `pointages_${month}_${year}`;
+      } else if (periodFilter === "quarter") {
+        const quarter = Math.floor(today.getMonth() / 3) + 1;
+        return `pointages_T${quarter}_${year}`;
+      } else {
+        return `pointages_annee_${year}`;
+      }
+    }
+  };
+
+  const formatDataForExport = (entries) => {
+    return entries.map(entry => ({
+      date: format(new Date(entry.date), "dd/MM/yyyy"),
+      employee: entry.employee?.name || "Sans nom",
+      department: entry.employee?.department || "Non assigné",
+      clock_in: format(new Date(entry.clock_in), "HH:mm"),
+      clock_out: entry.clock_out ? format(new Date(entry.clock_out), "HH:mm") : "--:--",
+      duration: calculateDuration(entry.clock_in, entry.clock_out, entry.break_time),
+      break_time: `${entry.break_time}m`,
+      status: entry.clock_out ? "Terminé" : "Actif"
+    }));
+  };
+
+  const handleExport = (format = 'csv') => {
+    if (filteredTimeEntries.length === 0) {
+      toast.error("Aucune donnée à exporter");
+      return;
+    }
+    
+    const exportData = formatDataForExport(filteredTimeEntries);
+    const filename = getExportFilename();
+    
+    const headers = {
+      date: "Date",
+      employee: "Employé",
+      department: "Département",
+      clock_in: "Entrée",
+      clock_out: "Sortie",
+      duration: "Durée",
+      break_time: "Pause",
+      status: "Statut"
+    };
+    
+    exportToCSV(exportData, filename, headers);
+  };
+
   return (
     <div className="container mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -132,10 +185,19 @@ const TimeTracking = () => {
           <p className="text-muted-foreground">Suivi des présences et des heures de travail des employés</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
-            <Download size={16} />
-            <span>Exporter le rapport</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Download size={16} />
+                <span>Exporter le rapport</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('csv')}>
+                Exporter en CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <EmployeeTimeClockDialog className="gap-2" />
         </div>
       </div>
@@ -215,6 +277,19 @@ const TimeTracking = () => {
                 </SelectContent>
               </Select>
               
+              {dateFilter === "all" && (
+                <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Période" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="month">Mois courant</SelectItem>
+                    <SelectItem value="quarter">Trimestre</SelectItem>
+                    <SelectItem value="year">Année</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+              
               <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filtrer par employé" />
@@ -246,8 +321,7 @@ const TimeTracking = () => {
       </Card>
     </div>
   );
-  
-  // Helper function to render the time entries table
+
   function renderTimeEntriesTable() {
     if (isLoading) {
       return (
