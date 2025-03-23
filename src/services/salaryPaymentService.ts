@@ -26,7 +26,7 @@ export const createSalaryPayment = async (paymentData: Omit<SalaryPayment, 'id' 
     }
 
     const { data, error } = await supabase
-      .from('salary_payments')
+      .from('salary_payments' as any)
       .insert({
         ...paymentData,
         created_by: user.user.id
@@ -52,7 +52,7 @@ export const createSalaryPayment = async (paymentData: Omit<SalaryPayment, 'id' 
 export const getSalaryPayments = async (): Promise<SalaryPayment[]> => {
   try {
     const { data, error } = await supabase
-      .from('salary_payments')
+      .from('salary_payments' as any)
       .select('*')
       .order('payment_date', { ascending: false }) as any;
 

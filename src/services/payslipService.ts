@@ -30,9 +30,9 @@ export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at'
       generated_date: new Date().toISOString()
     }));
     
-    // Use the generic method with type assertion for custom tables
+    // Use type assertion to handle table not being in TypeScript defs
     const { error } = await supabase
-      .from('payslips')
+      .from('payslips' as any)
       .insert(payslipsToInsert as any);
 
     if (error) {
@@ -61,7 +61,7 @@ export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at'
 export const updateSalaryPaymentTotal = async (paymentId: string, totalAmount: number): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('salary_payments')
+      .from('salary_payments' as any)
       .update({ 
         total_amount: totalAmount,
         status: 'completed'
@@ -86,7 +86,7 @@ export const updateSalaryPaymentTotal = async (paymentId: string, totalAmount: n
 export const getPayslipsByPaymentId = async (paymentId: string): Promise<Payslip[]> => {
   try {
     const { data, error } = await supabase
-      .from('payslips')
+      .from('payslips' as any)
       .select(`
         *,
         employee:profiles(full_name, role)
@@ -112,7 +112,7 @@ export const getPayslipsByPaymentId = async (paymentId: string): Promise<Payslip
 export const getEmployeePayslips = async (employeeId: string): Promise<Payslip[]> => {
   try {
     const { data, error } = await supabase
-      .from('payslips')
+      .from('payslips' as any)
       .select(`
         *,
         payment:salary_payments(payment_period, payment_date)
@@ -138,7 +138,7 @@ export const getEmployeePayslips = async (employeeId: string): Promise<Payslip[]
 export const getPayslipById = async (payslipId: string): Promise<Payslip | null> => {
   try {
     const { data, error } = await supabase
-      .from('payslips')
+      .from('payslips' as any)
       .select(`
         *,
         employee:profiles(full_name, role)
