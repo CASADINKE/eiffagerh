@@ -7,9 +7,10 @@ import { toast } from "sonner";
 interface EmployeeActionBarProps {
   onAddEmployee: () => void;
   onRefresh: () => void;
+  onDeleteRecent?: () => void;
 }
 
-const EmployeeActionBar = ({ onAddEmployee, onRefresh }: EmployeeActionBarProps) => {
+const EmployeeActionBar = ({ onAddEmployee, onRefresh, onDeleteRecent }: EmployeeActionBarProps) => {
   const handleBack = () => {
     toast.info("Retour à la page précédente");
     // Logique de navigation ici
@@ -21,8 +22,11 @@ const EmployeeActionBar = ({ onAddEmployee, onRefresh }: EmployeeActionBarProps)
   };
 
   const handleDeleteRecent = () => {
-    toast.info("Supprimer récents");
-    // Logique pour supprimer les récents
+    if (onDeleteRecent) {
+      onDeleteRecent();
+    } else {
+      toast.info("Supprimer récents");
+    }
   };
 
   return (

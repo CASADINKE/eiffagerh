@@ -38,9 +38,22 @@ const Employees = () => {
   const loadEmployees = async () => {
     setLoading(true);
     try {
-      const data = await fetchEmployees();
-      setEmployees(data);
-      setFilteredEmployees(data);
+      const rawData = await fetchEmployees();
+      
+      // Map the returned data to match the Employee type
+      const mappedEmployees: Employee[] = rawData.map(emp => ({
+        id: emp.id,
+        name: `${emp.nom} ${emp.prenom}`,
+        position: emp.poste,
+        department: emp.affectation,
+        email: emp.matricule, // Using matricule as email since there's no direct email field
+        phone: emp.telephone,
+        status: "active", // Default status
+        avatar: undefined
+      }));
+      
+      setEmployees(mappedEmployees);
+      setFilteredEmployees(mappedEmployees);
     } catch (error) {
       console.error("Erreur lors du chargement des employés:", error);
       toast.error("Erreur lors du chargement des employés");
