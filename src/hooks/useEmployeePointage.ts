@@ -13,8 +13,8 @@ export interface EmployeePointage {
   created_at: string;
   updated_at: string;
   employee?: EmployeeUI;
-  break_time?: number; // Add this to make it compatible with TimeEntry
-  notes?: string | null; // Add this to make it compatible with TimeEntry
+  break_time: number; // Added to make it compatible with TimeEntry
+  notes: string | null; // Added to make it compatible with TimeEntry
 }
 
 // Type for the profile data returned from Supabase
@@ -50,8 +50,13 @@ export const fetchEmployeePointages = async (): Promise<EmployeePointage[]> => {
 
   // Process and format the data
   return data.map((entry) => {
-    // Ensure profiles is treated as ProfileData or null
-    const profileData = entry.profiles as ProfileData | null || {};
+    // Fix: Properly handle the profiles data with type safety
+    // Initialize with default empty values to avoid type errors
+    const profileData: ProfileData = entry.profiles ? entry.profiles as ProfileData : {
+      id: entry.employee_id,
+      full_name: null,
+      avatar_url: null
+    };
     
     return {
       id: entry.id,
@@ -64,7 +69,7 @@ export const fetchEmployeePointages = async (): Promise<EmployeePointage[]> => {
       break_time: 0, // Default value to make it compatible with TimeEntry
       notes: null, // Default value to make it compatible with TimeEntry
       employee: {
-        id: profileData.id || entry.employee_id,
+        id: profileData.id,
         name: profileData.full_name || "Sans nom",
         department: "Département non assigné",
         position: "Poste non spécifié",
