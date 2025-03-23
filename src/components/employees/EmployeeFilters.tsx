@@ -26,14 +26,16 @@ const EmployeeFilters = ({
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 items-start">
       <div className="relative flex-1 w-full md:w-auto">
-        <Input 
-          type="search" 
-          placeholder="Rechercher un employé..." 
-          className="w-full md:w-[300px]"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          prefix={<Search size={16} className="text-muted-foreground" />}
-        />
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input 
+            type="search" 
+            placeholder="Rechercher un employé..." 
+            className="w-full md:w-[300px] pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
       
       <div className="flex flex-wrap gap-2 w-full md:w-auto">

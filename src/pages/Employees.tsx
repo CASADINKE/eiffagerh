@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from "react";
-import { Plus, RotateCcw, ExternalLink, ArrowLeft, Search } from "lucide-react";
+import { Plus, RotateCcw, ExternalLink, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import EmployeeFilters from "@/components/employees/EmployeeFilters";
@@ -99,13 +99,13 @@ const Employees = () => {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink as={Link} to="/dashboard">
+              <BreadcrumbLink href="/dashboard">
                 Accueil
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink as={Link} to="/employees">
+              <BreadcrumbLink href="/employees">
                 Employés
               </BreadcrumbLink>
             </BreadcrumbItem>
