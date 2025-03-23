@@ -76,6 +76,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // If session is null (user logged out), redirect to auth page
+        if (!session && !loading) {
+          navigate("/auth");
+        }
+        
         setLoading(false);
       }
     );
@@ -88,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -137,9 +143,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Vous avez été déconnecté");
-    navigate("/auth");
+    try {
+      await supabase.auth.signOut();
+      toast.success("Vous avez été déconnecté");
+      
+      // Force navigation to auth page after logout
+      navigate("/auth", { replace: true });
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+      toast.error("Erreur lors de la déconnexion");
+    }
   };
 
   return (
