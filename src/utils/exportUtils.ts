@@ -27,16 +27,9 @@ export function exportToCSV<T extends Record<string, any>>(
   for (const row of data) {
     const values = headerKeys.map(key => {
       const value = row[key];
-      
-      // Formatter les dates si nécessaire
-      let formattedValue = value;
-      if (key === 'date_naissance' && value) {
-        formattedValue = formatDateFR(value);
-      }
-      
       // Échapper les virgules et les guillemets
-      const escaped = formattedValue !== null && formattedValue !== undefined 
-        ? String(formattedValue).replace(/"/g, '""') 
+      const escaped = value !== null && value !== undefined 
+        ? String(value).replace(/"/g, '""') 
         : '';
       return `"${escaped}"`;
     });
@@ -71,17 +64,10 @@ export function exportToCSV<T extends Record<string, any>>(
  * Fonction utilitaire pour formater une date en français
  */
 export function formatDateFR(date: string | Date): string {
-  if (!date) return '';
-  
-  try {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  } catch (error) {
-    console.error("Erreur de formatage de date:", error);
-    return String(date);
-  }
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 }
