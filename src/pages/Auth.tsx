@@ -61,16 +61,9 @@ const Auth = () => {
   }
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center bg-cover bg-center p-4" 
-      style={{ 
-        backgroundImage: "url('/lovable-uploads/2fe055e9-5b9f-402e-8761-7883f86c3ad9.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}
-    >
+    <div className="min-h-screen flex items-center justify-center auth-backdrop">
       <div className="w-full max-w-md">
-        <Card className="w-full backdrop-blur-sm bg-white/10 border border-white/20 shadow-xl">
+        <Card className="w-full auth-card">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-primary">EIFFAGE</CardTitle>
             <CardDescription className="text-foreground/80">
@@ -91,7 +84,7 @@ const Auth = () => {
                           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
                             placeholder="vous@exemple.com"
-                            className="pl-10 bg-white/20 backdrop-blur-sm border-white/20"
+                            className="pl-10 auth-input"
                             {...field}
                           />
                         </div>
@@ -112,7 +105,7 @@ const Auth = () => {
                           <Input
                             type="password"
                             placeholder="••••••••"
-                            className="pl-10 bg-white/20 backdrop-blur-sm border-white/20"
+                            className="pl-10 auth-input"
                             {...field}
                           />
                         </div>
