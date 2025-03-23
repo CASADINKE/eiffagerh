@@ -67,10 +67,32 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
         .single();
         
       if (profileError) {
-        // If the employee doesn't exist in profiles table, we need to handle this
-        console.log("Employee not found in profiles table:", profileError);
-        toast.error("Employé non trouvé dans la base de données. Veuillez vous assurer que l'employé est enregistré correctement.");
-        return;
+        console.log("Profile not found, creating one:", profileError);
+        
+        // Find the employee in our local state to get their name
+        const employee = employees.find(emp => emp.id === employeeId);
+        
+        if (!employee) {
+          toast.error("Employé non trouvé dans la liste locale.");
+          return;
+        }
+        
+        // Create a profile for this employee
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            id: employeeId,
+            full_name: employee.name,
+            role: 'employee'
+          });
+          
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          toast.error("Erreur lors de la création du profil employé.");
+          return;
+        }
+        
+        console.log("Created profile for employee:", employee.name);
       }
       
       // Check if employee is already clocked in
