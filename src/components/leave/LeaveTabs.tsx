@@ -14,6 +14,14 @@ interface LeaveTabsProps {
 }
 
 export function LeaveTabs({ activeTab, onTabChange, leaveRequests, isLoading }: LeaveTabsProps) {
+  // Filter leave requests based on active tab
+  const getFilteredLeaveRequests = (tabValue: string) => {
+    if (tabValue === "all") {
+      return leaveRequests;
+    }
+    return leaveRequests.filter(leave => leave.status === tabValue);
+  };
+
   return (
     <Tabs 
       value={activeTab} 
@@ -49,7 +57,7 @@ export function LeaveTabs({ activeTab, onTabChange, leaveRequests, isLoading }: 
       
       <TabsContent value="all" className="pt-4">
         <LeaveTableContainer 
-          leaveRequests={leaveRequests} 
+          leaveRequests={leaveRequests}
           isLoading={isLoading} 
           activeTab="all"
         />
@@ -57,7 +65,7 @@ export function LeaveTabs({ activeTab, onTabChange, leaveRequests, isLoading }: 
       
       <TabsContent value="pending" className="pt-4">
         <LeaveTableContainer 
-          leaveRequests={leaveRequests} 
+          leaveRequests={getFilteredLeaveRequests("pending")} 
           isLoading={isLoading} 
           activeTab="pending"
         />
@@ -65,7 +73,7 @@ export function LeaveTabs({ activeTab, onTabChange, leaveRequests, isLoading }: 
       
       <TabsContent value="approved" className="pt-4">
         <LeaveTableContainer 
-          leaveRequests={leaveRequests} 
+          leaveRequests={getFilteredLeaveRequests("approved")} 
           isLoading={isLoading} 
           activeTab="approved"
         />
@@ -73,7 +81,7 @@ export function LeaveTabs({ activeTab, onTabChange, leaveRequests, isLoading }: 
       
       <TabsContent value="rejected" className="pt-4">
         <LeaveTableContainer 
-          leaveRequests={leaveRequests} 
+          leaveRequests={getFilteredLeaveRequests("rejected")} 
           isLoading={isLoading} 
           activeTab="rejected"
         />

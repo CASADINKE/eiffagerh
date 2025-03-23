@@ -84,6 +84,6 @@ const Leave = () => {
       />
     </div>
   );
-};
+}
 
 export default Leave;
