@@ -19,6 +19,7 @@ export interface Payslip {
     full_name: string;
     role: string;
   };
+  // Cette propriété est utilisée côté client seulement
   employee_metadata?: {
     [key: string]: any;
     matricule?: string;
@@ -38,13 +39,15 @@ export interface Payslip {
 }
 
 // Function to create multiple payslips for a payment
-export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at' | 'updated_at' | 'generated_date'>[]): Promise<boolean> => {
+export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at' | 'updated_at' | 'generated_date' | 'employee_metadata'>[]): Promise<boolean> => {
   try {
     // Add generated_date field to all payslips
     const payslipsToInsert = payslips.map(payslip => ({
       ...payslip,
       generated_date: new Date().toISOString()
     }));
+    
+    console.log("Inserting payslips:", payslipsToInsert);
     
     // Use type assertion to handle table not being in TypeScript defs
     const { error } = await supabase

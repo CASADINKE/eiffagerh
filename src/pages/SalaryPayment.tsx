@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,10 +102,6 @@ const SalaryPayment = () => {
         const deductions = socialContributions;
         const netSalary = baseSalary + allowances - deductions - taxAmount;
         
-        // Calculate social gross and IR base
-        const socialGross = Math.round(baseSalary * 1.5);
-        const irBase = socialGross;
-        
         return {
           employee_id: employee.id,
           salary_payment_id: latestPayment.id,
@@ -115,22 +110,7 @@ const SalaryPayment = () => {
           deductions,
           tax_amount: taxAmount,
           net_salary: netSalary,
-          status: 'generated',
-          employee_metadata: {
-            matricule: employee.matricule || "00115",
-            convention: "Convention Collective Nationale",
-            statut: "C.D.I",
-            parts_IR: 1,
-            qualification: "CONDUCTEUR ENGINS",
-            date_naissance: employee.date_naissance || "10/10/1988",
-            transport_allowance: transportAllowance,
-            displacement_allowance: displacementAllowance,
-            employer: employee.employeur || "EIFFAGE ENERGIE T&D Sénégal",
-            site: employee.site || "AV PETIT MBAO X RTE DES BRAS BP 29389 DAKAR SÉNÉGAL",
-            social_gross: socialGross,
-            ir_base: irBase,
-            total_deductions: deductions + taxAmount
-          }
+          status: 'generated'
         };
       });
       
