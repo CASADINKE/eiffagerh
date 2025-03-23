@@ -1,375 +1,187 @@
 
-import { useState } from "react";
-import { Plus, Calendar, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Tables } from "@/integrations/supabase/types";
+import { ExportLeaveButton } from "@/components/leave/ExportLeaveButton";
+import { LeaveNotification } from "@/components/leave/LeaveNotification";
 
-// Mock leave request data
-const leaveRequestsData = [
-  {
-    id: "1",
-    employee: {
-      name: "Alex Johnson",
-      department: "Engineering",
-    },
-    type: "Annual",
-    startDate: "2023-09-15",
-    endDate: "2023-09-20",
-    duration: "5 days",
-    status: "pending",
-    createdAt: "2023-09-01",
-  },
-  {
-    id: "2",
-    employee: {
-      name: "Sarah Williams",
-      department: "Human Resources",
-    },
-    type: "Sick",
-    startDate: "2023-09-10",
-    endDate: "2023-09-12",
-    duration: "2 days",
-    status: "approved",
-    createdAt: "2023-09-05",
-  },
-  {
-    id: "3",
-    employee: {
-      name: "Michael Brown",
-      department: "Product",
-    },
-    type: "Parental",
-    startDate: "2023-10-01",
-    endDate: "2023-10-31",
-    duration: "30 days",
-    status: "approved",
-    createdAt: "2023-08-15",
-  },
-  {
-    id: "4",
-    employee: {
-      name: "Emily Davis",
-      department: "Design",
-    },
-    type: "Annual",
-    startDate: "2023-09-25",
-    endDate: "2023-09-29",
-    duration: "5 days",
-    status: "pending",
-    createdAt: "2023-09-10",
-  },
-  {
-    id: "5",
-    employee: {
-      name: "Daniel Wilson",
-      department: "Engineering",
-    },
-    type: "Personal",
-    startDate: "2023-09-18",
-    endDate: "2023-09-19",
-    duration: "2 days",
-    status: "rejected",
-    createdAt: "2023-09-15",
-  },
-] as const;
-
-// Leave types with balances
-const leaveBalances = [
-  { type: "Annual", total: 20, used: 8, remaining: 12 },
-  { type: "Sick", total: 10, used: 3, remaining: 7 },
-  { type: "Personal", total: 5, used: 2, remaining: 3 },
-  { type: "Parental", total: 90, used: 0, remaining: 90 },
-];
+type LeaveRequest = Tables<"leave_requests">;
 
 const Leave = () => {
-  const [activeTab, setActiveTab] = useState("requests");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  useEffect(() => {
+    fetchLeaveRequests();
+  }, []);
 
-  // Sample calendar data (employees on leave for each day of month)
-  const calendarData = Array.from({ length: 31 }, (_, i) => ({
-    day: i + 1,
-    employees: Math.random() > 0.7 ? 
-      [...Array(Math.floor(Math.random() * 3) + 1)].map(() => 
-        leaveRequestsData[Math.floor(Math.random() * leaveRequestsData.length)].employee.name) : 
-      []
-  }));
+  const fetchLeaveRequests = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("leave_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  const filteredRequests = leaveRequestsData.filter(request => 
-    statusFilter === "all" || request.status === statusFilter
-  );
+      if (error) throw error;
+      setLeaveRequests(data || []);
+    } catch (error: any) {
+      console.error("Erreur lors du chargement des demandes:", error.message);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les demandes de congés",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case "approved":
-        return <Badge className="bg-emerald-500">Approved</Badge>;
-      case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>;
       case "pending":
-        return <Badge variant="outline" className="text-amber-500 border-amber-500">Pending</Badge>;
+        return "bg-yellow-100 text-yellow-800";
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
       default:
-        return null;
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const handlePreviousMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "En attente";
+      case "approved":
+        return "Approuvé";
+      case "rejected":
+        return "Refusé";
+      default:
+        return status;
     }
   };
 
-  const handleNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case "annual":
+        return "Congé annuel";
+      case "sick":
+        return "Congé maladie";
+      case "parental":
+        return "Congé parental";
+      case "other":
+        return "Autre";
+      default:
+        return type;
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   return (
-    <div className="container mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-semibold">Leave Management</h1>
-          <p className="text-muted-foreground">Track and manage employee leaves and absences</p>
+    <div className="p-4 md:p-6">
+      <LeaveNotification />
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Gestion des Congés</h1>
+        <div className="flex gap-2">
+          <Button variant="default">Nouvelle Demande</Button>
+          <ExportLeaveButton data={leaveRequests} isLoading={isLoading} />
         </div>
-        <Button className="gap-2">
-          <Plus size={16} />
-          <span>Request Leave</span>
-        </Button>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {leaveBalances.map((balance, index) => (
-          <Card key={index} className="p-4">
-            <h3 className="text-sm text-muted-foreground mb-2">{balance.type} Leave</h3>
-            <div className="text-2xl font-semibold mb-2">{balance.remaining} days</div>
-            <div className="flex justify-between text-xs">
-              <span>Total: {balance.total}</span>
-              <span>Used: {balance.used}</span>
-            </div>
-            <div className="mt-2 h-2 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary rounded-full"
-                style={{ width: `${(balance.used / balance.total) * 100}%` }}
-              ></div>
-            </div>
-          </Card>
-        ))}
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <TabsList>
-            <TabsTrigger value="requests" className="gap-2">
-              <span>Leave Requests</span>
-            </TabsTrigger>
-            <TabsTrigger value="calendar" className="gap-2">
-              <Calendar size={16} />
-              <span>Calendar View</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          {activeTab === "requests" && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Filter size={14} />
-                  <span>Filter</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-60">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Status</h4>
-                  <Select 
-                    value={statusFilter} 
-                    onValueChange={setStatusFilter}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+      <Card className="mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle>Mes Demandes de Congés</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">Toutes</TabsTrigger>
+              <TabsTrigger value="pending">En attente</TabsTrigger>
+              <TabsTrigger value="approved">Approuvées</TabsTrigger>
+              <TabsTrigger value="rejected">Refusées</TabsTrigger>
+            </TabsList>
+
+            {["all", "pending", "approved", "rejected"].map((tabValue) => (
+              <TabsContent key={tabValue} value={tabValue}>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Date de début</TableHead>
+                        <TableHead>Date de fin</TableHead>
+                        <TableHead>Motif</TableHead>
+                        <TableHead>Statut</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isLoading ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-10">
+                            Chargement des demandes de congés...
+                          </TableCell>
+                        </TableRow>
+                      ) : leaveRequests.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-10">
+                            Aucune demande de congé trouvée
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        leaveRequests
+                          .filter(
+                            (leave) =>
+                              tabValue === "all" || leave.status === tabValue
+                          )
+                          .map((leave) => (
+                            <TableRow key={leave.id}>
+                              <TableCell>{getTypeLabel(leave.type)}</TableCell>
+                              <TableCell>{formatDate(leave.start_date)}</TableCell>
+                              <TableCell>{formatDate(leave.end_date)}</TableCell>
+                              <TableCell>{leave.reason || "-"}</TableCell>
+                              <TableCell>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                                    leave.status
+                                  )}`}
+                                >
+                                  {getStatusLabel(leave.status)}
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
-              </PopoverContent>
-            </Popover>
-          )}
-          
-          {activeTab === "calendar" && (
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handlePreviousMonth} 
-                className="h-8 w-8 rounded-full"
-              >
-                <ChevronLeft size={16} />
-              </Button>
-              <span className="text-sm font-medium">
-                {monthNames[currentMonth]} {currentYear}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleNextMonth} 
-                className="h-8 w-8 rounded-full"
-              >
-                <ChevronRight size={16} />
-              </Button>
-            </div>
-          )}
-        </div>
-        
-        <TabsContent value="requests" className="mt-0">
-          <Card>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">Employee</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">Duration</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">Requested On</th>
-                    <th className="py-3 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredRequests.map((request) => (
-                    <tr key={request.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-3 px-4">
-                        <div>
-                          <div className="font-medium">{request.employee.name}</div>
-                          <div className="text-sm text-muted-foreground">{request.employee.department}</div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">{request.type}</td>
-                      <td className="py-3 px-4">
-                        <div className="text-sm">
-                          <div>{request.duration}</div>
-                          <div className="text-muted-foreground">
-                            {new Date(request.startDate).toLocaleDateString()} - {new Date(request.endDate).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">{getStatusBadge(request.status)}</td>
-                      <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {new Date(request.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              Actions
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                            {request.status === "pending" && (
-                              <>
-                                <DropdownMenuItem>Approve</DropdownMenuItem>
-                                <DropdownMenuItem>Reject</DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              
-              {filteredRequests.length === 0 && (
-                <div className="py-6 text-center text-muted-foreground">
-                  No leave requests found matching the filter.
-                </div>
-              )}
-            </div>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="calendar" className="mt-0">
-          <Card className="p-6">
-            <div className="grid grid-cols-7 gap-1">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                <div key={day} className="text-center py-2 text-sm font-medium">
-                  {day}
-                </div>
-              ))}
-              
-              {/* Sample calendar grid - in a real app, this would be calculated based on the month */}
-              {Array.from({ length: 42 }, (_, i) => {
-                const day = i - 3; // Offset to start month on correct day
-                return (
-                  <div 
-                    key={i} 
-                    className={`
-                      border border-border rounded-md min-h-[80px] p-2
-                      ${day < 0 || day >= 30 ? 'bg-muted/50 text-muted-foreground/50' : ''}
-                      ${day === new Date().getDate() - 1 && currentMonth === new Date().getMonth() && currentYear === new Date().getFullYear() ? 'border-primary/50' : ''}
-                    `}
-                  >
-                    {day >= 0 && day < 30 && (
-                      <>
-                        <div className="text-right text-sm mb-1">{day + 1}</div>
-                        {calendarData[day]?.employees.length > 0 && (
-                          <div className="space-y-1">
-                            {calendarData[day].employees.slice(0, 2).map((emp, idx) => (
-                              <div key={idx} className="text-xs py-0.5 px-1 bg-primary/10 rounded">
-                                {emp}
-                              </div>
-                            ))}
-                            {calendarData[day].employees.length > 2 && (
-                              <div className="text-xs text-muted-foreground">
-                                +{calendarData[day].employees.length - 2} more
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
