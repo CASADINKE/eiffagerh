@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { getSalaryPayments, getPayslipsByPaymentId, SalaryPayment, Payslip } from "@/services/salaryPaymentService";
+import { getSalaryPayments, getPayslipsByPaymentId, getPayslipById, SalaryPayment, Payslip } from "@/services/salaryPaymentService";
 
 // Hook to fetch all salary payments
 export const useSalaryPayments = () => {
@@ -16,5 +16,14 @@ export const usePayslipsByPaymentId = (paymentId: string | null) => {
     queryKey: ["payslips", paymentId],
     queryFn: () => paymentId ? getPayslipsByPaymentId(paymentId) : Promise.resolve([]),
     enabled: !!paymentId,
+  });
+};
+
+// Hook to fetch a specific payslip by ID
+export const usePayslipById = (payslipId: string | null) => {
+  return useQuery({
+    queryKey: ["payslip", payslipId],
+    queryFn: () => payslipId ? getPayslipById(payslipId) : Promise.resolve(null),
+    enabled: !!payslipId,
   });
 };

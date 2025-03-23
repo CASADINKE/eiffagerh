@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -101,10 +100,43 @@ export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at'
       return false;
     }
     
+    // Calculate total amount of all payslips
+    const totalAmount = payslips.reduce((sum, payslip) => sum + payslip.net_salary, 0);
+    
+    // Update the salary payment with the calculated total amount
+    if (payslips[0].salary_payment_id) {
+      await updateSalaryPaymentTotal(payslips[0].salary_payment_id, totalAmount);
+    }
+    
     return true;
   } catch (error) {
     console.error("Error creating payslips:", error);
     toast.error("Erreur lors de la création des bulletins de paie");
+    return false;
+  }
+};
+
+// Function to update the total amount of a salary payment
+export const updateSalaryPaymentTotal = async (paymentId: string, totalAmount: number): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('salary_payments')
+      .update({ 
+        total_amount: totalAmount,
+        status: 'completed'
+      })
+      .eq('id', paymentId);
+
+    if (error) {
+      console.error("Error updating salary payment total:", error);
+      toast.error("Erreur lors de la mise à jour du montant total du paiement");
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating salary payment total:", error);
+    toast.error("Erreur lors de la mise à jour du montant total du paiement");
     return false;
   }
 };
@@ -158,5 +190,31 @@ export const getEmployeePayslips = async (employeeId: string): Promise<Payslip[]
     console.error("Error fetching employee payslips:", error);
     toast.error("Erreur lors de la récupération des bulletins de paie");
     return [];
+  }
+};
+
+// Function to get a specific payslip by ID
+export const getPayslipById = async (payslipId: string): Promise<Payslip | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('payslips')
+      .select(`
+        *,
+        employee:profiles(full_name, role)
+      `)
+      .eq('id', payslipId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching payslip:", error);
+      toast.error("Erreur lors de la récupération du bulletin de paie");
+      return null;
+    }
+    
+    return data || null;
+  } catch (error) {
+    console.error("Error fetching payslip:", error);
+    toast.error("Erreur lors de la récupération du bulletin de paie");
+    return null;
   }
 };
