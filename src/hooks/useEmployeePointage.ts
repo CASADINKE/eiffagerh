@@ -90,6 +90,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     .from("employee_pointage")
     .insert({
       employee_id: employeeId,
+      notes: notes || null
     })
     .select()
     .single();
@@ -99,7 +100,12 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     throw new Error(`Error clocking in employee: ${error.message}`);
   }
 
-  return data;
+  // Add the missing properties to match EmployeePointage type
+  return {
+    ...data,
+    break_time: 0,
+    notes: data.notes || null
+  };
 };
 
 // Clock out an employee (update existing pointage entry)
@@ -118,7 +124,12 @@ export const clockOutEmployee = async (entryId: string): Promise<EmployeePointag
     throw new Error(`Error clocking out employee: ${error.message}`);
   }
 
-  return data;
+  // Add the missing properties to match EmployeePointage type
+  return {
+    ...data,
+    break_time: 0,
+    notes: data.notes || null
+  };
 };
 
 // Calculate the duration between clock in and clock out in hours
