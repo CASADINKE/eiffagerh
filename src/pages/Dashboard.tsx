@@ -35,7 +35,7 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-semibold">Tableau de bord RH</h1>
+        <h1 className="text-3xl font-semibold">Dashboard</h1>
         <p className="text-muted-foreground">Visualisation des données et statistiques RH.</p>
       </div>
       
