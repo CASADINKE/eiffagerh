@@ -16,6 +16,7 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SalaryPaymentsTableProps {
   payments: SalaryPayment[];
@@ -23,11 +24,20 @@ interface SalaryPaymentsTableProps {
 }
 
 export function SalaryPaymentsTable({ payments, isLoading }: SalaryPaymentsTableProps) {
+  console.log("SalaryPaymentsTable received payments:", payments);
+  
   if (isLoading) {
     return (
       <Card>
-        <div className="p-8 text-center">
-          <p className="text-muted-foreground">Chargement des paiements...</p>
+        <div className="p-4 border-b border-border flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Historique des paiements de salaire</h2>
+        </div>
+        <div className="overflow-x-auto p-4">
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
         </div>
       </Card>
     );
@@ -36,8 +46,11 @@ export function SalaryPaymentsTable({ payments, isLoading }: SalaryPaymentsTable
   if (!payments || payments.length === 0) {
     return (
       <Card>
+        <div className="p-4 border-b border-border flex justify-between items-center">
+          <h2 className="text-lg font-semibold">Historique des paiements de salaire</h2>
+        </div>
         <div className="p-8 text-center">
-          <p className="text-muted-foreground">Aucun paiement de salaire trouvé</p>
+          <p className="text-muted-foreground">Aucun paiement de salaire trouvé. Créez votre premier paiement de salaire en cliquant sur "Paiement Salaire".</p>
         </div>
       </Card>
     );
@@ -64,7 +77,11 @@ export function SalaryPaymentsTable({ payments, isLoading }: SalaryPaymentsTable
             {payments.map((payment) => (
               <TableRow key={payment.id}>
                 <TableCell className="font-medium">{payment.payment_period}</TableCell>
-                <TableCell>{format(parseISO(payment.payment_date), 'dd MMMM yyyy', { locale: fr })}</TableCell>
+                <TableCell>
+                  {payment.payment_date ? 
+                    format(parseISO(payment.payment_date), 'dd MMMM yyyy', { locale: fr }) :
+                    "Non définie"}
+                </TableCell>
                 <TableCell>
                   {payment.payment_method === 'virement' ? 'Virement bancaire' :
                    payment.payment_method === 'cheque' ? 'Chèque' :

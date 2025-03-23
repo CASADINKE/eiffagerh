@@ -9,6 +9,9 @@ import { Link } from "react-router-dom";
 
 const Salary = () => {
   const { data: salaryPayments, isLoading: isLoadingPayments } = useSalaryPayments();
+  
+  // Log de débogage pour vérifier les données récupérées
+  console.log("Salary payments data:", salaryPayments);
 
   return (
     <div className="container mx-auto p-4 space-y-6">

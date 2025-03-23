@@ -7,6 +7,8 @@ export const useSalaryPayments = () => {
   return useQuery({
     queryKey: ["salary-payments"],
     queryFn: () => getSalaryPayments(),
+    refetchOnWindowFocus: true, // Rafraîchir les données quand la fenêtre est active
+    staleTime: 1000 * 60 * 5, // Considérer les données comme "stale" après 5 minutes
   });
 };
 
