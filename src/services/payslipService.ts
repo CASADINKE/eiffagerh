@@ -38,6 +38,25 @@ export interface Payslip {
   };
 }
 
+// Interface pour le nouveau format de bulletin de paie
+export interface BulletinPaie {
+  id: string;
+  matricule: string;
+  nom: string;
+  periode_paie: string;
+  salaire_base: number;
+  sursalaire: number;
+  indemnite_deplacement: number;
+  retenue_ir: number;
+  ipres_general: number;
+  trimf: number;
+  prime_transport: number;
+  total_brut: number;
+  net_a_payer: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // Function to create multiple payslips for a payment
 export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at' | 'updated_at' | 'generated_date' | 'employee_metadata'>[]): Promise<boolean> => {
   try {
@@ -215,5 +234,166 @@ export const getPayslipById = async (payslipId: string): Promise<Payslip | null>
     console.error("Error fetching payslip:", error);
     toast.error("Erreur lors de la récupération du bulletin de paie");
     return null;
+  }
+};
+
+// Nouvelles fonctions pour le nouveau format de bulletin de paie
+
+// Fonction pour créer un nouveau bulletin de paie
+export const createBulletinPaie = async (bulletin: Omit<BulletinPaie, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('bulletins_paie')
+      .insert(bulletin);
+
+    if (error) {
+      console.error("Erreur lors de la création du bulletin de paie:", error);
+      toast.error("Erreur lors de la création du bulletin de paie");
+      return false;
+    }
+    
+    toast.success("Bulletin de paie créé avec succès");
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de la création du bulletin de paie:", error);
+    toast.error("Erreur lors de la création du bulletin de paie");
+    return false;
+  }
+};
+
+// Fonction pour récupérer tous les bulletins de paie
+export const getAllBulletinsPaie = async (): Promise<BulletinPaie[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('bulletins_paie')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Erreur lors de la récupération des bulletins de paie:", error);
+      toast.error("Erreur lors de la récupération des bulletins de paie");
+      return [];
+    }
+    
+    return data as BulletinPaie[];
+  } catch (error) {
+    console.error("Erreur lors de la récupération des bulletins de paie:", error);
+    toast.error("Erreur lors de la récupération des bulletins de paie");
+    return [];
+  }
+};
+
+// Fonction pour récupérer les bulletins de paie par période
+export const getBulletinsPaieByPeriode = async (periode: string): Promise<BulletinPaie[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('bulletins_paie')
+      .select('*')
+      .eq('periode_paie', periode)
+      .order('nom', { ascending: true });
+
+    if (error) {
+      console.error("Erreur lors de la récupération des bulletins de paie:", error);
+      toast.error("Erreur lors de la récupération des bulletins de paie");
+      return [];
+    }
+    
+    return data as BulletinPaie[];
+  } catch (error) {
+    console.error("Erreur lors de la récupération des bulletins de paie:", error);
+    toast.error("Erreur lors de la récupération des bulletins de paie");
+    return [];
+  }
+};
+
+// Fonction pour récupérer les bulletins de paie par matricule
+export const getBulletinsPaieByMatricule = async (matricule: string): Promise<BulletinPaie[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('bulletins_paie')
+      .select('*')
+      .eq('matricule', matricule)
+      .order('periode_paie', { ascending: false });
+
+    if (error) {
+      console.error("Erreur lors de la récupération des bulletins de paie:", error);
+      toast.error("Erreur lors de la récupération des bulletins de paie");
+      return [];
+    }
+    
+    return data as BulletinPaie[];
+  } catch (error) {
+    console.error("Erreur lors de la récupération des bulletins de paie:", error);
+    toast.error("Erreur lors de la récupération des bulletins de paie");
+    return [];
+  }
+};
+
+// Fonction pour récupérer un bulletin de paie par ID
+export const getBulletinPaieById = async (id: string): Promise<BulletinPaie | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('bulletins_paie')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de la récupération du bulletin de paie:", error);
+      toast.error("Erreur lors de la récupération du bulletin de paie");
+      return null;
+    }
+    
+    return data as BulletinPaie;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du bulletin de paie:", error);
+    toast.error("Erreur lors de la récupération du bulletin de paie");
+    return null;
+  }
+};
+
+// Fonction pour mettre à jour un bulletin de paie
+export const updateBulletinPaie = async (id: string, updates: Partial<Omit<BulletinPaie, 'id' | 'created_at' | 'updated_at'>>): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('bulletins_paie')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      console.error("Erreur lors de la mise à jour du bulletin de paie:", error);
+      toast.error("Erreur lors de la mise à jour du bulletin de paie");
+      return false;
+    }
+    
+    toast.success("Bulletin de paie mis à jour avec succès");
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du bulletin de paie:", error);
+    toast.error("Erreur lors de la mise à jour du bulletin de paie");
+    return false;
+  }
+};
+
+// Fonction pour supprimer un bulletin de paie
+export const deleteBulletinPaie = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('bulletins_paie')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error("Erreur lors de la suppression du bulletin de paie:", error);
+      toast.error("Erreur lors de la suppression du bulletin de paie");
+      return false;
+    }
+    
+    toast.success("Bulletin de paie supprimé avec succès");
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de la suppression du bulletin de paie:", error);
+    toast.error("Erreur lors de la suppression du bulletin de paie");
+    return false;
   }
 };

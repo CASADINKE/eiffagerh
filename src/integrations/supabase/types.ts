@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      bulletins_paie: {
+        Row: {
+          created_at: string
+          id: string
+          indemnite_deplacement: number
+          ipres_general: number
+          matricule: string
+          net_a_payer: number
+          nom: string
+          periode_paie: string
+          prime_transport: number
+          retenue_ir: number
+          salaire_base: number
+          sursalaire: number
+          total_brut: number
+          trimf: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          indemnite_deplacement?: number
+          ipres_general?: number
+          matricule: string
+          net_a_payer?: number
+          nom: string
+          periode_paie: string
+          prime_transport?: number
+          retenue_ir?: number
+          salaire_base?: number
+          sursalaire?: number
+          total_brut?: number
+          trimf?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          indemnite_deplacement?: number
+          ipres_general?: number
+          matricule?: string
+          net_a_payer?: number
+          nom?: string
+          periode_paie?: string
+          prime_transport?: number
+          retenue_ir?: number
+          salaire_base?: number
+          sursalaire?: number
+          total_brut?: number
+          trimf?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           address: string | null
