@@ -27,6 +27,7 @@ import { SalaireFormData } from "@/services/salaireService";
 import { useSalaires } from "@/hooks/useSalaires";
 import { useEmployees } from "@/hooks/useEmployees";
 import { Calculator } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   employee: z.string().min(1, "Sélectionnez un employé"),
@@ -54,6 +55,19 @@ export function SalaireForm() {
   const { data: employees } = useEmployees();
   const [netAPayer, setNetAPayer] = useState<number>(0);
   const [selectedEmployee, setSelectedEmployee] = useState<{ matricule: string; nom: string; prenom: string } | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  // Get the current user ID
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    
+    fetchCurrentUser();
+  }, []);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -125,7 +139,8 @@ export function SalaireForm() {
       ipres_general: values.ipres_general,
       trimf: values.trimf,
       net_a_payer: netAPayer,
-      statut_paiement: 'En attente'
+      statut_paiement: 'En attente',
+      user_id: userId || undefined // Add the user ID
     };
     
     console.log("Création du salaire avec les données:", formData);

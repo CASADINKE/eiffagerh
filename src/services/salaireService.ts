@@ -21,6 +21,7 @@ export interface Salaire {
   statut_paiement: SalairePaiementStatus;
   mode_paiement: ModePaiement | null;
   date_paiement: string | null;
+  user_id?: string; // Added the user_id field
 }
 
 export interface SalaireFormData {
@@ -36,10 +37,19 @@ export interface SalaireFormData {
   retenue_ir: number;
   net_a_payer: number;
   statut_paiement: SalairePaiementStatus;
+  user_id?: string; // Added the user_id field
 }
 
 export const fetchSalaires = async () => {
   try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error("Utilisateur non authentifié");
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('salaires')
       .select('*')
@@ -60,6 +70,15 @@ export const fetchSalaires = async () => {
 export const createSalaire = async (formData: SalaireFormData) => {
   try {
     console.log("Creating salary with data:", formData);
+    
+    // If user_id is not provided, get the current user
+    if (!formData.user_id) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        formData.user_id = user.id;
+      }
+    }
+    
     const { data, error } = await supabase
       .from('salaires')
       .insert([formData]);
