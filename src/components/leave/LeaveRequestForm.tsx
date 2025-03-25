@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -29,7 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Employee } from "@/hooks/useEmployees";
-import { mapEmployeeToUI } from "@/types/employee";
+import { mapEmployeesToUI } from "@/types/employee";
 
 const LeaveFormSchema = z.object({
   employee_id: z.string({
@@ -77,7 +76,7 @@ export function LeaveRequestForm({
     mode: "onChange", // Enable validation on change
   });
 
-  const mappedEmployees = employees.map(mapEmployeeToUI);
+  const mappedEmployees = mapEmployeesToUI(employees);
   
   // Check if the form is valid
   const isValid = form.formState.isValid;
