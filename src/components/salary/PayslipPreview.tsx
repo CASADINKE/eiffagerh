@@ -85,7 +85,7 @@ export function PayslipPreview({ payslip, isOpen, onClose }: PayslipPreviewProps
           </div>
         </DialogHeader>
         
-        <div ref={printRef} className="bg-white payslip-content">
+        <div ref={printRef} className="bg-white payslip-content print-container">
           <PayslipGenerator salaire={salaire} onClose={() => {}} />
         </div>
       </DialogContent>
