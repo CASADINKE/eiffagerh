@@ -15,7 +15,6 @@ import { TimeTrackingStats } from "@/components/timeTracking/TimeTrackingStats";
 import { WorkingHoursChart } from "@/components/timeTracking/WorkingHoursChart";
 import { TimeTrackingFilters, TimeTrackingFilters as TimeTrackingFiltersType } from "@/components/timeTracking/TimeTrackingFilters";
 import { TimeEntriesTable } from "@/components/timeTracking/TimeEntriesTable";
-import { handleExportTimeEntries } from "@/components/timeTracking/TimeTrackingUtils";
 import { EmployeeClockStatus } from "@/components/timeTracking/EmployeeClockStatus";
 
 const workingHoursData = [
@@ -112,15 +111,11 @@ const TimeTracking = () => {
     });
   };
 
-  const handleExport = (format = 'csv') => {
-    handleExportTimeEntries(filteredTimeEntries, activeTab, format);
-  };
-
   console.log("TimeTracking: Rendering with", tabFilteredEntries.length, "entries");
 
   return (
     <div className="container mx-auto">
-      <TimeTrackingHeader handleExport={handleExport} />
+      <TimeTrackingHeader />
       
       <TimeTrackingStats 
         activeEmployeeCount={activeEmployeeCount}
