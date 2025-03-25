@@ -85,7 +85,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className={className} variant="default">
+        <Button className={className}>
           <Clock size={16} className="mr-2" />
           <span>Pointer entrée/sortie</span>
         </Button>

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmployeeUI, mapEmployeesToUI } from "@/types/employee";
@@ -87,10 +86,40 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
   console.log("Clocking in employee:", employeeId);
   
   try {
-    // Skip profile creation - since we're hitting a foreign key constraint,
-    // we'll directly insert the time entry without profile creation
+    // First check if a profile exists for this employee
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", employeeId)
+      .single();
+      
+    // If not, create a profile
+    if (!existingProfile) {
+      console.log("Creating profile for employee:", employeeId);
+      
+      // Get employee info from listes_employées
+      const { data: employeeInfo } = await supabase
+        .from("listes_employées")
+        .select("*")
+        .eq("id", employeeId)
+        .single();
+        
+      if (employeeInfo) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert({
+            id: employeeId,
+            full_name: `${employeeInfo.prenom} ${employeeInfo.nom}`,
+            role: 'employee'
+          });
+          
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+        }
+      }
+    }
     
-    // Try to insert the time entry
+    // Insert the time entry
     const { data, error } = await supabase
       .from("time_entries")
       .insert({
