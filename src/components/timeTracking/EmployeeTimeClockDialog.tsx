@@ -36,7 +36,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployeesUI();
   
   // Fetch time entries to know which employees are already clocked in
-  const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
+  const { data: timeEntries = [], isLoading: entriesLoading, refetch } = useTimeEntries();
   
   // Mutations for clock in/out
   const clockInMutation = useClockInMutation();
@@ -64,13 +64,17 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
       if (activeEntry) {
         // Clock out
         console.log("Clocking out employee, entry ID:", activeEntry.id);
-        clockOutMutation.mutate(activeEntry.id);
+        await clockOutMutation.mutateAsync(activeEntry.id);
+        toast.success("Pointage de sortie enregistré avec succès");
       } else {
         // Clock in
         console.log("Clocking in employee:", employeeId);
-        clockInMutation.mutate({ employeeId });
+        await clockInMutation.mutateAsync({ employeeId });
+        toast.success("Pointage d'entrée enregistré avec succès");
       }
       
+      // Refresh the time entries after clocking in/out
+      refetch();
       setOpen(false);
     } catch (error) {
       console.error("Error in handleClockInOut:", error);
@@ -153,7 +157,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
                           <p className="text-xs text-muted-foreground">{employee.position}</p>
                         </div>
                         {isActive && (
-                          <span className="inline-flex h-2 w-2 rounded-full bg-green-500" />
+                          <span className="inline-flex h-2 w-2 rounded-full bg-green-500 ml-2" />
                         )}
                       </div>
                     </TableCell>

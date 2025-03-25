@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmployeeUI, mapEmployeesToUI } from "@/types/employee";
@@ -115,8 +116,42 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
           
         if (profileError) {
           console.error("Error creating profile:", profileError);
+          // Don't throw here to continue with the clock-in operation
         }
       }
+    }
+    
+    // Check if there's already an active time entry for this employee today
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    
+    const { data: activeEntries, error: activeEntriesError } = await supabase
+      .from("time_entries")
+      .select("*")
+      .eq("employee_id", employeeId)
+      .eq("date", today)
+      .is("clock_out", null);
+      
+    if (activeEntriesError) {
+      console.error("Error checking for active entries:", activeEntriesError);
+    }
+    
+    // If there's already an active entry, don't create a new one
+    if (activeEntries && activeEntries.length > 0) {
+      console.log("Employee already has an active time entry today");
+      
+      // Return the existing active entry
+      const existingEntry = activeEntries[0];
+      return {
+        id: existingEntry.id,
+        employee_id: existingEntry.employee_id,
+        clock_in: existingEntry.clock_in,
+        clock_out: existingEntry.clock_out,
+        date: existingEntry.date,
+        break_time: existingEntry.break_time || 0,
+        notes: existingEntry.notes,
+        created_at: existingEntry.created_at,
+        updated_at: existingEntry.updated_at
+      };
     }
     
     // Insert the time entry
@@ -243,7 +278,6 @@ export const useClockInMutation = () => {
       clockInEmployee(employeeId, notes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
-      toast.success("Pointage d'entrée enregistré avec succès");
     },
     onError: (error) => {
       toast.error(`Erreur lors du pointage d'entrée: ${error}`);
@@ -258,7 +292,6 @@ export const useClockOutMutation = () => {
     mutationFn: (entryId: string) => clockOutEmployee(entryId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
-      toast.success("Pointage de sortie enregistré avec succès");
     },
     onError: (error) => {
       toast.error(`Erreur lors du pointage de sortie: ${error}`);

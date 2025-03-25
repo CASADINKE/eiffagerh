@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
+import { toast } from "sonner";
 
 interface EmployeeClockStatusProps {
   employees: EmployeeUI[];
@@ -43,7 +44,11 @@ export const EmployeeClockStatus = ({
     }
   });
   
-  const clockedInEmployeeIds = new Set(latestEntryMap.keys());
+  const clockedInEmployeeIds = new Set(
+    Array.from(latestEntryMap.values())
+      .filter(entry => !entry.clock_out) // Only consider employees who haven't clocked out
+      .map(entry => entry.employee_id)
+  );
 
   // Separate employees into clocked in and not clocked in
   const clockedInEmployees = employees.filter(emp => clockedInEmployeeIds.has(emp.id));
@@ -62,12 +67,24 @@ export const EmployeeClockStatus = ({
     return format(new Date(dateString), "HH:mm", { locale: fr });
   };
 
-  const handleClockIn = (employeeId: string) => {
-    clockInMutation.mutate({ employeeId });
+  const handleClockIn = async (employeeId: string) => {
+    try {
+      await clockInMutation.mutateAsync({ employeeId });
+      toast.success("Pointage d'entrée enregistré avec succès");
+    } catch (error) {
+      console.error("Error clocking in:", error);
+      // Toast error is handled in the mutation
+    }
   };
 
-  const handleClockOut = (entryId: string) => {
-    clockOutMutation.mutate(entryId);
+  const handleClockOut = async (entryId: string) => {
+    try {
+      await clockOutMutation.mutateAsync(entryId);
+      toast.success("Pointage de sortie enregistré avec succès");
+    } catch (error) {
+      console.error("Error clocking out:", error);
+      // Toast error is handled in the mutation
+    }
   };
 
   return (
@@ -123,7 +140,7 @@ export const EmployeeClockStatus = ({
                       </div>
                     </div>
                     <div className="ml-3">
-                      {isActive ? (
+                      {isActive && entry ? (
                         <Button 
                           variant="destructive" 
                           size="sm"
