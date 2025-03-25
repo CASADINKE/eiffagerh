@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,19 +17,11 @@ export interface EmployeePointage {
   notes: string | null; // Added to make it compatible with TimeEntry
 }
 
-// Type for the profile data returned from Supabase
-interface ProfileData {
-  id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  role?: string | null;
-  department_id?: string | null;
-}
-
 // Fetch all employee pointage entries with employee details
 export const fetchEmployeePointages = async (): Promise<EmployeePointage[]> => {
+  // Use the time_entries table that exists in the database schema
   const { data, error } = await supabase
-    .from("employee_pointage")
+    .from("time_entries")
     .select(`
       *,
       profiles:employee_id (
@@ -49,9 +42,8 @@ export const fetchEmployeePointages = async (): Promise<EmployeePointage[]> => {
 
   // Process and format the data
   return data.map((entry) => {
-    // Fix: Properly handle the profiles data with type safety
-    // Initialize with default empty values to avoid type errors
-    const profileData: ProfileData = entry.profiles ? entry.profiles as ProfileData : {
+    // Make sure we handle the profile data correctly
+    const profileData = entry.profiles || {
       id: entry.employee_id,
       full_name: null,
       avatar_url: null
@@ -65,8 +57,8 @@ export const fetchEmployeePointages = async (): Promise<EmployeePointage[]> => {
       date: entry.date,
       created_at: entry.created_at,
       updated_at: entry.updated_at,
-      break_time: 0, // Default value to make it compatible with TimeEntry
-      notes: entry.notes, // Now using the notes column from database
+      break_time: entry.break_time || 0,
+      notes: entry.notes,
       employee: {
         id: profileData.id,
         name: profileData.full_name || "Sans nom",
@@ -85,8 +77,35 @@ export const fetchEmployeePointages = async (): Promise<EmployeePointage[]> => {
 
 // Clock in an employee
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<EmployeePointage> => {
+  // First create a profile if it doesn't exist yet
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", employeeId)
+    .single();
+
+  if (!existingProfile) {
+    // Get employee info from listes_employées to create a basic profile
+    const { data: employeeInfo } = await supabase
+      .from("listes_employées")
+      .select("*")
+      .eq("id", employeeId)
+      .single();
+
+    if (employeeInfo) {
+      await supabase
+        .from("profiles")
+        .insert({
+          id: employeeId,
+          full_name: `${employeeInfo.prenom} ${employeeInfo.nom}`,
+          role: 'employee'
+        });
+    }
+  }
+
+  // Now insert into time_entries
   const { data, error } = await supabase
-    .from("employee_pointage")
+    .from("time_entries")
     .insert({
       employee_id: employeeId,
       notes: notes || null
@@ -108,15 +127,15 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     date: data.date,
     created_at: data.created_at,
     updated_at: data.updated_at,
-    break_time: 0,
-    notes: notes || null // Use the notes we passed to the function
+    break_time: data.break_time || 0,
+    notes: data.notes
   };
 };
 
 // Clock out an employee (update existing pointage entry)
 export const clockOutEmployee = async (entryId: string): Promise<EmployeePointage> => {
   const { data, error } = await supabase
-    .from("employee_pointage")
+    .from("time_entries")
     .update({
       clock_out: new Date().toISOString()
     })
@@ -138,8 +157,8 @@ export const clockOutEmployee = async (entryId: string): Promise<EmployeePointag
     date: data.date,
     created_at: data.created_at,
     updated_at: data.updated_at,
-    break_time: 0,
-    notes: data.notes // Now using the notes from the database
+    break_time: data.break_time || 0,
+    notes: data.notes
   };
 };
 

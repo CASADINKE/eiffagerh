@@ -1,6 +1,6 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Employee } from "./useEmployees";
 import { EmployeeUI, mapEmployeeToUI } from "@/types/employee";
 import { toast } from "sonner";
 
@@ -19,8 +19,8 @@ export interface TimeEntry {
 export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   console.log("Fetching time entries...");
   
-  // Try to fetch from time_entries first
-  let { data: timeEntriesData, error: timeEntriesError } = await supabase
+  // Use time_entries table that exists in the database schema
+  const { data: timeEntriesData, error: timeEntriesError } = await supabase
     .from("time_entries")
     .select(`
       *,
@@ -33,43 +33,14 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
     .order("date", { ascending: false })
     .order("clock_in", { ascending: false });
 
-  // If error or no data, try employee_pointage as fallback
-  if (timeEntriesError || !timeEntriesData || timeEntriesData.length === 0) {
-    console.log("Falling back to employee_pointage table");
-    const { data: pointageData, error: pointageError } = await supabase
-      .from("employee_pointage")
-      .select(`
-        *,
-        profiles:employee_id (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
-      .order("date", { ascending: false })
-      .order("clock_in", { ascending: false });
-      
-    if (pointageError) {
-      console.error("Error fetching from both tables:", pointageError);
-      throw new Error(`Error fetching time entries: ${pointageError.message}`);
-    }
-    
-    // Transform employee_pointage data to match TimeEntry interface
-    timeEntriesData = (pointageData || []).map(entry => ({
-      id: entry.id,
-      employee_id: entry.employee_id,
-      clock_in: entry.clock_in,
-      clock_out: entry.clock_out,
-      break_time: 0,
-      date: entry.date,
-      notes: entry.notes,
-      profiles: entry.profiles
-    }));
+  if (timeEntriesError) {
+    console.error("Error fetching time entries:", timeEntriesError);
+    throw new Error(`Error fetching time entries: ${timeEntriesError.message}`);
   }
 
   console.log("Time entries fetched:", timeEntriesData?.length || 0);
   
-  // If aucune donnée n'est retournée, on retourne un tableau vide
+  // If no data is returned, return an empty array
   if (!timeEntriesData || timeEntriesData.length === 0) {
     return [];
   }
@@ -77,7 +48,11 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   // Process and format the data
   return timeEntriesData.map((entry) => {
     // Create an empty profile object if profiles is null
-    const profileData = entry.profiles as { id: string; full_name: string | null; avatar_url: string | null } | null;
+    const profileData = entry.profiles || {
+      id: entry.employee_id,
+      full_name: null,
+      avatar_url: null
+    };
     
     return {
       id: entry.id,
@@ -88,8 +63,8 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       date: entry.date,
       notes: entry.notes,
       employee: {
-        id: profileData?.id || entry.employee_id,
-        name: profileData?.full_name || "Sans nom",
+        id: profileData.id || entry.employee_id,
+        name: profileData.full_name || "Sans nom",
         department: "Département non assigné",
         position: "Poste non spécifié",
         email: "Email non spécifié",
@@ -97,20 +72,53 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
         status: "active" as const,
         matricule: "Non spécifié",
         site: "Site non spécifié",
-        avatar: profileData?.avatar_url
+        avatar: profileData.avatar_url
       }
     };
   });
 };
 
-// Simplify clock in - directly use employee_pointage and skip profile check
+// Clock in an employee - create a profile if it doesn't exist
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
   console.log("Clocking in employee:", employeeId);
   
   try {
-    // Use employee_pointage table directly (no foreign key constraint)
+    // First check if a profile exists for this employee
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", employeeId)
+      .single();
+      
+    // If not, create a profile
+    if (!existingProfile) {
+      console.log("Creating profile for employee:", employeeId);
+      
+      // Get employee info from listes_employées
+      const { data: employeeInfo } = await supabase
+        .from("listes_employées")
+        .select("*")
+        .eq("id", employeeId)
+        .single();
+        
+      if (employeeInfo) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert({
+            id: employeeId,
+            full_name: `${employeeInfo.prenom} ${employeeInfo.nom}`,
+            role: 'employee'
+          });
+          
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+        }
+      }
+    }
+    
+    // Insert the time entry
     const { data, error } = await supabase
-      .from("employee_pointage")
+      .from("time_entries")
       .insert({
         employee_id: employeeId,
         notes: notes || null
@@ -125,14 +133,14 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     
     console.log("Clock in successful:", data);
     
-    // Convert to TimeEntry format
+    // Return as TimeEntry format
     return {
       id: data.id,
       employee_id: data.employee_id,
       clock_in: data.clock_in,
       clock_out: data.clock_out,
       date: data.date,
-      break_time: 0,
+      break_time: data.break_time || 0,
       notes: data.notes
     };
   } catch (error) {
@@ -146,9 +154,8 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
   console.log("Clocking out employee, entry ID:", entryId);
   
   try {
-    // Try employee_pointage table first (since we're now using it for clock in)
     const { data, error } = await supabase
-      .from("employee_pointage")
+      .from("time_entries")
       .update({
         clock_out: new Date().toISOString()
       })
@@ -157,45 +164,20 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
       .single();
       
     if (error) {
-      console.log("Entry not found in employee_pointage, trying time_entries");
-      
-      // If not found in employee_pointage, try time_entries
-      const { data: timeEntryData, error: timeEntryError } = await supabase
-        .from("time_entries")
-        .update({
-          clock_out: new Date().toISOString()
-        })
-        .eq("id", entryId)
-        .select()
-        .single();
-        
-      if (timeEntryError) {
-        console.error("Error clocking out employee:", timeEntryError);
-        throw new Error(`Error clocking out employee: ${timeEntryError.message}`);
-      }
-      
-      // Return time_entries format
-      return {
-        id: timeEntryData.id,
-        employee_id: timeEntryData.employee_id,
-        clock_in: timeEntryData.clock_in,
-        clock_out: timeEntryData.clock_out,
-        date: timeEntryData.date,
-        break_time: timeEntryData.break_time || 0,
-        notes: timeEntryData.notes
-      };
+      console.error("Error clocking out employee:", error);
+      throw new Error(`Error clocking out employee: ${error.message}`);
     }
 
     console.log("Clock out successful:", data);
     
-    // Return employee_pointage format converted to TimeEntry
+    // Return time entry format
     return {
       id: data.id,
       employee_id: data.employee_id,
       clock_in: data.clock_in,
       clock_out: data.clock_out,
       date: data.date,
-      break_time: 0,
+      break_time: data.break_time || 0,
       notes: data.notes
     };
   } catch (error) {
@@ -285,6 +267,3 @@ export const getActiveTimeEntry = (entries: TimeEntry[], employeeId: string): Ti
     !entry.clock_out
   );
 };
-
-//
-
