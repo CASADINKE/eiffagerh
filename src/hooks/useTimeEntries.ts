@@ -120,7 +120,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
       };
     }
     
-    // Instead of relying on foreign key constraints, we'll use a temporary entry approach
+    // Insert a new time entry
     const { data, error } = await supabase
       .from("time_entries")
       .insert({
@@ -144,34 +144,40 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
         // Note: This is a workaround solution for the current issue
         const tempEntryId = crypto.randomUUID();
         
-        // Insert a temporary entry with a SQL command that bypasses constraints
-        // Use direct SQL to bypass constraints (temporary solution)
-        const { data: overrideData, error: overrideError } = await supabase
-          .rpc('insert_time_entry_bypass_fk', {
-            p_id: tempEntryId,
-            p_employee_id: employeeId,
-            p_notes: notes || null,
-            p_date: today,
-            p_clock_in: new Date().toISOString()
-          });
+        // Try using a custom function call as a last resort
+        try {
+          const { data: funcData, error: funcError } = await supabase.rpc(
+            'insert_time_entry_bypass_fk', 
+            { 
+              p_id: tempEntryId,
+              p_employee_id: employeeId,
+              p_notes: notes || null,
+              p_date: today,
+              p_clock_in: new Date().toISOString()
+            }
+          );
           
-        if (overrideError) {
-          console.error("Error inserting time entry with bypass:", overrideError);
-          throw new Error(`Failed to clock in: ${overrideError.message}`);
+          if (funcError) {
+            console.error("Error inserting time entry with bypass function:", funcError);
+            throw new Error(`Failed to clock in: ${funcError.message}`);
+          }
+          
+          // If the function succeeded, return a constructed time entry
+          return {
+            id: tempEntryId,
+            employee_id: employeeId,
+            clock_in: new Date().toISOString(),
+            clock_out: null,
+            date: today,
+            break_time: 0,
+            notes: notes || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        } catch (rpcError) {
+          console.error("RPC call failed:", rpcError);
+          throw new Error(`Error clocking in employee: ${String(rpcError)}`);
         }
-        
-        // If the bypass succeeded, return a constructed time entry
-        return {
-          id: tempEntryId,
-          employee_id: employeeId,
-          clock_in: new Date().toISOString(),
-          clock_out: null,
-          date: today,
-          break_time: 0,
-          notes: notes || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
       }
       
       // For other errors, throw normally
