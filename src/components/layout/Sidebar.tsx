@@ -5,13 +5,12 @@ import {
   Users,
   ClipboardList,
   Calendar, 
-  Wallet,
   Settings,
-  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Building,
   CreditCard,
+  Clock,
   Wallet,
   CheckCircle
 } from "lucide-react";
@@ -34,20 +33,9 @@ const navItems = [
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
-  { path: "/salary", title: "Gestion des paies", icon: CreditCard },
+  { path: "/salary-management", title: "Gestion des paies", icon: Wallet },
+  { path: "/validate-salary", title: "Validation des Paiements", icon: CheckCircle },
   { path: "/settings", title: "Paramètres", icon: Settings },
-  {
-    title: "Gestion des Salaires",
-    href: "/salary-management",
-    icon: <Wallet className="h-5 w-5" />,
-    roles: ["super_admin", "admin", "rh"],
-  },
-  {
-    title: "Validation des Paiements",
-    href: "/validate-salary",
-    icon: <CheckCircle className="h-5 w-5" />,
-    roles: ["super_admin", "admin", "rh"],
-  },
 ];
 
 const Sidebar = () => {

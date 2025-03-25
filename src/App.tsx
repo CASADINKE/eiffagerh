@@ -1,3 +1,4 @@
+
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Employees from "@/pages/Employees";
@@ -13,12 +14,13 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "@/components/ui/theme-provider";
+import { ThemeProvider } from "./components/ui/theme-provider";
 import { Toaster } from "sonner";
 import Layout from "@/components/layout/Layout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import SalaryManagement from "@/pages/SalaryManagement";
 import ValidateSalary from "@/components/salary/ValidateSalary";
+import EmployeePayslipsPage from "@/pages/EmployeePayslips";
 
 function App() {
   const queryClient = new QueryClient();
@@ -90,6 +92,16 @@ function App() {
                   <ProtectedRoute allowedRoles={['super_admin', 'admin', 'rh']}>
                     <Layout>
                       <ValidateSalary />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/employee-payslips/:employeeId"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <EmployeePayslipsPage />
                     </Layout>
                   </ProtectedRoute>
                 }
