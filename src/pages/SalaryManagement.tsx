@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Tabs, 
@@ -96,7 +95,12 @@ const SalaryManagement = () => {
     paymentMethod?: string, 
     paymentDate?: string
   ) => {
-    updateStatus({ payslipId, status, paymentMethod, paymentDate });
+    updateStatus({ 
+      payslipId, 
+      status, 
+      paymentMethod: paymentMethod as PaymentMethod, 
+      paymentDate 
+    });
   };
   
   // Get counts for tabs
