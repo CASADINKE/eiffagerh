@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Employee } from "./useEmployees";
@@ -20,7 +19,8 @@ export interface TimeEntry {
 export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   console.log("Fetching time entries...");
   
-  const { data, error } = await supabase
+  // Try to fetch from time_entries first
+  let { data: timeEntriesData, error: timeEntriesError } = await supabase
     .from("time_entries")
     .select(`
       *,
@@ -33,20 +33,49 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
     .order("date", { ascending: false })
     .order("clock_in", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching time entries:", error);
-    throw new Error(`Error fetching time entries: ${error.message}`);
+  // If error or no data, try employee_pointage as fallback
+  if (timeEntriesError || !timeEntriesData || timeEntriesData.length === 0) {
+    console.log("Falling back to employee_pointage table");
+    const { data: pointageData, error: pointageError } = await supabase
+      .from("employee_pointage")
+      .select(`
+        *,
+        profiles:employee_id (
+          id,
+          full_name,
+          avatar_url
+        )
+      `)
+      .order("date", { ascending: false })
+      .order("clock_in", { ascending: false });
+      
+    if (pointageError) {
+      console.error("Error fetching from both tables:", pointageError);
+      throw new Error(`Error fetching time entries: ${pointageError.message}`);
+    }
+    
+    // Transform employee_pointage data to match TimeEntry interface
+    timeEntriesData = (pointageData || []).map(entry => ({
+      id: entry.id,
+      employee_id: entry.employee_id,
+      clock_in: entry.clock_in,
+      clock_out: entry.clock_out,
+      break_time: 0,
+      date: entry.date,
+      notes: entry.notes,
+      profiles: entry.profiles
+    }));
   }
 
-  console.log("Time entries fetched:", data?.length || 0);
+  console.log("Time entries fetched:", timeEntriesData?.length || 0);
   
-  // Si aucune donnée n'est retournée, on retourne un tableau vide
-  if (!data || data.length === 0) {
+  // If aucune donnée n'est retournée, on retourne un tableau vide
+  if (!timeEntriesData || timeEntriesData.length === 0) {
     return [];
   }
 
   // Process and format the data
-  return data.map((entry) => {
+  return timeEntriesData.map((entry) => {
     // Create an empty profile object if profiles is null
     const profileData = entry.profiles as { id: string; full_name: string | null; avatar_url: string | null } | null;
     
@@ -74,101 +103,38 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   });
 };
 
-// Ensure profile exists before clocking in
-const ensureProfileExists = async (employeeId: string): Promise<void> => {
-  console.log("Checking if profile exists for employee:", employeeId);
-  
-  // Check if profile exists
-  const { data: profileData, error: profileError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("id", employeeId)
-    .single();
-    
-  if (profileError) {
-    // If no profile exists, create one
-    console.log("No profile found, creating one for employee:", employeeId);
-    
-    // Get employee data to create profile
-    const { data: employeeData, error: employeeError } = await supabase
-      .from("listes_employées")
-      .select("*")
-      .eq("id", employeeId)
-      .single();
-      
-    if (employeeError) {
-      console.error("Error getting employee data:", employeeError);
-      throw new Error(`Error getting employee data: ${employeeError.message}`);
-    }
-    
-    if (employeeData) {
-      // Create profile
-      const { error: createError } = await supabase
-        .from("profiles")
-        .insert({
-          id: employeeId,
-          full_name: `${employeeData.prenom} ${employeeData.nom}`,
-          role: 'employee'
-        });
-        
-      if (createError) {
-        console.error("Error creating profile:", createError);
-        // Continue even if there's an error creating the profile
-      }
-    }
-  }
-};
-
-// Clock in an employee - use table without profile constraint
+// Simplify clock in - directly use employee_pointage and skip profile check
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
   console.log("Clocking in employee:", employeeId);
   
   try {
-    // First try to ensure profile exists
-    await ensureProfileExists(employeeId);
-    
-    // Try to use time_entries first
+    // Use employee_pointage table directly (no foreign key constraint)
     const { data, error } = await supabase
-      .from("time_entries")
+      .from("employee_pointage")
       .insert({
         employee_id: employeeId,
-        notes
+        notes: notes || null
       })
       .select()
       .single();
-
+      
     if (error) {
-      console.log("Error in time_entries, trying employee_pointage:", error);
-      
-      // If time_entries fails, try using employee_pointage
-      const { data: pointageData, error: pointageError } = await supabase
-        .from("employee_pointage")
-        .insert({
-          employee_id: employeeId,
-          notes
-        })
-        .select()
-        .single();
-        
-      if (pointageError) {
-        console.error("Error in both tables:", pointageError);
-        throw new Error(`Error clocking in employee: ${pointageError.message}`);
-      }
-      
-      // Convert employee_pointage format to TimeEntry format
-      return {
-        id: pointageData.id,
-        employee_id: pointageData.employee_id,
-        clock_in: pointageData.clock_in,
-        clock_out: pointageData.clock_out,
-        date: pointageData.date,
-        break_time: 0,
-        notes: pointageData.notes
-      };
+      console.error("Error clocking in employee:", error);
+      throw new Error(`Error clocking in employee: ${error.message}`);
     }
-
+    
     console.log("Clock in successful:", data);
-    return data;
+    
+    // Convert to TimeEntry format
+    return {
+      id: data.id,
+      employee_id: data.employee_id,
+      clock_in: data.clock_in,
+      clock_out: data.clock_out,
+      date: data.date,
+      break_time: 0,
+      notes: data.notes
+    };
   } catch (error) {
     console.error("Error in clockInEmployee:", error);
     throw error;
@@ -180,22 +146,22 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
   console.log("Clocking out employee, entry ID:", entryId);
   
   try {
-    // Try time_entries table first
+    // Try employee_pointage table first (since we're now using it for clock in)
     const { data, error } = await supabase
-      .from("time_entries")
+      .from("employee_pointage")
       .update({
         clock_out: new Date().toISOString()
       })
       .eq("id", entryId)
       .select()
       .single();
-
-    if (error) {
-      console.log("Entry not found in time_entries, trying employee_pointage");
       
-      // If not found in time_entries, try employee_pointage
-      const { data: pointageData, error: pointageError } = await supabase
-        .from("employee_pointage")
+    if (error) {
+      console.log("Entry not found in employee_pointage, trying time_entries");
+      
+      // If not found in employee_pointage, try time_entries
+      const { data: timeEntryData, error: timeEntryError } = await supabase
+        .from("time_entries")
         .update({
           clock_out: new Date().toISOString()
         })
@@ -203,25 +169,35 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
         .select()
         .single();
         
-      if (pointageError) {
-        console.error("Error clocking out employee:", pointageError);
-        throw new Error(`Error clocking out employee: ${pointageError.message}`);
+      if (timeEntryError) {
+        console.error("Error clocking out employee:", timeEntryError);
+        throw new Error(`Error clocking out employee: ${timeEntryError.message}`);
       }
       
-      // Convert employee_pointage format to TimeEntry format
+      // Return time_entries format
       return {
-        id: pointageData.id,
-        employee_id: pointageData.employee_id,
-        clock_in: pointageData.clock_in,
-        clock_out: pointageData.clock_out,
-        date: pointageData.date,
-        break_time: 0,
-        notes: pointageData.notes
+        id: timeEntryData.id,
+        employee_id: timeEntryData.employee_id,
+        clock_in: timeEntryData.clock_in,
+        clock_out: timeEntryData.clock_out,
+        date: timeEntryData.date,
+        break_time: timeEntryData.break_time || 0,
+        notes: timeEntryData.notes
       };
     }
 
     console.log("Clock out successful:", data);
-    return data;
+    
+    // Return employee_pointage format converted to TimeEntry
+    return {
+      id: data.id,
+      employee_id: data.employee_id,
+      clock_in: data.clock_in,
+      clock_out: data.clock_out,
+      date: data.date,
+      break_time: 0,
+      notes: data.notes
+    };
   } catch (error) {
     console.error("Error in clockOutEmployee:", error);
     throw error;
@@ -309,3 +285,6 @@ export const getActiveTimeEntry = (entries: TimeEntry[], employeeId: string): Ti
     !entry.clock_out
   );
 };
+
+//
+

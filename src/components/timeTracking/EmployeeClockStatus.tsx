@@ -6,6 +6,8 @@ import { TimeEntry, calculateDuration } from "@/hooks/useTimeEntries";
 import { EmployeeUI } from "@/types/employee";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
 
 interface EmployeeClockStatusProps {
   employees: EmployeeUI[];
@@ -18,6 +20,9 @@ export const EmployeeClockStatus = ({
   timeEntries,
   isLoading,
 }: EmployeeClockStatusProps) => {
+  const clockInMutation = useClockInMutation();
+  const clockOutMutation = useClockOutMutation();
+
   if (isLoading) {
     return <div className="p-4 text-center">Chargement des données...</div>;
   }
@@ -55,6 +60,14 @@ export const EmployeeClockStatus = ({
   // Format time to HH:MM format
   const formatTime = (dateString: string) => {
     return format(new Date(dateString), "HH:mm", { locale: fr });
+  };
+
+  const handleClockIn = (employeeId: string) => {
+    clockInMutation.mutate({ employeeId });
+  };
+
+  const handleClockOut = (entryId: string) => {
+    clockOutMutation.mutate(entryId);
   };
 
   return (
@@ -109,6 +122,25 @@ export const EmployeeClockStatus = ({
                         </span>
                       </div>
                     </div>
+                    <div className="ml-3">
+                      {isActive ? (
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => handleClockOut(entry.id)}
+                        >
+                          Sortie
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          disabled
+                        >
+                          Terminé
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -143,13 +175,22 @@ export const EmployeeClockStatus = ({
                       <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
                     )}
                   </Avatar>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{employee.name}</p>
                     <p className="text-xs text-muted-foreground">{employee.matricule} • {employee.position}</p>
                   </div>
-                  <div className="ml-auto flex items-center">
+                  <div className="flex items-center">
                     <span className="h-2 w-2 rounded-full bg-red-500 mr-2"></span>
                     <span className="text-sm">Non pointé</span>
+                  </div>
+                  <div className="ml-3">
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={() => handleClockIn(employee.id)}
+                    >
+                      Entrée
+                    </Button>
                   </div>
                 </div>
               ))}
