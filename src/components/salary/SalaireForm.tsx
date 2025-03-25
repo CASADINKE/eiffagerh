@@ -40,6 +40,9 @@ const formSchema = z.object({
   trimf: z.coerce.number().min(0, "Le TRIMF ne peut pas être négatif").default(0),
 });
 
+// Create a type that matches the Zod schema
+type FormValues = z.infer<typeof formSchema>;
+
 const getCurrentYear = () => new Date().getFullYear();
 const months = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
@@ -50,7 +53,7 @@ export function SalaireForm() {
   const { createSalaire, isCreating } = useSalaires();
   const [netAPayer, setNetAPayer] = useState<number>(0);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       matricule: "",
@@ -86,10 +89,19 @@ export function SalaireForm() {
     setNetAPayer(totalBrut - totalDeductions);
   }, [watchAllFields]);
   
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Add net_a_payer to the form data before submitting
+  function onSubmit(values: FormValues) {
+    // Create a properly typed SalaireFormData object with all required fields
     const formData: SalaireFormData = {
-      ...values,
+      matricule: values.matricule,
+      nom: values.nom,
+      periode_paie: values.periode_paie,
+      salaire_base: values.salaire_base,
+      sursalaire: values.sursalaire,
+      indemnite_deplacement: values.indemnite_deplacement,
+      prime_transport: values.prime_transport,
+      retenue_ir: values.retenue_ir,
+      ipres_general: values.ipres_general,
+      trimf: values.trimf,
       net_a_payer: netAPayer,
       statut_paiement: 'En attente'
     };
