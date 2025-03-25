@@ -62,8 +62,9 @@ export const TimeEntriesTable = ({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Matricule</TableHead>
             <TableHead>Employé</TableHead>
-            <TableHead>Département</TableHead>
+            <TableHead>Site</TableHead>
             <TableHead>Entrée</TableHead>
             <TableHead>Sortie</TableHead>
             <TableHead>Durée</TableHead>
@@ -84,6 +85,7 @@ export const TimeEntriesTable = ({
             
             return (
               <TableRow key={entry.id}>
+                <TableCell>{entry.employee?.matricule || "N/A"}</TableCell>
                 <TableCell>
                   {entry.employee && (
                     <div className="flex items-center gap-2">
@@ -98,7 +100,7 @@ export const TimeEntriesTable = ({
                     </div>
                   )}
                 </TableCell>
-                <TableCell>{entry.employee?.department || "Non assigné"}</TableCell>
+                <TableCell>{entry.employee?.site || "Non assigné"}</TableCell>
                 <TableCell>{formattedClockIn}</TableCell>
                 <TableCell>{formattedClockOut}</TableCell>
                 <TableCell>{duration}</TableCell>

@@ -42,10 +42,10 @@ const EmployeeTable = ({ employees, isLoading, isError }: EmployeeTableProps) =>
 
     return employees.map((employee) => (
       <TableRow key={employee.id}>
-        <TableCell className="font-medium">{employee.name}</TableCell>
-        <TableCell>{employee.email}</TableCell>
-        <TableCell>{employee.department}</TableCell>
+        <TableCell className="font-medium">{employee.matricule}</TableCell>
+        <TableCell>{employee.name}</TableCell>
         <TableCell>{employee.position}</TableCell>
+        <TableCell>{employee.site}</TableCell>
         <TableCell>
           <span className={`px-2 py-1 text-xs rounded-full ${
             employee.status === 'active' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-800/50' :
@@ -69,7 +69,7 @@ const EmployeeTable = ({ employees, isLoading, isError }: EmployeeTableProps) =>
             <TableHead className="font-semibold text-foreground">NOM & PRÉNOM</TableHead>
             <TableHead className="font-semibold text-foreground">POSTE</TableHead>
             <TableHead className="font-semibold text-foreground">SITE</TableHead>
-            <TableHead className="font-semibold text-foreground">TÉLÉPHONE</TableHead>
+            <TableHead className="font-semibold text-foreground">STATUT</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

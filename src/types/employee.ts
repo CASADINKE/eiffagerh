@@ -1,36 +1,43 @@
 
-import { Employee } from "@/hooks/useEmployees";
-
 export interface EmployeeUI {
   id: string;
-  name: string;
   matricule: string;
-  position: string;
-  department: string;
-  site: string;
+  name: string;
   email: string;
+  department: string;
+  position: string;
+  status: 'active' | 'on-leave' | 'terminated';
   phone: string;
-  status: "active" | "on-leave" | "terminated";
+  site: string;
   avatar?: string;
 }
 
-// Fonction pour convertir un employé du format DB au format UI
-export const mapEmployeeToUI = (employee: Employee): EmployeeUI => {
-  return {
-    id: employee.id,
-    name: `${employee.prenom} ${employee.nom}`,
-    matricule: employee.matricule,
-    position: employee.poste || "",
-    department: employee.affectation || "",
-    site: employee.site || "",
-    email: employee.matricule || "", // Utilisation du matricule comme email par défaut
-    phone: employee.telephone || "",
-    status: "active", // Statut par défaut
-    avatar: undefined
-  };
-};
+export interface Employee {
+  id: string;
+  matricule: string;
+  nom: string;
+  prenom: string;
+  employeur: string;
+  poste: string;
+  adresse: string;
+  telephone: string;
+  affectation: string;
+  site: string;
+  date_naissance: string;
+  created_at: string;
+  updated_at: string;
+}
 
-// Fonction pour convertir une liste d'employés
 export const mapEmployeesToUI = (employees: Employee[]): EmployeeUI[] => {
-  return employees.map(mapEmployeeToUI);
+  return employees.map(e => ({
+    id: e.id,
+    matricule: e.matricule,
+    name: `${e.prenom} ${e.nom}`,
+    email: e.adresse.includes('@') ? e.adresse : 'email@example.com',
+    department: e.affectation,
+    position: e.poste,
+    status: 'active', // Default status, could be updated based on actual data
+    phone: e.telephone,
+    site: e.site
+  }));
 };
