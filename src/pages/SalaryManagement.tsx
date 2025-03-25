@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Tabs, 
@@ -139,7 +138,7 @@ const SalaryManagement = () => {
       }
       
       return acc;
-    }, { pending: 0, validated: 0, paid: 0, all: 0 });
+    }, { pending: 0, validated: 0, all: 0 });
   };
   
   const counts = getPayslipCounts();

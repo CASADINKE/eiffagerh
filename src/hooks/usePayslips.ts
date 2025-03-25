@@ -53,8 +53,7 @@ export const usePayslips = () => {
   });
   
   const downloadPayslipMutation = useMutation({
-    mutationFn: async (payslipId: string) => {
-      const payslip = await getPayslipById(payslipId);
+    mutationFn: (payslip: Payslip) => {
       return generatePayslipPDF(payslip);
     },
   });
