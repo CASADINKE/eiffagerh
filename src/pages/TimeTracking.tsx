@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
@@ -9,13 +8,14 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { useTimeEntries, useClockOutMutation, calculateDuration, getActiveTimeEntry } from "@/hooks/useTimeEntries";
-import { useEmployees } from "@/hooks/useEmployees";
+import { useEmployees, useEmployeesUI } from "@/hooks/useEmployees";
 import { TimeTrackingHeader } from "@/components/timeTracking/TimeTrackingHeader";
 import { TimeTrackingStats } from "@/components/timeTracking/TimeTrackingStats";
 import { WorkingHoursChart } from "@/components/timeTracking/WorkingHoursChart";
 import { TimeTrackingFilters, TimeTrackingFilters as TimeTrackingFiltersType } from "@/components/timeTracking/TimeTrackingFilters";
 import { TimeEntriesTable } from "@/components/timeTracking/TimeEntriesTable";
 import { handleExportTimeEntries } from "@/components/timeTracking/TimeTrackingUtils";
+import { EmployeeClockStatus } from "@/components/timeTracking/EmployeeClockStatus";
 
 const workingHoursData = [
   { day: "Lun", hours: 8.2 },
@@ -35,6 +35,7 @@ const TimeTracking = () => {
   });
 
   const { data: employees = [], isLoading: employeesLoading } = useEmployees();
+  const { data: employeesUI = [], isLoading: employeesUILoading } = useEmployeesUI();
   const { 
     data: timeEntries = [], 
     isLoading: entriesLoading,
@@ -44,7 +45,6 @@ const TimeTracking = () => {
 
   console.log("TimeTracking: Loaded time entries:", timeEntries.length);
 
-  // Filter time entries based on date range if present
   const filteredTimeEntries = timeEntries.filter(entry => {
     if (!filters.dateRange?.from) return true;
     
@@ -52,7 +52,6 @@ const TimeTracking = () => {
     const from = filters.dateRange.from;
     const to = filters.dateRange.to || from;
     
-    // Set hours to 0 for proper date comparison
     const entryDateOnly = new Date(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate());
     const fromDateOnly = new Date(from.getFullYear(), from.getMonth(), from.getDate());
     const toDateOnly = new Date(to.getFullYear(), to.getMonth(), to.getDate());
@@ -62,7 +61,6 @@ const TimeTracking = () => {
 
   console.log("TimeTracking: Filtered by date range:", filteredTimeEntries.length);
 
-  // Filter based on active tab
   const today = format(new Date(), "yyyy-MM-dd");
   const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
   
@@ -71,7 +69,7 @@ const TimeTracking = () => {
     
     if (activeTab === "today") return entryDate === today;
     if (activeTab === "yesterday") return entryDate === yesterday;
-    return true; // "history" tab shows all entries
+    return true;
   });
 
   console.log(`TimeTracking: Tab filtered (${activeTab}):`, tabFilteredEntries.length);
@@ -100,7 +98,7 @@ const TimeTracking = () => {
     clockOutMutation.mutate(entryId);
   };
 
-  const isLoading = employeesLoading || entriesLoading;
+  const isLoading = employeesLoading || entriesLoading || employeesUILoading;
 
   const handleFilterChange = (newFilters: TimeTrackingFiltersType) => {
     setFilters(newFilters);
@@ -127,6 +125,7 @@ const TimeTracking = () => {
         activeEmployeeCount={activeEmployeeCount}
         averageHours={averageHours}
         totalEntries={filteredTimeEntries.length}
+        totalEmployees={employeesUI.length}
       />
       
       <WorkingHoursChart data={workingHoursData} />
@@ -176,6 +175,12 @@ const TimeTracking = () => {
           </TabsContent>
         </Tabs>
       </Card>
+      
+      <EmployeeClockStatus 
+        employees={employeesUI}
+        timeEntries={timeEntries}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
