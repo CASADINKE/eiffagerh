@@ -8,10 +8,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Calendar } from "lucide-react";
+import { Calendar, MessageCircle } from "lucide-react";
 import { LeaveStatusBadge } from "./LeaveStatusBadge";
 import { LeaveTypeIcon } from "./LeaveTypeIcon";
 import { Tables } from "@/integrations/supabase/types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type LeaveRequest = Tables<"leave_requests">;
 
@@ -44,7 +50,7 @@ export function LeaveTable({ leaveRequests, isLoading, activeTab }: LeaveTablePr
   if (isLoading) {
     return (
       <TableRow>
-        <TableCell colSpan={5} className="text-center py-10">
+        <TableCell colSpan={6} className="text-center py-10">
           <div className="flex justify-center">
             <div className="animate-pulse flex space-x-1">
               <div className="h-2.5 w-2.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
@@ -61,7 +67,7 @@ export function LeaveTable({ leaveRequests, isLoading, activeTab }: LeaveTablePr
   if (filteredRequests.length === 0) {
     return (
       <TableRow>
-        <TableCell colSpan={5} className="text-center py-16">
+        <TableCell colSpan={6} className="text-center py-16">
           <Calendar className="h-12 w-12 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
           <span className="text-muted-foreground">Aucune demande de congé trouvée</span>
         </TableCell>
@@ -81,6 +87,25 @@ export function LeaveTable({ leaveRequests, isLoading, activeTab }: LeaveTablePr
           <TableCell>{leave.reason || "-"}</TableCell>
           <TableCell>
             <LeaveStatusBadge status={leave.status} />
+          </TableCell>
+          <TableCell>
+            {leave.comments ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center text-slate-500">
+                      <MessageCircle size={16} className="mr-1" />
+                      <span className="text-xs">Commentaire</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">{leave.comments}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              "-"
+            )}
           </TableCell>
         </TableRow>
       ))}

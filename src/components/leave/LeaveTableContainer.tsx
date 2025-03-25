@@ -25,11 +25,12 @@ export function LeaveTableContainer({ leaveRequests, isLoading, activeTab }: Lea
       <Table>
         <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
           <TableRow className="hover:bg-transparent">
-            <TableHead className="font-semibold text-foreground/90 w-1/5">Type</TableHead>
-            <TableHead className="font-semibold text-foreground/90 w-1/5">Date de début</TableHead>
-            <TableHead className="font-semibold text-foreground/90 w-1/5">Date de fin</TableHead>
-            <TableHead className="font-semibold text-foreground/90 w-1/5">Motif</TableHead>
-            <TableHead className="font-semibold text-foreground/90 w-1/5">Statut</TableHead>
+            <TableHead className="font-semibold text-foreground/90 w-[15%]">Type</TableHead>
+            <TableHead className="font-semibold text-foreground/90 w-[15%]">Date de début</TableHead>
+            <TableHead className="font-semibold text-foreground/90 w-[15%]">Date de fin</TableHead>
+            <TableHead className="font-semibold text-foreground/90 w-[25%]">Motif</TableHead>
+            <TableHead className="font-semibold text-foreground/90 w-[15%]">Statut</TableHead>
+            <TableHead className="font-semibold text-foreground/90 w-[15%]">Commentaires</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

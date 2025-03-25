@@ -8,7 +8,9 @@ import { LeaveNotification } from "@/components/leave/LeaveNotification";
 import { LeaveRequestDialog } from "@/components/leave/LeaveRequestDialog";
 import { LeaveHeader } from "@/components/leave/LeaveHeader";
 import { LeaveTabs } from "@/components/leave/LeaveTabs";
+import { LeaveAdminPanel } from "@/components/leave/LeaveAdminPanel";
 import { Calendar } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type LeaveRequest = Tables<"leave_requests">;
 
@@ -18,6 +20,7 @@ const Leave = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { userRole } = useAuth();
 
   useEffect(() => {
     fetchLeaveRequests();
@@ -57,6 +60,12 @@ const Leave = () => {
         openLeaveRequestDialog={() => setIsDialogOpen(true)} 
         isLoading={isLoading}
         leaveRequests={leaveRequests}
+      />
+
+      {/* Panneau d'administration pour les super_admin */}
+      <LeaveAdminPanel 
+        leaveRequests={leaveRequests} 
+        onUpdate={fetchLeaveRequests}
       />
 
       <Card className="shadow-sm border-slate-200 dark:border-slate-700">
