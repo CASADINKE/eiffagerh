@@ -82,45 +82,11 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   });
 };
 
-// Clock in an employee - create a profile if it doesn't exist
+// Clock in an employee - directly insert into time_entries without profile creation
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
   console.log("Clocking in employee:", employeeId);
   
   try {
-    // First check if a profile exists for this employee
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", employeeId)
-      .single();
-      
-    // If not, create a profile
-    if (!existingProfile) {
-      console.log("Creating profile for employee:", employeeId);
-      
-      // Get employee info from listes_employées
-      const { data: employeeInfo } = await supabase
-        .from("listes_employées")
-        .select("*")
-        .eq("id", employeeId)
-        .single();
-        
-      if (employeeInfo) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert({
-            id: employeeId,
-            full_name: `${employeeInfo.prenom} ${employeeInfo.nom}`,
-            role: 'employee'
-          });
-          
-        if (profileError) {
-          console.error("Error creating profile:", profileError);
-          // Don't throw here to continue with the clock-in operation
-        }
-      }
-    }
-    
     // Check if there's already an active time entry for this employee today
     const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
     
@@ -154,34 +120,62 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
       };
     }
     
-    // Insert the time entry
-    const { data, error } = await supabase
-      .from("time_entries")
-      .insert({
-        employee_id: employeeId,
-        notes: notes || null
-      })
-      .select()
-      .single();
-      
+    // Insert directly into time_entries with RPC function that bypasses RLS
+    const { data, error } = await supabase.rpc('create_time_entry', {
+      p_employee_id: employeeId,
+      p_notes: notes || null
+    });
+    
     if (error) {
-      console.error("Error clocking in employee:", error);
-      throw new Error(`Error clocking in employee: ${error.message}`);
+      console.error("Error clocking in employee with RPC:", error);
+      
+      // Fallback: Try direct insert if RPC fails
+      const { data: directData, error: directError } = await supabase
+        .from("time_entries")
+        .insert({
+          employee_id: employeeId,
+          notes: notes || null,
+          date: today,
+          clock_in: new Date().toISOString(),
+          break_time: 0
+        })
+        .select()
+        .single();
+        
+      if (directError) {
+        console.error("Error clocking in employee with direct insert:", directError);
+        throw new Error(`Error clocking in employee: ${directError.message}`);
+      }
+      
+      console.log("Clock in successful with direct insert:", directData);
+      
+      // Return as TimeEntry format
+      return {
+        id: directData.id,
+        employee_id: directData.employee_id,
+        clock_in: directData.clock_in,
+        clock_out: directData.clock_out,
+        date: directData.date,
+        break_time: directData.break_time || 0,
+        notes: directData.notes,
+        created_at: directData.created_at,
+        updated_at: directData.updated_at
+      };
     }
     
-    console.log("Clock in successful:", data);
+    console.log("Clock in successful with RPC:", data);
     
-    // Return as TimeEntry format
+    // Return TimeEntry format with data from the RPC
     return {
       id: data.id,
-      employee_id: data.employee_id,
+      employee_id: employeeId,
       clock_in: data.clock_in,
-      clock_out: data.clock_out,
-      date: data.date,
-      break_time: data.break_time || 0,
-      notes: data.notes,
-      created_at: data.created_at,
-      updated_at: data.updated_at
+      clock_out: null,
+      date: data.date || today,
+      break_time: 0,
+      notes: notes || null,
+      created_at: data.created_at || new Date().toISOString(),
+      updated_at: data.updated_at || new Date().toISOString()
     };
   } catch (error) {
     console.error("Error in clockInEmployee:", error);

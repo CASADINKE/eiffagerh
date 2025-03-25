@@ -75,7 +75,6 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
       
       // Refresh the time entries after clocking in/out
       refetch();
-      setOpen(false);
     } catch (error) {
       console.error("Error in handleClockInOut:", error);
       toast.error("Une erreur est survenue lors du pointage");
