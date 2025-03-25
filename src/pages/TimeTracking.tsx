@@ -16,6 +16,7 @@ import { WorkingHoursChart } from "@/components/timeTracking/WorkingHoursChart";
 import { TimeTrackingFilters, TimeTrackingFilters as TimeTrackingFiltersType } from "@/components/timeTracking/TimeTrackingFilters";
 import { TimeEntriesTable } from "@/components/timeTracking/TimeEntriesTable";
 import { EmployeeClockStatus } from "@/components/timeTracking/EmployeeClockStatus";
+import { EmployeeTimeClockDialog } from "@/components/timeTracking/EmployeeTimeClockDialog";
 
 const workingHoursData = [
   { day: "Lun", hours: 8.2 },
@@ -116,6 +117,11 @@ const TimeTracking = () => {
   return (
     <div className="container mx-auto">
       <TimeTrackingHeader />
+      
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Suivi du temps de travail</h1>
+        <EmployeeTimeClockDialog className="ml-auto" />
+      </div>
       
       <TimeTrackingStats 
         activeEmployeeCount={activeEmployeeCount}
