@@ -9,7 +9,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Building
+  Building,
+  CreditCard
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -30,6 +31,7 @@ const navigationItems = [
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
+  { path: "/salary", title: "Gestion des paies", icon: CreditCard },
   { path: "/settings", title: "Paramètres", icon: Settings },
 ];
 

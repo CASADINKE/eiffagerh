@@ -14,6 +14,7 @@ import TimeTracking from "./pages/TimeTracking";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import SalaryManagement from "./pages/SalaryManagement";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <TimeTracking />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/salary" element={
+              <ProtectedRoute allowedRoles={['super_admin', 'admin', 'rh']}>
+                <Layout>
+                  <SalaryManagement />
                 </Layout>
               </ProtectedRoute>
             } />

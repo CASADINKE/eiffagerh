@@ -12,16 +12,19 @@ export type Database = {
       bulletins_paie: {
         Row: {
           created_at: string
+          date_paiement: string | null
           id: string
           indemnite_deplacement: number
           ipres_general: number
           matricule: string
+          mode_paiement: string | null
           net_a_payer: number
           nom: string
           periode_paie: string
           prime_transport: number
           retenue_ir: number
           salaire_base: number
+          statut_paiement: string
           sursalaire: number
           total_brut: number
           trimf: number
@@ -29,16 +32,19 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          date_paiement?: string | null
           id?: string
           indemnite_deplacement?: number
           ipres_general?: number
           matricule: string
+          mode_paiement?: string | null
           net_a_payer?: number
           nom: string
           periode_paie: string
           prime_transport?: number
           retenue_ir?: number
           salaire_base?: number
+          statut_paiement?: string
           sursalaire?: number
           total_brut?: number
           trimf?: number
@@ -46,16 +52,19 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          date_paiement?: string | null
           id?: string
           indemnite_deplacement?: number
           ipres_general?: number
           matricule?: string
+          mode_paiement?: string | null
           net_a_payer?: number
           nom?: string
           periode_paie?: string
           prime_transport?: number
           retenue_ir?: number
           salaire_base?: number
+          statut_paiement?: string
           sursalaire?: number
           total_brut?: number
           trimf?: number
