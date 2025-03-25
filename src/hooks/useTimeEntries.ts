@@ -120,62 +120,43 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
       };
     }
     
-    // Insert directly into time_entries with RPC function that bypasses RLS
-    const { data, error } = await supabase.rpc('create_time_entry', {
-      p_employee_id: employeeId,
-      p_notes: notes || null
-    });
-    
+    // We'll skip the RPC approach since it's causing type errors and directly insert
+    // Insert directly into time_entries
+    const { data, error } = await supabase
+      .from("time_entries")
+      .insert({
+        employee_id: employeeId,
+        notes: notes || null,
+        date: today,
+        clock_in: new Date().toISOString(),
+        break_time: 0
+      })
+      .select()
+      .single();
+      
     if (error) {
-      console.error("Error clocking in employee with RPC:", error);
-      
-      // Fallback: Try direct insert if RPC fails
-      const { data: directData, error: directError } = await supabase
-        .from("time_entries")
-        .insert({
-          employee_id: employeeId,
-          notes: notes || null,
-          date: today,
-          clock_in: new Date().toISOString(),
-          break_time: 0
-        })
-        .select()
-        .single();
-        
-      if (directError) {
-        console.error("Error clocking in employee with direct insert:", directError);
-        throw new Error(`Error clocking in employee: ${directError.message}`);
-      }
-      
-      console.log("Clock in successful with direct insert:", directData);
-      
-      // Return as TimeEntry format
-      return {
-        id: directData.id,
-        employee_id: directData.employee_id,
-        clock_in: directData.clock_in,
-        clock_out: directData.clock_out,
-        date: directData.date,
-        break_time: directData.break_time || 0,
-        notes: directData.notes,
-        created_at: directData.created_at,
-        updated_at: directData.updated_at
-      };
+      console.error("Error clocking in employee:", error);
+      throw new Error(`Error clocking in employee: ${error.message}`);
     }
     
-    console.log("Clock in successful with RPC:", data);
+    console.log("Clock in successful:", data);
     
-    // Return TimeEntry format with data from the RPC
+    // Safe check for data before using it
+    if (!data) {
+      throw new Error("No data returned after clock in");
+    }
+    
+    // Return as TimeEntry format with safe null checks
     return {
       id: data.id,
-      employee_id: employeeId,
+      employee_id: data.employee_id,
       clock_in: data.clock_in,
-      clock_out: null,
-      date: data.date || today,
-      break_time: 0,
-      notes: notes || null,
-      created_at: data.created_at || new Date().toISOString(),
-      updated_at: data.updated_at || new Date().toISOString()
+      clock_out: data.clock_out,
+      date: data.date,
+      break_time: data.break_time || 0,
+      notes: data.notes,
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
   } catch (error) {
     console.error("Error in clockInEmployee:", error);
@@ -200,6 +181,10 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
     if (error) {
       console.error("Error clocking out employee:", error);
       throw new Error(`Error clocking out employee: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error("No data returned after clock out");
     }
 
     console.log("Clock out successful:", data);
