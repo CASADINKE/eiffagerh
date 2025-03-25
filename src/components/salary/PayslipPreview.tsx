@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download, X, FileText } from "lucide-react";
+import { Printer, X, FileText } from "lucide-react";
 import { Payslip } from "@/services/payslipService";
 import { PayslipGenerator } from "./PayslipGenerator";
 import { generatePDFFromElement } from "@/utils/exportUtils";
@@ -75,7 +75,6 @@ export function PayslipPreview({ payslip, isOpen, onClose }: PayslipPreviewProps
               Imprimer
             </Button>
             <Button variant="outline" onClick={handleDownloadPDF} className="hover:bg-gray-100">
-              <Download className="mr-2 h-4 w-4" />
               Télécharger PDF
             </Button>
             <Button variant="outline" onClick={onClose} className="hover:bg-gray-100">
