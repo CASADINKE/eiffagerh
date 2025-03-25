@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download, X } from "lucide-react";
+import { Printer, Download, X, FileText } from "lucide-react";
 import { Payslip } from "@/services/payslipService";
 import { PayslipGenerator } from "./PayslipGenerator";
 import { generatePDFFromElement } from "@/utils/exportUtils";
@@ -65,24 +65,27 @@ export function PayslipPreview({ payslip, isOpen, onClose }: PayslipPreviewProps
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[90vh] overflow-auto print:shadow-none print:border-none print:p-0 print:max-h-none">
         <DialogHeader className="print:hidden">
-          <DialogTitle className="text-xl">Bulletin de paie - {payslip.nom}</DialogTitle>
+          <DialogTitle className="text-xl flex items-center">
+            <FileText className="mr-2 h-5 w-5" />
+            Bulletin de paie - {payslip.nom}
+          </DialogTitle>
           <div className="flex space-x-2 mt-2">
-            <Button variant="outline" onClick={handlePrint}>
+            <Button variant="outline" onClick={handlePrint} className="hover:bg-gray-100">
               <Printer className="mr-2 h-4 w-4" />
               Imprimer
             </Button>
-            <Button variant="outline" onClick={handleDownloadPDF}>
+            <Button variant="outline" onClick={handleDownloadPDF} className="hover:bg-gray-100">
               <Download className="mr-2 h-4 w-4" />
               Télécharger PDF
             </Button>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onClose} className="hover:bg-gray-100">
               <X className="mr-2 h-4 w-4" />
               Fermer
             </Button>
           </div>
         </DialogHeader>
         
-        <div ref={printRef} className="bg-white">
+        <div ref={printRef} className="bg-white payslip-content">
           <PayslipGenerator salaire={salaire} onClose={() => {}} />
         </div>
       </DialogContent>

@@ -129,5 +129,23 @@
       max-height: none !important;
       overflow: visible !important;
     }
+    
+    /* Enhanced print styles for payslip */
+    .payslip-content {
+      width: 100% !important;
+      height: 100% !important;
+      page-break-inside: avoid;
+    }
+    
+    table {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    /* Force background colors to show in print */
+    .bg-gray-50, .bg-gray-100, .bg-gray-200 {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
   }
 }
