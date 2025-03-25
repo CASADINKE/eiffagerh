@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -59,7 +58,6 @@ export const updatePayslipStatus = async (
     if (paymentDate) {
       updateData.date_paiement = paymentDate;
     } else if (status === 'Payé') {
-      // Si le statut est 'Payé' et qu'aucune date n'est fournie, utiliser la date actuelle
       updateData.date_paiement = new Date().toISOString().split('T')[0];
     }
     
@@ -125,7 +123,6 @@ export const deletePayslip = async (payslipId: string) => {
 
 export const generatePayslipPDF = async (payslip: Payslip) => {
   try {
-    // Fetch employee details from database
     const { data: employeeData, error: employeeError } = await supabase
       .from('listes_employées')
       .select('*')
@@ -137,7 +134,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
       toast.error("Erreur lors de la récupération des données de l'employé");
     }
     
-    // Use employee data from database if available, fallback to payslip data
     const employeeInfo = employeeData || { 
       nom: payslip.nom,
       prenom: '',
@@ -154,7 +150,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
       new Date(employeeInfo.date_naissance).toLocaleDateString('fr-FR') : 
       '10/10/1988'; // Fallback date
       
-    // Calculate total values and create mock data for complete bulletin
     const salaireBrut = payslip.salaire_base + payslip.sursalaire;
     const baseIR = salaireBrut;
     const brutSocial = salaireBrut;
@@ -169,7 +164,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
     const prixEntrepriseMois = 907131;
     const prixEntrepriseCumul = 1378988;
     
-    // Génération du contenu HTML pour le PDF avec le format exact de l'image
     const html = `
       <html>
         <head>
@@ -239,16 +233,14 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
           </style>
         </head>
         <body>
-          <!-- Titre principal -->
           <div class="header-title">BULLETIN DE PAIE</div>
           
           <div class="clearfix">
-            <!-- Bloc info employeur -->
             <table style="width: 70%; float: left; margin-bottom: 5mm;">
               <tr>
                 <td>
                   <div class="eiffage-logo">
-                    <img src="/lovable-uploads/0a8437e4-516c-4ba1-b2d9-24ddef68546b.png" alt="EIFFAGE ENERGIE" height="40">
+                    <img src="/lovable-uploads/cb445974-5134-4b00-af57-97fa4ce41c4b.png" alt="EIFFAGE ENERGIE" height="40">
                     <div>EIFFAGE</div>
                     <div>ENERGIE</div>
                   </div>
@@ -263,7 +255,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
               </tr>
             </table>
             
-            <!-- Bloc info période et identifiants -->
             <div style="width: 29%; float: right;">
               <div style="margin-bottom: 5mm;">
                 <strong>Période de paie: ${payslip.periode_paie}</strong>
@@ -276,7 +267,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
             </div>
           </div>
           
-          <!-- Tableau des infos principales de l'employé -->
           <table style="margin-bottom: 5mm;">
             <tr>
               <th>Embauche</th>
@@ -294,7 +284,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
             </tr>
           </table>
           
-          <!-- Tableau principal des détails du salaire -->
           <table style="margin-bottom: 5mm;">
             <tr>
               <th>Libellé</th>
@@ -369,7 +358,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
               <td></td>
             </tr>
             
-            <!-- Lignes vides pour l'espace comme dans l'image -->
             <tr>
               <td>&nbsp;</td>
               <td></td>
@@ -416,7 +404,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
               <td></td>
             </tr>
             
-            <!-- Ligne des totaux -->
             <tr>
               <th colspan="3" class="text-right">TOTAUX</th>
               <th class="text-right">${payslip.total_brut.toLocaleString('fr')}</th>
@@ -426,7 +413,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
             </tr>
           </table>
           
-          <!-- Tableau récapitulatif -->
           <table style="margin-bottom: 5mm;">
             <tr>
               <td style="width: 10%"></td>
@@ -457,7 +443,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
             </tr>
           </table>
           
-          <!-- Bloc paiement -->
           <table style="margin-bottom: 5mm; text-align: center;">
             <tr>
               <th>NET A PAYER EN FRANCS</th>
@@ -470,7 +455,6 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
             </tr>
           </table>
           
-          <!-- Tableau du bas -->
           <table>
             <tr>
               <td style="width: 50%">
@@ -488,11 +472,9 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
       </html>
     `;
     
-    // Créer un blob avec le contenu HTML
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     
-    // Ouvrir le contenu dans une nouvelle fenêtre pour l'impression
     const printWindow = window.open(url, '_blank');
     
     if (printWindow) {

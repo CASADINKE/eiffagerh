@@ -5,6 +5,7 @@ import {
   updatePayslipStatus, 
   deletePayslip,
   generatePayslipPDF,
+  getPayslipById,
   PayslipStatus, 
   PaymentMethod,
   Payslip 
@@ -52,7 +53,8 @@ export const usePayslips = () => {
   });
   
   const downloadPayslipMutation = useMutation({
-    mutationFn: (payslip: Payslip) => {
+    mutationFn: async (payslipId: string) => {
+      const payslip = await getPayslipById(payslipId);
       return generatePayslipPDF(payslip);
     },
   });
