@@ -1,11 +1,11 @@
 
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { EmployeePointage } from "@/hooks/useEmployeePointage";
+import { TimeEntry } from "@/hooks/useTimeEntries";
 
 // Function to export time entries to CSV
 export const handleExportTimeEntries = (
-  entries: EmployeePointage[], 
+  entries: TimeEntry[], 
   activeTab: string, 
   exportFormat = 'csv'
 ) => {
@@ -31,7 +31,7 @@ export const handleExportTimeEntries = (
 };
 
 // Export to CSV format
-const exportTimeEntriesToCSV = (entries: EmployeePointage[], fileName: string) => {
+const exportTimeEntriesToCSV = (entries: TimeEntry[], fileName: string) => {
   // CSV header
   const headers = [
     "ID",
@@ -40,6 +40,7 @@ const exportTimeEntriesToCSV = (entries: EmployeePointage[], fileName: string) =
     "Date",
     "Heure d'entrée",
     "Heure de sortie",
+    "Pause",
     "Durée",
     "Statut"
   ];
@@ -52,6 +53,7 @@ const exportTimeEntriesToCSV = (entries: EmployeePointage[], fileName: string) =
       : "";
     const date = format(new Date(entry.date), "dd/MM/yyyy", { locale: fr });
     const status = entry.clock_out ? "Terminé" : "Actif";
+    const breakTime = `${entry.break_time || 0}m`;
     
     const hoursDiff = entry.clock_out 
       ? Math.floor((new Date(entry.clock_out).getTime() - new Date(entry.clock_in).getTime()) / (1000 * 60 * 60)) 
@@ -72,6 +74,7 @@ const exportTimeEntriesToCSV = (entries: EmployeePointage[], fileName: string) =
       date,
       clockIn,
       clockOut,
+      breakTime,
       duration,
       status
     ];
@@ -98,7 +101,7 @@ const exportTimeEntriesToCSV = (entries: EmployeePointage[], fileName: string) =
 };
 
 // Export to PDF format
-const exportTimeEntriesToPDF = (entries: EmployeePointage[], fileName: string) => {
+const exportTimeEntriesToPDF = (entries: TimeEntry[], fileName: string) => {
   // For now, just use CSV as PDF is not implemented yet
   alert("Export PDF non implémenté pour le moment, utilisation du format CSV à la place");
   exportTimeEntriesToCSV(entries, fileName);

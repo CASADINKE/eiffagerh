@@ -8,13 +8,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useEmployeePointages, useClockOutMutation, calculatePointageDuration, getActivePointage } from "@/hooks/useEmployeePointage";
+import { useTimeEntries, useClockOutMutation, calculateDuration, getActiveTimeEntry } from "@/hooks/useTimeEntries";
 import { useEmployees } from "@/hooks/useEmployees";
 import { TimeTrackingHeader } from "@/components/timeTracking/TimeTrackingHeader";
 import { TimeTrackingStats } from "@/components/timeTracking/TimeTrackingStats";
 import { WorkingHoursChart } from "@/components/timeTracking/WorkingHoursChart";
 import { TimeTrackingFilters, TimeTrackingFilters as TimeTrackingFiltersType } from "@/components/timeTracking/TimeTrackingFilters";
-import { EmployeePointagesTable } from "@/components/timeTracking/EmployeePointagesTable";
+import { TimeEntriesTable } from "@/components/timeTracking/TimeEntriesTable";
 import { handleExportTimeEntries } from "@/components/timeTracking/TimeTrackingUtils";
 
 const workingHoursData = [
@@ -36,14 +36,14 @@ const TimeTracking = () => {
 
   const { data: employees = [], isLoading: employeesLoading } = useEmployees();
   const { 
-    data: pointageEntries = [], 
+    data: timeEntries = [], 
     isLoading: entriesLoading,
     isError: entriesError
-  } = useEmployeePointages(filters.employeeId || undefined);
+  } = useTimeEntries(filters.employeeId || undefined);
   const clockOutMutation = useClockOutMutation();
 
-  // Filter pointage entries based on date range if present
-  const filteredPointages = pointageEntries.filter(entry => {
+  // Filter time entries based on date range if present
+  const filteredTimeEntries = timeEntries.filter(entry => {
     if (!filters.dateRange?.from) return true;
     
     const entryDate = new Date(entry.date);
@@ -62,7 +62,7 @@ const TimeTracking = () => {
   const today = format(new Date(), "yyyy-MM-dd");
   const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
   
-  const tabFilteredEntries = filteredPointages.filter(entry => {
+  const tabFilteredEntries = filteredTimeEntries.filter(entry => {
     const entryDate = format(new Date(entry.date), "yyyy-MM-dd");
     
     if (activeTab === "today") return entryDate === today;
@@ -70,16 +70,16 @@ const TimeTracking = () => {
     return true; // "history" tab shows all entries
   });
 
-  const activeEmployeeCount = pointageEntries.filter(
+  const activeEmployeeCount = timeEntries.filter(
     entry => !entry.clock_out && format(new Date(entry.date), "yyyy-MM-dd") === today
   ).length;
 
-  const completedEntriesForToday = pointageEntries.filter(
+  const completedEntriesForToday = timeEntries.filter(
     entry => entry.clock_out && format(new Date(entry.date), "yyyy-MM-dd") === today
   );
 
   const totalCompletedHours = completedEntriesForToday.reduce((acc, entry) => {
-    const duration = calculatePointageDuration(entry.clock_in, entry.clock_out);
+    const duration = calculateDuration(entry.clock_in, entry.clock_out, entry.break_time);
     if (duration === "en cours") return acc;
     
     const [hours, minutes] = duration.split("h ").map(part => parseFloat(part.replace("m", "")));
@@ -108,8 +108,7 @@ const TimeTracking = () => {
   };
 
   const handleExport = (format = 'csv') => {
-    // Pass EmployeePointage[] directly to handleExportTimeEntries which now supports this type
-    handleExportTimeEntries(filteredPointages, activeTab, format);
+    handleExportTimeEntries(filteredTimeEntries, activeTab, format);
   };
 
   return (
@@ -119,7 +118,7 @@ const TimeTracking = () => {
       <TimeTrackingStats 
         activeEmployeeCount={activeEmployeeCount}
         averageHours={averageHours}
-        totalEntries={filteredPointages.length}
+        totalEntries={filteredTimeEntries.length}
       />
       
       <WorkingHoursChart data={workingHoursData} />
@@ -142,8 +141,8 @@ const TimeTracking = () => {
           </div>
           
           <TabsContent value="today" className="m-0">
-            <EmployeePointagesTable 
-              pointages={tabFilteredEntries}
+            <TimeEntriesTable 
+              timeEntries={tabFilteredEntries}
               isLoading={isLoading}
               entriesError={entriesError}
               handleClockOut={handleClockOut}
@@ -151,8 +150,8 @@ const TimeTracking = () => {
           </TabsContent>
           
           <TabsContent value="yesterday" className="m-0">
-            <EmployeePointagesTable 
-              pointages={tabFilteredEntries}
+            <TimeEntriesTable 
+              timeEntries={tabFilteredEntries}
               isLoading={isLoading}
               entriesError={entriesError}
               handleClockOut={handleClockOut}
@@ -160,8 +159,8 @@ const TimeTracking = () => {
           </TabsContent>
           
           <TabsContent value="history" className="m-0">
-            <EmployeePointagesTable 
-              pointages={tabFilteredEntries}
+            <TimeEntriesTable 
+              timeEntries={tabFilteredEntries}
               isLoading={isLoading}
               entriesError={entriesError}
               handleClockOut={handleClockOut}

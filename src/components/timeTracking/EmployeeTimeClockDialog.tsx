@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEmployeesUI } from "@/hooks/useEmployees";
-import { useEmployeePointages, useClockInMutation, useClockOutMutation, getActivePointage } from "@/hooks/useEmployeePointage";
+import { useTimeEntries, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,8 +36,8 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   // Use useEmployeesUI instead of useEmployees
   const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployeesUI();
   
-  // Fetch pointage entries to know which employees are already clocked in
-  const { data: pointageEntries = [], isLoading: entriesLoading } = useEmployeePointages();
+  // Fetch time entries to know which employees are already clocked in
+  const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
   
   // Mutations for clock in/out
   const clockInMutation = useClockInMutation();
@@ -111,7 +111,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
       }
       
       // Check if employee is already clocked in
-      const activeEntry = getActivePointage(pointageEntries, employeeId);
+      const activeEntry = getActiveTimeEntry(timeEntries, employeeId);
       
       if (activeEntry) {
         // Clock out
@@ -185,7 +185,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
             <TableBody>
               {filteredEmployees.map((employee) => {
                 // Check if employee is currently clocked in
-                const activeEntry = getActivePointage(pointageEntries, employee.id);
+                const activeEntry = getActiveTimeEntry(timeEntries, employee.id);
                 const isActive = !!activeEntry;
                 
                 return (
