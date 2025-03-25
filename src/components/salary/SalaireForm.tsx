@@ -87,7 +87,14 @@ export function SalaireForm() {
   }, [watchAllFields]);
   
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createSalaire(values as SalaireFormData);
+    // Add net_a_payer to the form data before submitting
+    const formData: SalaireFormData = {
+      ...values,
+      net_a_payer: netAPayer,
+      statut_paiement: 'En attente'
+    };
+    
+    createSalaire(formData);
     form.reset();
   }
   

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -58,12 +59,14 @@ export const fetchSalaires = async () => {
 
 export const createSalaire = async (formData: SalaireFormData) => {
   try {
+    console.log("Creating salary with data:", formData);
     const { data, error } = await supabase
       .from('salaires')
       .insert([formData]);
     
     if (error) {
       console.error("Erreur lors de la création du salaire:", error);
+      toast.error(`Erreur: ${error.message}`);
       throw error;
     }
     
