@@ -109,15 +109,15 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
         </Button>
       </div>
       
-      <div ref={payslipRef} className="border border-gray-300 p-4 print:p-2">
+      <div ref={payslipRef} className="border-2 border-gray-500 p-4 print:p-2 bg-white text-black">
         {/* Header */}
-        <div className="text-center border border-gray-300 p-2 mb-2">
+        <div className="text-center border-2 border-gray-500 p-2 mb-2 bg-gray-100">
           <h2 className="text-lg font-bold uppercase">Bulletin de paie</h2>
         </div>
         
         <div className="grid grid-cols-2 gap-2 mb-2">
           {/* Employer Information */}
-          <div className="border border-gray-300 p-2">
+          <div className="border-2 border-gray-500 p-2 bg-gray-50">
             <div className="flex items-center">
               <div className="text-red-600 font-bold mr-2">
                 <img 
@@ -129,223 +129,223 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
             </div>
             <div className="font-bold mt-2">EIFFAGE ENERGIE</div>
             <div className="font-bold">T&D Sénégal</div>
-            <div className="text-xs mt-2">
+            <div className="text-xs mt-2 text-black">
               AV. FELIX EBOUE X RTE DES BRASSERIES<br />
               BP<br />
               DAKAR SENEGAL
             </div>
-            <div className="text-xs mt-2">Convention Collective Nationale</div>
+            <div className="text-xs mt-2 text-black">Convention Collective Nationale</div>
           </div>
           
           {/* Period and Employee Info */}
-          <div className="border-t border-r border-b border-gray-300 p-2">
+          <div className="border-t-2 border-r-2 border-b-2 border-gray-500 p-2 bg-gray-50">
             <div className="text-right mb-4">
-              <div>Période de paie: {salaire.periode_paie}</div>
+              <div className="font-semibold">Période de paie: {salaire.periode_paie}</div>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <div>Matricule: {salaire.matricule}</div>
-                <div>SEIDI SULEIMANE</div>
+                <div className="font-semibold">Matricule: {salaire.matricule}</div>
+                <div className="font-bold">SEIDI SULEIMANE</div>
               </div>
               <div className="text-right">
-                <div>NDIHEM</div>
+                <div className="font-semibold">NDIHEM</div>
               </div>
             </div>
           </div>
         </div>
         
         {/* Employee Status Information */}
-        <div className="border border-gray-300 mb-2">
+        <div className="border-2 border-gray-500 mb-2">
           <table className="w-full text-xs">
             <thead>
-              <tr>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Embauche</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Statut</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Parts IR</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Qualification</th>
-                <th className="border-b border-gray-300 p-1 text-left">Date Naissance</th>
+              <tr className="bg-gray-200">
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Embauche</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Statut</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Parts IR</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Qualification</th>
+                <th className="border-b-2 border-gray-500 p-1 text-left font-bold">Date Naissance</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className="border-r border-gray-300 p-1">{employeeData.embauche}</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.statut}</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.partsIR}</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.qualification}</td>
-                <td className="p-1">{employeeData.dateNaissance}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.embauche}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.statut}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.partsIR}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.qualification}</td>
+                <td className="p-1 bg-white">{employeeData.dateNaissance}</td>
               </tr>
             </tbody>
           </table>
         </div>
         
         {/* Salary Breakdown */}
-        <div className="border border-gray-300 mb-2">
+        <div className="border-2 border-gray-500 mb-2">
           <table className="w-full text-xs">
             <thead>
-              <tr>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Libellé</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Nombre ou Base</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Taux</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Gain</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Taux Salarial</th>
-                <th className="border-r border-b border-gray-300 p-1 text-left">Montant</th>
-                <th className="border-b border-gray-300 p-1 text-left">Montant Employeur</th>
+              <tr className="bg-gray-200">
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Libellé</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Nombre ou Base</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Taux</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Gain</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Taux Salarial</th>
+                <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Montant</th>
+                <th className="border-b-2 border-gray-500 p-1 text-left font-bold">Montant Employeur</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border-r border-gray-300 p-1">102 Salaire de base du mois</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.tauxJournalier.base}</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
+              <tr className="even:bg-gray-50">
+                <td className="border-r-2 border-gray-500 p-1">102 Salaire de base du mois</td>
+                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1">{employeeData.tauxJournalier.base}</td>
+                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">105 Sursalaire</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.tauxJournalier.sursalaire}</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
+              <tr className="odd:bg-white">
+                <td className="border-r-2 border-gray-500 p-1">105 Sursalaire</td>
+                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1">{employeeData.tauxJournalier.sursalaire}</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">217 Indemnité de déplacement</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1">{employeeData.gain.indemniteLogement.toLocaleString('fr-FR')}</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
+              <tr className="even:bg-gray-50">
+                <td className="border-r-2 border-gray-500 p-1">217 Indemnité de déplacement</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.indemniteLogement.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">411 Retenue I.R</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1">89 308</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.cotisations.ir.toLocaleString('fr-FR')}</td>
+              <tr className="odd:bg-white">
+                <td className="border-r-2 border-gray-500 p-1">411 Retenue I.R</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1">89 308</td>
+                <td className="border-r-2 border-gray-500 p-1 font-semibold">{employeeData.cotisations.ir.toLocaleString('fr-FR')}</td>
                 <td className="p-1"></td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">414 IPRES général</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1">24 838</td>
-                <td className="border-r border-gray-300 p-1">{employeeData.cotisations.ipresGen.toLocaleString('fr-FR')}</td>
+              <tr className="even:bg-gray-50">
+                <td className="border-r-2 border-gray-500 p-1">414 IPRES général</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1">24 838</td>
+                <td className="border-r-2 border-gray-500 p-1 font-semibold">{employeeData.cotisations.ipresGen.toLocaleString('fr-FR')}</td>
                 <td className="p-1">37 255</td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">420 TRIMF</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1">{employeeData.cotisations.trimf.toLocaleString('fr-FR')}</td>
+              <tr className="odd:bg-white">
+                <td className="border-r-2 border-gray-500 p-1">420 TRIMF</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1 font-semibold">{employeeData.cotisations.trimf.toLocaleString('fr-FR')}</td>
                 <td className="p-1"></td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">420 Prime de transport</td>
-                <td className="border-r border-gray-300 p-1">26 000</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1">26 000</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
+              <tr className="even:bg-gray-50">
+                <td className="border-r-2 border-gray-500 p-1">420 Prime de transport</td>
+                <td className="border-r-2 border-gray-500 p-1">26 000</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1">26 000</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">0673 Arrondi mois précédent</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1">71</td>
+              <tr className="odd:bg-white">
+                <td className="border-r-2 border-gray-500 p-1">0673 Arrondi mois précédent</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1">71</td>
                 <td className="p-1"></td>
               </tr>
-              <tr>
-                <td className="border-r border-gray-300 p-1">0670 Arrondi du mois</td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
-                <td className="border-r border-gray-300 p-1"></td>
+              <tr className="even:bg-gray-50">
+                <td className="border-r-2 border-gray-500 p-1">0670 Arrondi du mois</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
               </tr>
               
               {/* Empty rows for spacing */}
               {[...Array(10)].map((_, i) => (
-                <tr key={i}>
-                  <td className="border-r border-gray-300 p-1">&nbsp;</td>
-                  <td className="border-r border-gray-300 p-1"></td>
-                  <td className="border-r border-gray-300 p-1"></td>
-                  <td className="border-r border-gray-300 p-1"></td>
-                  <td className="border-r border-gray-300 p-1"></td>
-                  <td className="border-r border-gray-300 p-1"></td>
+                <tr key={i} className={i % 2 === 0 ? "odd:bg-white" : "even:bg-gray-50"}>
+                  <td className="border-r-2 border-gray-500 p-1">&nbsp;</td>
+                  <td className="border-r-2 border-gray-500 p-1"></td>
+                  <td className="border-r-2 border-gray-500 p-1"></td>
+                  <td className="border-r-2 border-gray-500 p-1"></td>
+                  <td className="border-r-2 border-gray-500 p-1"></td>
+                  <td className="border-r-2 border-gray-500 p-1"></td>
                   <td className="p-1"></td>
                 </tr>
               ))}
               
               {/* Totals row */}
-              <tr>
-                <td className="border-r border-t border-gray-300 p-1 text-right font-bold" colSpan={3}>TOTAUX</td>
-                <td className="border-r border-t border-gray-300 p-1 font-bold">{totalBrut.toLocaleString('fr-FR')}</td>
-                <td className="border-r border-t border-gray-300 p-1"></td>
-                <td className="border-r border-t border-gray-300 p-1 font-bold">{totalDeductions.toLocaleString('fr-FR')}</td>
-                <td className="border-t border-gray-300 p-1 font-bold">{montantEmployeur.toLocaleString('fr-FR')}</td>
+              <tr className="bg-gray-200">
+                <td className="border-r-2 border-t-2 border-gray-500 p-1 text-right font-bold" colSpan={3}>TOTAUX</td>
+                <td className="border-r-2 border-t-2 border-gray-500 p-1 font-bold">{totalBrut.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-t-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-t-2 border-gray-500 p-1 font-bold">{totalDeductions.toLocaleString('fr-FR')}</td>
+                <td className="border-t-2 border-gray-500 p-1 font-bold">{montantEmployeur.toLocaleString('fr-FR')}</td>
               </tr>
             </tbody>
           </table>
         </div>
         
         {/* Summary */}
-        <div className="grid grid-cols-7 border border-gray-300 mb-2">
-          <div className="col-span-3 border-r border-gray-300 p-1">
+        <div className="grid grid-cols-7 border-2 border-gray-500 mb-2">
+          <div className="col-span-3 border-r-2 border-gray-500 p-1">
             <table className="w-full text-xs">
               <thead>
-                <tr>
-                  <th className="border-r border-b border-gray-300 p-1 text-left"></th>
-                  <th className="border-r border-b border-gray-300 p-1 text-left">Brut Social</th>
-                  <th className="border-r border-b border-gray-300 p-1 text-left">Base IR</th>
-                  <th className="border-r border-b border-gray-300 p-1 text-left">IPRES Gen.</th>
-                  <th className="border-r border-b border-gray-300 p-1 text-left">IPRES Cad.</th>
-                  <th className="border-b border-gray-300 p-1 text-left">IR</th>
+                <tr className="bg-gray-200">
+                  <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold"></th>
+                  <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Brut Social</th>
+                  <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">Base IR</th>
+                  <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">IPRES Gen.</th>
+                  <th className="border-r-2 border-b-2 border-gray-500 p-1 text-left font-bold">IPRES Cad.</th>
+                  <th className="border-b-2 border-gray-500 p-1 text-left font-bold">IR</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border-r border-gray-300 p-1 font-bold">MOIS</td>
-                  <td className="border-r border-gray-300 p-1">{salaireBrut.toLocaleString('fr-FR')}</td>
-                  <td className="border-r border-gray-300 p-1">{salaireBrut.toLocaleString('fr-FR')}</td>
-                  <td className="border-r border-gray-300 p-1">{employeeData.cotisations.ipresGen.toLocaleString('fr-FR')}</td>
-                  <td className="border-r border-gray-300 p-1"></td>
+                  <td className="border-r-2 border-gray-500 p-1 font-bold">MOIS</td>
+                  <td className="border-r-2 border-gray-500 p-1">{salaireBrut.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{salaireBrut.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cotisations.ipresGen.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1"></td>
                   <td className="p-1">{employeeData.cotisations.ir.toLocaleString('fr-FR')}</td>
                 </tr>
-                <tr>
-                  <td className="border-r border-gray-300 p-1 font-bold">CUMUL</td>
-                  <td className="border-r border-gray-300 p-1">{employeeData.cumul.brut.toLocaleString('fr-FR')}</td>
-                  <td className="border-r border-gray-300 p-1">{employeeData.cumul.ir.toLocaleString('fr-FR')}</td>
-                  <td className="border-r border-gray-300 p-1">{employeeData.cumul.ipresGen.toLocaleString('fr-FR')}</td>
-                  <td className="border-r border-gray-300 p-1"></td>
+                <tr className="bg-gray-50">
+                  <td className="border-r-2 border-gray-500 p-1 font-bold">CUMUL</td>
+                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cumul.brut.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cumul.ir.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cumul.ipresGen.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1"></td>
                   <td className="p-1">{employeeData.cumul.trimf.toLocaleString('fr-FR')}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div className="col-span-2 border-r border-gray-300 p-1">
+          <div className="col-span-2 border-r-2 border-gray-500 p-1">
             <table className="w-full text-xs">
               <thead>
-                <tr>
-                  <th className="border-b border-gray-300 p-1 text-left">TRIMF</th>
+                <tr className="bg-gray-200">
+                  <th className="border-b-2 border-gray-500 p-1 text-left font-bold">TRIMF</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td className="p-1">{employeeData.cotisations.trimf.toLocaleString('fr-FR')}</td>
                 </tr>
-                <tr>
+                <tr className="bg-gray-50">
                   <td className="p-1">{employeeData.cumul.trimf.toLocaleString('fr-FR')}</td>
                 </tr>
               </tbody>
@@ -354,15 +354,15 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
           <div className="col-span-2 p-1">
             <table className="w-full text-xs">
               <thead>
-                <tr>
-                  <th className="border-b border-gray-300 p-1 text-center">NET A PAYER EN FRANCS</th>
+                <tr className="bg-gray-200">
+                  <th className="border-b-2 border-gray-500 p-1 text-center font-bold">NET A PAYER EN FRANCS</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="p-1 text-center font-bold text-lg">{salaire.net_a_payer.toLocaleString('fr-FR')}</td>
+                  <td className="p-1 text-center font-bold text-xl bg-gray-100">{salaire.net_a_payer.toLocaleString('fr-FR')}</td>
                 </tr>
-                <tr>
+                <tr className="bg-gray-50">
                   <td className="p-1 text-center">{employeeData.cumul.netAPayer.toLocaleString('fr-FR')}</td>
                 </tr>
               </tbody>
@@ -371,26 +371,26 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
         </div>
         
         {/* Footer */}
-        <div className="grid grid-cols-2 border border-gray-300">
-          <div className="border-r border-gray-300 p-1">
+        <div className="grid grid-cols-2 border-2 border-gray-500">
+          <div className="border-r-2 border-gray-500 p-1 bg-gray-50">
             <div className="text-xs">
               <div className="font-bold">CONGES PAYES</div>
               <div className="grid grid-cols-2">
                 <div>Montant:</div>
-                <div>{employeeData.congesPaies.toLocaleString('fr-FR')}</div>
+                <div className="font-semibold">{employeeData.congesPaies.toLocaleString('fr-FR')}</div>
               </div>
             </div>
           </div>
-          <div className="p-1">
+          <div className="p-1 bg-gray-50">
             <div className="text-xs">
               <div className="font-bold">PRIX PAR ENTREPRISE</div>
               <div className="grid grid-cols-2">
                 <div>Mois:</div>
-                <div>{employeeData.prixEntreprise.toLocaleString('fr-FR')}</div>
+                <div className="font-semibold">{employeeData.prixEntreprise.toLocaleString('fr-FR')}</div>
               </div>
               <div className="grid grid-cols-2">
                 <div>Cumul:</div>
-                <div>{employeeData.cumul.netAPayer.toLocaleString('fr-FR')}</div>
+                <div className="font-semibold">{employeeData.cumul.netAPayer.toLocaleString('fr-FR')}</div>
               </div>
             </div>
           </div>
