@@ -12,8 +12,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, Download } from "lucide-react";
-import { BulletinPaie, getAllBulletinsPaie } from "@/services/payslipService";
+import { BulletinPaie, getAllBulletinsPaie, getBulletinPaieById } from "@/services/payslipService";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
 
 export default function PayslipList() {
   const [payslips, setPayslips] = useState<BulletinPaie[]>([]);
@@ -41,9 +42,148 @@ export default function PayslipList() {
     toast.info("Fonctionnalité de visualisation à venir");
   };
 
-  const handleDownloadPayslip = (id: string) => {
-    // Implémenter le téléchargement du bulletin
-    toast.info("Fonctionnalité de téléchargement à venir");
+  const handleDownloadPayslip = async (id: string) => {
+    try {
+      // Récupérer les détails du bulletin de paie
+      const payslip = await getBulletinPaieById(id);
+      
+      if (!payslip) {
+        toast.error("Bulletin de paie non trouvé");
+        return;
+      }
+      
+      // Générer le PDF
+      generatePayslipPDF(payslip);
+      toast.success("Bulletin de paie téléchargé");
+    } catch (error) {
+      console.error("Erreur lors du téléchargement du bulletin:", error);
+      toast.error("Impossible de télécharger le bulletin de paie");
+    }
+  };
+
+  const generatePayslipPDF = (payslip: BulletinPaie) => {
+    const doc = new jsPDF();
+    
+    // Ajouter le logo ou l'en-tête de l'entreprise
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("BULLETIN DE PAIE", 105, 20, { align: "center" });
+    
+    // Informations de l'entreprise
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("EIFFAGE ENERGIE T&D Sénégal", 105, 30, { align: "center" });
+    doc.text("AV PETIT MBAO X RTE DES BRAS BP 29389 DAKAR SÉNÉGAL", 105, 35, { align: "center" });
+    
+    // Ligne séparatrice
+    doc.setDrawColor(220, 220, 220);
+    doc.line(20, 40, 190, 40);
+    
+    // Informations de l'employé
+    doc.setFontSize(11);
+    doc.text(`Matricule: ${payslip.matricule}`, 20, 50);
+    doc.text(`Nom: ${payslip.nom}`, 20, 57);
+    doc.text(`Période de paie: ${payslip.periode_paie}`, 20, 64);
+    
+    // Détails du salaire
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("DÉTAILS DU SALAIRE", 105, 80, { align: "center" });
+    
+    // Tableau des composants du salaire
+    doc.setFont("helvetica", "normal");
+    doc.text("Description", 30, 90);
+    doc.text("Montant (FCFA)", 150, 90);
+    
+    let yPosition = 100;
+    
+    // Éléments du salaire
+    doc.text("Salaire de base", 30, yPosition);
+    doc.text(`${payslip.salaire_base.toLocaleString()}`, 150, yPosition);
+    yPosition += 7;
+    
+    if (payslip.sursalaire > 0) {
+      doc.text("Sursalaire", 30, yPosition);
+      doc.text(`${payslip.sursalaire.toLocaleString()}`, 150, yPosition);
+      yPosition += 7;
+    }
+    
+    if (payslip.prime_transport > 0) {
+      doc.text("Prime de transport", 30, yPosition);
+      doc.text(`${payslip.prime_transport.toLocaleString()}`, 150, yPosition);
+      yPosition += 7;
+    }
+    
+    if (payslip.indemnite_deplacement > 0) {
+      doc.text("Indemnité de déplacement", 30, yPosition);
+      doc.text(`${payslip.indemnite_deplacement.toLocaleString()}`, 150, yPosition);
+      yPosition += 7;
+    }
+    
+    // Ligne pour le total brut
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 7;
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL BRUT", 30, yPosition);
+    doc.text(`${payslip.total_brut.toLocaleString()}`, 150, yPosition);
+    yPosition += 12;
+    
+    // Déductions
+    doc.setFont("helvetica", "bold");
+    doc.text("DÉDUCTIONS", 105, yPosition, { align: "center" });
+    yPosition += 7;
+    
+    doc.setFont("helvetica", "normal");
+    
+    if (payslip.retenue_ir > 0) {
+      doc.text("Retenue IR", 30, yPosition);
+      doc.text(`-${payslip.retenue_ir.toLocaleString()}`, 150, yPosition);
+      yPosition += 7;
+    }
+    
+    if (payslip.ipres_general > 0) {
+      doc.text("IPRES Général", 30, yPosition);
+      doc.text(`-${payslip.ipres_general.toLocaleString()}`, 150, yPosition);
+      yPosition += 7;
+    }
+    
+    if (payslip.trimf > 0) {
+      doc.text("TRIMF", 30, yPosition);
+      doc.text(`-${payslip.trimf.toLocaleString()}`, 150, yPosition);
+      yPosition += 7;
+    }
+    
+    // Ligne pour le total des déductions
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 7;
+    
+    // Calcul du total des déductions
+    const totalDeductions = payslip.retenue_ir + payslip.ipres_general + payslip.trimf;
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("TOTAL DÉDUCTIONS", 30, yPosition);
+    doc.text(`-${totalDeductions.toLocaleString()}`, 150, yPosition);
+    yPosition += 12;
+    
+    // Ligne séparatrice avant le net à payer
+    doc.setLineWidth(0.5);
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 10;
+    
+    // Net à payer
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("NET À PAYER", 30, yPosition);
+    doc.text(`${payslip.net_a_payer.toLocaleString()} FCFA`, 150, yPosition);
+    
+    // Pied de page
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.text("Ce document a une valeur informative et ne constitue pas une pièce comptable officielle.", 105, 280, { align: "center" });
+    
+    // Enregistrer le PDF
+    doc.save(`bulletin_paie_${payslip.matricule}_${payslip.periode_paie.replace(/\s/g, "_")}.pdf`);
   };
 
   return (
