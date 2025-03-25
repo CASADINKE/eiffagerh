@@ -12,9 +12,6 @@ import {
   Building,
   CreditCard,
   Clock,
-  Wallet,
-  CheckCircle,
-  History
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -35,9 +32,6 @@ const navItems = [
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
-  { path: "/salary-management", title: "Gestion des paies", icon: Wallet },
-  { path: "/payroll-management", title: "Historique des paies", icon: History },
-  { path: "/validate-salary", title: "Validation des Paiements", icon: CheckCircle },
   { path: "/settings", title: "Paramètres", icon: Settings },
 ];
 

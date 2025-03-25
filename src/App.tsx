@@ -18,10 +18,7 @@ import { ThemeProvider } from "./components/ui/theme-provider";
 import { Toaster } from "sonner";
 import Layout from "@/components/layout/Layout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import SalaryManagement from "@/pages/SalaryManagement";
-import ValidateSalary from "@/components/salary/ValidateSalary";
 import EmployeePayslipsPage from "@/pages/EmployeePayslips";
-import PayrollManagement from "@/pages/PayrollManagement";
 
 function App() {
   const queryClient = new QueryClient();
@@ -73,36 +70,6 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <Leave />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/salary-management"
-                element={
-                  <ProtectedRoute allowedRoles={['super_admin', 'admin', 'rh']}>
-                    <Layout>
-                      <SalaryManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/payroll-management"
-                element={
-                  <ProtectedRoute allowedRoles={['super_admin', 'admin', 'rh']}>
-                    <Layout>
-                      <PayrollManagement />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/validate-salary"
-                element={
-                  <ProtectedRoute allowedRoles={['super_admin', 'admin', 'rh']}>
-                    <Layout>
-                      <ValidateSalary />
                     </Layout>
                   </ProtectedRoute>
                 }
