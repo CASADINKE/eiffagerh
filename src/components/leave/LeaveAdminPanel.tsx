@@ -47,7 +47,7 @@ export function LeaveAdminPanel({ leaveRequests, onUpdate }: LeaveAdminPanelProp
   const { user, userRole } = useAuth();
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState<string>("pending");
   const [comments, setComments] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -83,7 +83,7 @@ export function LeaveAdminPanel({ leaveRequests, onUpdate }: LeaveAdminPanelProp
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setSelectedRequest(null);
-    setStatus("");
+    setStatus("pending");
     setComments("");
   };
 
