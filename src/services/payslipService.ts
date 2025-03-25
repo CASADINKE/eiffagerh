@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -19,7 +18,6 @@ export interface Payslip {
     full_name: string;
     role: string;
   };
-  // Ces propriétés sont utilisées côté client uniquement
   employee_metadata?: {
     [key: string]: any;
     matricule?: string;
@@ -38,7 +36,6 @@ export interface Payslip {
   };
 }
 
-// Interface pour le nouveau format de bulletin de paie
 export interface BulletinPaie {
   id: string;
   matricule: string;
@@ -55,12 +52,11 @@ export interface BulletinPaie {
   net_a_payer: number;
   created_at: string;
   updated_at: string;
+  status?: string;
 }
 
-// Function to create multiple payslips for a payment
 export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at' | 'updated_at' | 'generated_date' | 'employee_metadata'>[]): Promise<boolean> => {
   try {
-    // Add generated_date field to all payslips
     const payslipsToInsert = payslips.map(payslip => ({
       ...payslip,
       generated_date: new Date().toISOString()
@@ -68,7 +64,6 @@ export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at'
     
     console.log("Inserting payslips:", payslipsToInsert);
     
-    // Use type assertion to handle table not being in TypeScript defs
     const { error } = await supabase
       .from('payslips' as any)
       .insert(payslipsToInsert as any);
@@ -79,10 +74,8 @@ export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at'
       return false;
     }
     
-    // Calculate total amount of all payslips
     const totalAmount = payslips.reduce((sum, payslip) => sum + payslip.net_salary, 0);
     
-    // Update the salary payment with the calculated total amount
     if (payslips[0].salary_payment_id) {
       await updateSalaryPaymentTotal(payslips[0].salary_payment_id, totalAmount);
     }
@@ -95,7 +88,6 @@ export const createPayslips = async (payslips: Omit<Payslip, 'id' | 'created_at'
   }
 };
 
-// Function to update the total amount of a salary payment
 export const updateSalaryPaymentTotal = async (paymentId: string, totalAmount: number): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -120,7 +112,6 @@ export const updateSalaryPaymentTotal = async (paymentId: string, totalAmount: n
   }
 };
 
-// Function to get payslips by salary payment ID
 export const getPayslipsByPaymentId = async (paymentId: string): Promise<Payslip[]> => {
   try {
     const { data, error } = await supabase
@@ -138,9 +129,7 @@ export const getPayslipsByPaymentId = async (paymentId: string): Promise<Payslip
       return [];
     }
 
-    // Add EIFFAGE specific metadata to each payslip
     return data.map((payslip: Payslip) => {
-      // Get employee matricule from employee record if available
       const employeeName = payslip.employee?.full_name || "SEIDU SOULEYMANE";
 
       return {
@@ -168,7 +157,6 @@ export const getPayslipsByPaymentId = async (paymentId: string): Promise<Payslip
   }
 };
 
-// Function to get employee's payslips
 export const getEmployeePayslips = async (employeeId: string): Promise<Payslip[]> => {
   try {
     const { data, error } = await supabase
@@ -194,7 +182,6 @@ export const getEmployeePayslips = async (employeeId: string): Promise<Payslip[]
   }
 };
 
-// Function to get a specific payslip by ID
 export const getPayslipById = async (payslipId: string): Promise<Payslip | null> => {
   try {
     const { data, error } = await supabase
@@ -212,7 +199,6 @@ export const getPayslipById = async (payslipId: string): Promise<Payslip | null>
       return null;
     }
 
-    // Add EIFFAGE specific metadata
     return {
       ...data,
       employee_metadata: {
@@ -237,9 +223,6 @@ export const getPayslipById = async (payslipId: string): Promise<Payslip | null>
   }
 };
 
-// Nouvelles fonctions pour le nouveau format de bulletin de paie
-
-// Fonction pour créer un nouveau bulletin de paie
 export const createBulletinPaie = async (bulletin: Omit<BulletinPaie, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -261,7 +244,6 @@ export const createBulletinPaie = async (bulletin: Omit<BulletinPaie, 'id' | 'cr
   }
 };
 
-// Fonction pour récupérer tous les bulletins de paie
 export const getAllBulletinsPaie = async (): Promise<BulletinPaie[]> => {
   try {
     const { data, error } = await supabase
@@ -283,7 +265,6 @@ export const getAllBulletinsPaie = async (): Promise<BulletinPaie[]> => {
   }
 };
 
-// Fonction pour récupérer les bulletins de paie par période
 export const getBulletinsPaieByPeriode = async (periode: string): Promise<BulletinPaie[]> => {
   try {
     const { data, error } = await supabase
@@ -306,7 +287,6 @@ export const getBulletinsPaieByPeriode = async (periode: string): Promise<Bullet
   }
 };
 
-// Fonction pour récupérer les bulletins de paie par matricule
 export const getBulletinsPaieByMatricule = async (matricule: string): Promise<BulletinPaie[]> => {
   try {
     const { data, error } = await supabase
@@ -329,7 +309,6 @@ export const getBulletinsPaieByMatricule = async (matricule: string): Promise<Bu
   }
 };
 
-// Fonction pour récupérer un bulletin de paie par ID
 export const getBulletinPaieById = async (id: string): Promise<BulletinPaie | null> => {
   try {
     const { data, error } = await supabase
@@ -352,7 +331,6 @@ export const getBulletinPaieById = async (id: string): Promise<BulletinPaie | nu
   }
 };
 
-// Fonction pour mettre à jour un bulletin de paie
 export const updateBulletinPaie = async (id: string, updates: Partial<Omit<BulletinPaie, 'id' | 'created_at' | 'updated_at'>>): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -375,7 +353,6 @@ export const updateBulletinPaie = async (id: string, updates: Partial<Omit<Bulle
   }
 };
 
-// Fonction pour supprimer un bulletin de paie
 export const deleteBulletinPaie = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase

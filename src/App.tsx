@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Salary from "./pages/Salary";
 import SalaryPayment from "./pages/SalaryPayment";
+import EmployeePayslips from "./pages/EmployeePayslips";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <SalaryPayment />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employee-payslips" element={
+              <ProtectedRoute>
+                <Layout>
+                  <EmployeePayslips />
                 </Layout>
               </ProtectedRoute>
             } />

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,9 @@ import { Payslip } from "@/services/payslipService";
 import { exportToCSV } from "@/utils/exportUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useSalaryDetails } from "@/hooks/useSalaryDetails";
+import { PayslipApproval } from "@/components/salary/PayslipApproval";
+import { getAllBulletinsPaie } from "@/services/payslipService";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SalaryPayment = () => {
   const { data: employees, isLoading: isLoadingEmployees } = useEmployees();
@@ -30,6 +32,8 @@ const SalaryPayment = () => {
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [bulletins, setBulletins] = useState([]);
+  const [loadingBulletins, setLoadingBulletins] = useState(false);
   
   const queryClient = useQueryClient();
   const currentDate = new Date();
@@ -38,6 +42,23 @@ const SalaryPayment = () => {
   const latestPayment = payments && payments.length > 0 
     ? payments[0] 
     : null;
+
+  const fetchBulletins = async () => {
+    setLoadingBulletins(true);
+    try {
+      const data = await getAllBulletinsPaie();
+      setBulletins(data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des bulletins:", error);
+      toast.error("Impossible de charger les bulletins de paie");
+    } finally {
+      setLoadingBulletins(false);
+    }
+  };
+
+  useState(() => {
+    fetchBulletins();
+  }, []);
   
   const generatePayslips = async () => {
     if (!latestPayment || !employees || employees.length === 0) {
@@ -55,7 +76,6 @@ const SalaryPayment = () => {
         return;
       }
       
-      // Ensure each employee has a profile
       const profilePromises = employees.map(async (employee) => {
         const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
@@ -81,24 +101,19 @@ const SalaryPayment = () => {
       
       await Promise.all(profilePromises);
       
-      // Generate payslips with calculations based on employee data and EIFFAGE specific format
       const newPayslips = employees.map(employee => {
-        // Find salary details for this employee or use default values
         const employeeSalaryDetail = salaryDetails?.find(sd => sd.employee_id === employee.id);
         
-        // EIFFAGE specific values from the example payslip
         const baseSalary = 150000;
         const transportAllowance = 26000;
         const displacementAllowance = 197000;
         const allowances = transportAllowance + displacementAllowance;
         
-        // Pre-calculated deductions from the example
-        const socialContributions = 24836; // TRIM general
-        const taxAmount = 89308; // IR
+        const socialContributions = 24836;
+        const taxAmount = 89308;
         
-        // Total deductions and net salary
         const deductions = socialContributions;
-        const netSalary = 344900; // From the example
+        const netSalary = 344900;
         
         return {
           employee_id: employee.id,
@@ -184,7 +199,7 @@ const SalaryPayment = () => {
     }, 1500);
   };
   
-  const isLoading = isLoadingEmployees || isLoadingPayments || isLoadingPayslips || isLoadingSalaryDetails;
+  const isLoading = isLoadingEmployees || isLoadingPayments || isLoadingPayslips || isLoadingSalaryDetails || loadingBulletins;
   
   return (
     <div className="container mx-auto p-4">
@@ -216,63 +231,82 @@ const SalaryPayment = () => {
         </div>
       </div>
       
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-xl">Résumé de la paie - {latestPayment ? latestPayment.payment_period : currentMonth}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                  <p className="text-blue-600 font-medium">Employés</p>
-                  <p className="text-2xl font-bold">{employees?.length || 0}</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                  <p className="text-green-600 font-medium">Bulletins générés</p>
-                  <p className="text-2xl font-bold">{payslips?.length || 0}</p>
-                </div>
-                <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                  <p className="text-amber-600 font-medium">Montant total</p>
-                  <p className="text-2xl font-bold">
-                    {payslips ? payslips.reduce((sum, p) => sum + p.net_salary, 0).toLocaleString() : 0} FCFA
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {payslips && payslips.length > 0 ? (
-            <PayslipsList 
-              payslips={payslips} 
-              latestPayment={latestPayment} 
-              onViewPayslip={showPayslipPreview} 
-            />
+      <Tabs defaultValue="payments" className="mb-6">
+        <TabsList className="mb-4">
+          <TabsTrigger value="payments">Paiements</TabsTrigger>
+          <TabsTrigger value="approval">Validation</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="payments" className="space-y-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
           ) : (
-            <Card className="mb-6">
-              <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">
-                  Aucun bulletin de paie généré. Cliquez sur "Générer les bulletins de paie" pour commencer.
-                </p>
-              </CardContent>
-            </Card>
+            <>
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-xl">Résumé de la paie - {latestPayment ? latestPayment.payment_period : currentMonth}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                      <p className="text-blue-600 font-medium">Employés</p>
+                      <p className="text-2xl font-bold">{employees?.length || 0}</p>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                      <p className="text-green-600 font-medium">Bulletins générés</p>
+                      <p className="text-2xl font-bold">{payslips?.length || 0}</p>
+                    </div>
+                    <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
+                      <p className="text-amber-600 font-medium">Montant total</p>
+                      <p className="text-2xl font-bold">
+                        {payslips ? payslips.reduce((sum, p) => sum + p.net_salary, 0).toLocaleString() : 0} FCFA
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {payslips && payslips.length > 0 ? (
+                <PayslipsList 
+                  payslips={payslips} 
+                  latestPayment={latestPayment} 
+                  onViewPayslip={showPayslipPreview} 
+                />
+              ) : (
+                <Card className="mb-6">
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">
+                      Aucun bulletin de paie généré. Cliquez sur "Générer les bulletins de paie" pour commencer.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
-          
-          {showPreview && selectedPayslip && (
-            <PayslipDetails 
-              payslip={selectedPayslip}
-              paymentPeriod={latestPayment?.payment_period || currentMonth}
-              paymentMethod={latestPayment?.payment_method || "virement bancaire"}
-              onClose={closePreview}
-              onPrint={printPayslip}
-              onDownload={downloadPayslip}
-            />
+        </TabsContent>
+        
+        <TabsContent value="approval">
+          {loadingBulletins ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <PayslipApproval payslips={bulletins} onRefresh={fetchBulletins} />
           )}
-        </>
+        </TabsContent>
+      </Tabs>
+      
+      {showPreview && selectedPayslip && (
+        <PayslipDetails 
+          payslip={selectedPayslip}
+          paymentPeriod={latestPayment?.payment_period || currentMonth}
+          paymentMethod={latestPayment?.payment_method || "virement bancaire"}
+          onClose={closePreview}
+          onPrint={printPayslip}
+          onDownload={downloadPayslip}
+        />
       )}
       
       <SalaryPaymentDialog 
