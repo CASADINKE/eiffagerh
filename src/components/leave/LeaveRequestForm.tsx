@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Employee } from "@/hooks/useEmployees";
@@ -74,9 +74,13 @@ export function LeaveRequestForm({
       type: "",
       reason: "",
     },
+    mode: "onChange", // Enable validation on change
   });
 
   const mappedEmployees = employees.map(mapEmployeeToUI);
+  
+  // Check if the form is valid
+  const isValid = form.formState.isValid;
   
   return (
     <Form {...form}>
@@ -237,7 +241,7 @@ export function LeaveRequestForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !isValid}>
             {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>
         </div>
