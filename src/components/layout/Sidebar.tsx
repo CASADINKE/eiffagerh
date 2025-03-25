@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -12,7 +13,8 @@ import {
   CreditCard,
   Clock,
   Wallet,
-  CheckCircle
+  CheckCircle,
+  History
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -34,6 +36,7 @@ const navItems = [
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
   { path: "/salary-management", title: "Gestion des paies", icon: Wallet },
+  { path: "/payroll-management", title: "Historique des paies", icon: History },
   { path: "/validate-salary", title: "Validation des Paiements", icon: CheckCircle },
   { path: "/settings", title: "Paramètres", icon: Settings },
 ];
@@ -95,7 +98,7 @@ const Sidebar = () => {
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton asChild>
                     <NavLink
-                      to={item.href}
+                      to={item.path}
                       className={({ isActive }) => cn(
                         "flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 my-1",
                         isActive
