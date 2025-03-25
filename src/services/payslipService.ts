@@ -164,21 +164,162 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
       <html>
         <head>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h1 { text-align: center; color: #333; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; }
-            .info-block { width: 48%; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-            th { background-color: #f2f2f2; }
-            .total-row { font-weight: bold; background-color: #f9f9f9; }
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+            body { 
+              font-family: 'Roboto', Arial, sans-serif;
+              padding: 20px;
+              color: #333;
+              font-size: 12px;
+              line-height: 1.5;
+            }
+            h1 { 
+              text-align: center; 
+              color: #333; 
+              font-size: 22px;
+              margin-bottom: 15px;
+            }
+            h2 {
+              font-size: 16px;
+              margin-bottom: 10px;
+              color: #2c3e50;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 20px; 
+            }
+            .info-section { 
+              display: flex; 
+              justify-content: space-between; 
+              margin-bottom: 20px; 
+            }
+            .info-block { 
+              width: 48%; 
+              padding: 15px;
+              background-color: #f8f9fa;
+              border-radius: 8px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin: 20px 0; 
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            th, td { 
+              padding: 12px 15px; 
+              text-align: left; 
+              border-bottom: 1px solid #e0e0e0; 
+            }
+            th { 
+              background-color: #f2f2f2; 
+              font-weight: 600;
+              color: #2c3e50;
+            }
+            tr:nth-child(even) {
+              background-color: #f8f9fa;
+            }
+            .total-row { 
+              font-weight: bold; 
+              background-color: #edf2f7 !important; 
+              border-top: 2px solid #cbd5e0;
+            }
             
             /* Improved styling for payslip */
-            .payslip-container { border: 2px solid #333; padding: 20px; }
-            .company-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-            .employee-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-            .employee-details { border: 1px solid #ddd; padding: 10px; }
+            .payslip-container { 
+              border: 2px solid #2c3e50; 
+              padding: 25px;
+              border-radius: 10px;
+              background-color: white;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            .company-header { 
+              display: flex; 
+              justify-content: space-between; 
+              border-bottom: 2px solid #2c3e50; 
+              padding-bottom: 15px; 
+              margin-bottom: 25px; 
+            }
+            .employee-info { 
+              display: grid; 
+              grid-template-columns: 1fr 1fr; 
+              gap: 20px; 
+              margin-bottom: 25px; 
+            }
+            .employee-details { 
+              border: 1px solid #cbd5e0; 
+              padding: 15px;
+              border-radius: 8px;
+              background-color: #f8f9fa;
+            }
+            .employee-details h3 {
+              margin-top: 0;
+              color: #2c3e50;
+              border-bottom: 1px solid #e2e8f0;
+              padding-bottom: 8px;
+              margin-bottom: 12px;
+            }
+            .employee-details p {
+              margin: 8px 0;
+            }
+            .employee-details strong {
+              font-weight: 600;
+              color: #2c3e50;
+            }
+            .amount-column {
+              text-align: right;
+              font-family: 'Courier New', monospace;
+            }
+            .signature-area {
+              margin-top: 40px;
+              display: flex;
+              justify-content: space-between;
+            }
+            .signature-box {
+              width: 45%;
+              border-top: 1px solid #cbd5e0;
+              padding-top: 10px;
+              text-align: center;
+            }
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 10px;
+              color: #718096;
+              border-top: 1px solid #e2e8f0;
+              padding-top: 15px;
+            }
+            /* Print optimization */
+            @media print {
+              body { 
+                padding: 0;
+                font-size: 11px;
+              }
+              .payslip-container {
+                border: 1px solid #2c3e50;
+                padding: 15px;
+                box-shadow: none;
+              }
+              .employee-details, .info-block {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+              }
+              th {
+                background-color: #f2f2f2 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+              }
+              tr:nth-child(even) {
+                background-color: #f8f9fa !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+              }
+              .total-row {
+                background-color: #edf2f7 !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+              }
+            }
           </style>
         </head>
         <body>
@@ -187,10 +328,11 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
               <div>
                 <h2>EIFFAGE ENERGIE</h2>
                 <p>T&D Sénégal</p>
+                <p style="color: #666; font-size: 10px;">AV. FELIX EBOUE X RTE DES BRASSERIES<br>DAKAR SENEGAL</p>
               </div>
               <div>
                 <h1>Bulletin de Paie</h1>
-                <p>Période: ${payslip.periode_paie}</p>
+                <p style="text-align: right;"><strong>Période:</strong> ${payslip.periode_paie}</p>
               </div>
             </div>
             
@@ -206,69 +348,98 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
                 <h3>Informations Paiement</h3>
                 <p><strong>Statut:</strong> ${payslip.statut_paiement}</p>
                 <p><strong>Mode de paiement:</strong> ${payslip.mode_paiement || 'Non défini'}</p>
-                <p><strong>Date de paiement:</strong> ${payslip.date_paiement || 'Non défini'}</p>
+                <p><strong>Date de paiement:</strong> ${payslip.date_paiement ? new Date(payslip.date_paiement).toLocaleDateString('fr-FR') : 'Non défini'}</p>
               </div>
             </div>
             
             <table>
               <thead>
                 <tr>
-                  <th>Désignation</th>
-                  <th style="text-align: right;">Base</th>
-                  <th style="text-align: right;">Montant (FCFA)</th>
+                  <th style="width: 40%;">Désignation</th>
+                  <th style="width: 20%; text-align: right;">Base</th>
+                  <th style="width: 10%; text-align: center;">Taux</th>
+                  <th style="width: 30%; text-align: right;">Montant (FCFA)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>Salaire de base</td>
                   <td style="text-align: right;">${payslip.salaire_base.toLocaleString('fr-FR')}</td>
-                  <td style="text-align: right;">${payslip.salaire_base.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;">100%</td>
+                  <td style="text-align: right;" class="amount-column">${payslip.salaire_base.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr>
                   <td>Sursalaire</td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">${payslip.sursalaire.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column">${payslip.sursalaire.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr>
                   <td>Prime de transport</td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">${payslip.prime_transport.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column">${payslip.prime_transport.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr>
                   <td>Indemnité de déplacement</td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">${payslip.indemnite_deplacement.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column">${payslip.indemnite_deplacement.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr class="total-row">
-                  <td>Total Brut</td>
+                  <td><strong>Total Brut</strong></td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">${totalBrut.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column"><strong>${totalBrut.toLocaleString('fr-FR')}</strong></td>
                 </tr>
+                
+                <!-- Déductions -->
                 <tr>
                   <td>IPRES Général</td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">-${payslip.ipres_general.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column">-${payslip.ipres_general.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr>
                   <td>TRIMF</td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">-${payslip.trimf.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column">-${payslip.trimf.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr>
                   <td>Retenue IR</td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">-${payslip.retenue_ir.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column">-${payslip.retenue_ir.toLocaleString('fr-FR')}</td>
                 </tr>
-                <tr class="total-row">
-                  <td>Net à Payer</td>
+                <tr>
+                  <td><strong>Total des retenues</strong></td>
                   <td style="text-align: right;"></td>
-                  <td style="text-align: right;">${payslip.net_a_payer.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column"><strong>${totalDeductions.toLocaleString('fr-FR')}</strong></td>
+                </tr>
+                
+                <tr class="total-row">
+                  <td><strong>Net à Payer</strong></td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: right;" class="amount-column"><strong>${payslip.net_a_payer.toLocaleString('fr-FR')}</strong></td>
                 </tr>
               </tbody>
             </table>
             
-            <div style="margin-top: 30px; text-align: right;">
-              <p><strong>Date d'émission:</strong> ${new Date().toLocaleDateString('fr-FR')}</p>
+            <div class="signature-area">
+              <div class="signature-box">
+                <p>Signature de l'employeur</p>
+              </div>
+              <div class="signature-box">
+                <p>Signature de l'employé</p>
+              </div>
+            </div>
+            
+            <div class="footer">
+              <p>Document généré le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+              <p>Ce bulletin est un document officiel. Conservez-le précieusement.</p>
             </div>
           </div>
         </body>
