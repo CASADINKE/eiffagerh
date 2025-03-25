@@ -176,119 +176,180 @@ export const deleteSalaire = async (salaireId: string) => {
 
 export const generatePDF = async (salaireId: string) => {
   try {
-    const salaire = await getSalaireById(salaireId);
+    const { data: salaire, error } = await supabase
+      .from('salaires')
+      .select('*')
+      .eq('id', salaireId)
+      .single();
     
-    if (!salaire) {
-      toast.error("Bulletin de salaire introuvable");
-      return null;
+    if (error) {
+      console.error("Erreur lors de la récupération du salaire:", error);
+      toast.error("Erreur lors de la génération du PDF");
+      throw error;
     }
     
-    const tempDiv = document.createElement('div');
-    tempDiv.className = 'payslip-container p-8 bg-white';
-    tempDiv.style.width = '800px';
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
+    const { data: employeeData, error: employeeError } = await supabase
+      .from('listes_employées')
+      .select('*')
+      .eq('matricule', salaire.matricule)
+      .single();
     
-    tempDiv.innerHTML = `
-      <div style="font-family: Arial, sans-serif;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="color: #333; font-size: 24px; margin-bottom: 10px;">BULLETIN DE PAIE</h1>
-          <p style="font-size: 16px; color: #666;">${salaire.periode_paie}</p>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
-          <div>
-            <h3 style="margin-bottom: 10px; font-size: 18px;">Informations Employé</h3>
-            <p><strong>Matricule:</strong> ${salaire.matricule}</p>
-            <p><strong>Nom:</strong> ${salaire.nom}</p>
+    if (employeeError) {
+      console.error("Erreur lors de la récupération des données de l'employé:", employeeError);
+      console.log("Matricule recherché:", salaire.matricule);
+    }
+    
+    const employeeInfo = employeeData || { 
+      nom: salaire.nom,
+      prenom: '',
+      matricule: salaire.matricule,
+      poste: 'Non spécifié',
+      date_naissance: null
+    };
+    
+    const employeeName = employeeData ? 
+      `${employeeInfo.prenom} ${employeeInfo.nom}` : 
+      salaire.nom;
+    
+    const dateNaissance = employeeInfo.date_naissance ? 
+      new Date(employeeInfo.date_naissance).toLocaleDateString('fr-FR') : 
+      '10/10/1988'; // Fallback date
+      
+    const salaireBrut = salaire.salaire_base + salaire.sursalaire;
+    const totalBrut = salaireBrut + salaire.indemnite_deplacement + salaire.prime_transport;
+    const totalDeductions = salaire.ipres_general + salaire.trimf + salaire.retenue_ir;
+    
+    const html = `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { text-align: center; color: #333; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; }
+            .info-block { width: 48%; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+            th { background-color: #f2f2f2; }
+            .total-row { font-weight: bold; background-color: #f9f9f9; }
+            
+            .payslip-container { border: 2px solid #333; padding: 20px; }
+            .company-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            .employee-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+            .employee-details { border: 1px solid #ddd; padding: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="payslip-container">
+            <div class="company-header">
+              <div>
+                <h2>EIFFAGE ENERGIE</h2>
+                <p>T&D Sénégal</p>
+              </div>
+              <div>
+                <h1>Bulletin de Paie</h1>
+                <p>Période: ${salaire.periode_paie}</p>
+              </div>
+            </div>
+            
+            <div class="employee-info">
+              <div class="employee-details">
+                <h3>Informations Employé</h3>
+                <p><strong>Matricule:</strong> ${salaire.matricule}</p>
+                <p><strong>Nom:</strong> ${employeeName}</p>
+                <p><strong>Date de naissance:</strong> ${dateNaissance}</p>
+                <p><strong>Poste:</strong> ${employeeInfo.poste || 'Non spécifié'}</p>
+              </div>
+              <div class="employee-details">
+                <h3>Informations Paiement</h3>
+                <p><strong>Statut:</strong> ${salaire.statut_paiement}</p>
+                <p><strong>Mode de paiement:</strong> ${salaire.mode_paiement || 'Non défini'}</p>
+                <p><strong>Date de paiement:</strong> ${salaire.date_paiement || 'Non défini'}</p>
+              </div>
+            </div>
+            
+            <table>
+              <thead>
+                <tr>
+                  <th>Désignation</th>
+                  <th style="text-align: right;">Base</th>
+                  <th style="text-align: right;">Montant (FCFA)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Salaire de base</td>
+                  <td style="text-align: right;">${salaire.salaire_base.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: right;">${salaire.salaire_base.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Sursalaire</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${salaire.sursalaire.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Prime de transport</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${salaire.prime_transport.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Indemnité de déplacement</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${salaire.indemnite_deplacement.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total Brut</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${totalBrut.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>IPRES Général</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">-${salaire.ipres_general.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>TRIMF</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">-${salaire.trimf.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Retenue IR</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">-${salaire.retenue_ir.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Net à Payer</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${salaire.net_a_payer.toLocaleString('fr-FR')}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div style="margin-top: 30px; text-align: right;">
+              <p><strong>Date d'émission:</strong> ${new Date().toLocaleDateString('fr-FR')}</p>
+            </div>
           </div>
-          <div>
-            <h3 style="margin-bottom: 10px; font-size: 18px;">Informations Paiement</h3>
-            <p><strong>Statut:</strong> ${salaire.statut_paiement}</p>
-            <p><strong>Mode de paiement:</strong> ${salaire.mode_paiement || 'Non défini'}</p>
-            <p><strong>Date de paiement:</strong> ${salaire.date_paiement || 'Non définie'}</p>
-          </div>
-        </div>
-        
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-          <thead>
-            <tr style="background-color: #f3f4f6;">
-              <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">Rubrique</th>
-              <th style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">Montant (FCFA)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">Salaire de base</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${salaire.salaire_base.toLocaleString('fr-FR')}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">Sursalaire</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${salaire.sursalaire.toLocaleString('fr-FR')}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">Prime de transport</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${salaire.prime_transport.toLocaleString('fr-FR')}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">Indemnité de déplacement</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${salaire.indemnite_deplacement.toLocaleString('fr-FR')}</td>
-            </tr>
-            <tr style="background-color: #f3f4f6;">
-              <td style="padding: 10px; border-bottom: 2px solid #ddd;"><strong>Total Brut</strong></td>
-              <td style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;"><strong>${(salaire.salaire_base + salaire.sursalaire + salaire.prime_transport + salaire.indemnite_deplacement).toLocaleString('fr-FR')}</strong></td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">IPRES Général</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">-${salaire.ipres_general.toLocaleString('fr-FR')}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">TRIMF</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">-${salaire.trimf.toLocaleString('fr-FR')}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">Retenue IR</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">-${salaire.retenue_ir.toLocaleString('fr-FR')}</td>
-            </tr>
-            <tr style="background-color: #f3f4f6; font-weight: bold;">
-              <td style="padding: 10px; border-bottom: 1px solid #ddd;">NET A PAYER</td>
-              <td style="padding: 10px; text-align: right; border-bottom: 1px solid #ddd;">${salaire.net_a_payer.toLocaleString('fr-FR')}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div style="margin-top: 40px; font-size: 12px; color: #666; text-align: center;">
-          <p>Ce bulletin est généré électroniquement et ne nécessite pas de signature.</p>
-        </div>
-      </div>
+        </body>
+      </html>
     `;
     
-    document.body.appendChild(tempDiv);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
     
-    try {
-      const canvas = await html2canvas(tempDiv, {
-        scale: 1.5,
-        useCORS: true,
-        logging: false
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Bulletin_${salaire.matricule}_${salaire.periode_paie.replace(/\s/g, '_')}.pdf`);
-      
-      toast.success("Bulletin de paie téléchargé avec succès");
-      return true;
-    } finally {
-      document.body.removeChild(tempDiv);
+    const printWindow = window.open(url, '_blank');
+    
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
     }
+    
+    toast.success("Bulletin de paie généré avec succès");
+    return true;
   } catch (error) {
     console.error("Erreur lors de la génération du PDF:", error);
     toast.error("Erreur lors de la génération du PDF");
-    return null;
+    throw error;
   }
 };
 

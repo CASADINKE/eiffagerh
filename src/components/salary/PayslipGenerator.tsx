@@ -1,5 +1,5 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Salaire } from "@/services/salaireService";
 import { format } from "date-fns";
@@ -8,14 +8,55 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Download, Printer } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PayslipGeneratorProps {
   salaire: Salaire;
   onClose: () => void;
 }
 
+interface EmployeeData {
+  nom: string;
+  prenom: string;
+  matricule: string;
+  poste: string;
+  date_naissance: string | null;
+  adresse: string;
+  telephone: string;
+  [key: string]: any;
+}
+
 export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
   const payslipRef = useRef<HTMLDivElement>(null);
+  const [employeeData, setEmployeeData] = useState<EmployeeData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch employee data
+  useEffect(() => {
+    const fetchEmployeeData = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('listes_employées')
+          .select('*')
+          .eq('matricule', salaire.matricule)
+          .single();
+          
+        if (error) {
+          console.error("Erreur lors de la récupération des données de l'employé:", error);
+          console.log("Matricule recherché:", salaire.matricule);
+        } else if (data) {
+          setEmployeeData(data as EmployeeData);
+        }
+      } catch (error) {
+        console.error("Erreur:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchEmployeeData();
+  }, [salaire.matricule]);
 
   const generatePDF = async () => {
     if (!payslipRef.current) return;
@@ -49,18 +90,28 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
   const currentDate = new Date();
   const formattedDate = format(currentDate, 'MMMM yyyy', { locale: fr });
 
-  // Mock data based on image - in real implementation, this would come from the database
-  const employeeData = {
+  // Get employee display name
+  const employeeName = employeeData 
+    ? `${employeeData.prenom} ${employeeData.nom}`
+    : salaire.nom;
+
+  // Get employee birth date
+  const dateNaissance = employeeData && employeeData.date_naissance
+    ? new Date(employeeData.date_naissance).toLocaleDateString('fr-FR')
+    : '10/10/1988'; // Fallback date
+
+  // Mock data based on the salaire with employee data if available
+  const mockEmployeeData = {
     embauche: "02/10/23",
     statut: "E G",
     partsIR: 1,
-    qualification: "CONDUCTEUR ENGINS",
-    dateNaissance: "10/10/1988",
+    qualification: employeeData?.poste || "CONDUCTEUR ENGINS",
+    dateNaissance: dateNaissance,
     gain: {
       salaireBrut: salaire.salaire_base,
       sursalaire: salaire.sursalaire,
-      indemniteLogement: 150000,
-      indemniteTransport: 107500,
+      indemniteLogement: salaire.indemnite_deplacement,
+      indemniteTransport: salaire.prime_transport,
     },
     tauxJournalier: {
       base: 1.00,
@@ -92,6 +143,10 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
   const printPayslip = () => {
     window.print();
   };
+
+  if (isLoading) {
+    return <div className="p-4 text-center">Chargement des données employé...</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto bg-white p-4">
@@ -145,10 +200,10 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <div className="font-semibold">Matricule: {salaire.matricule}</div>
-                <div className="font-bold">SEIDI SULEIMANE</div>
+                <div className="font-bold">{employeeName}</div>
               </div>
               <div className="text-right">
-                <div className="font-semibold">NDIHEM</div>
+                <div className="font-semibold">{employeeData?.adresse || "NDIHEM"}</div>
               </div>
             </div>
           </div>
@@ -168,11 +223,11 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
             </thead>
             <tbody>
               <tr>
-                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.embauche}</td>
-                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.statut}</td>
-                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.partsIR}</td>
-                <td className="border-r-2 border-gray-500 p-1 bg-white">{employeeData.qualification}</td>
-                <td className="p-1 bg-white">{employeeData.dateNaissance}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{mockEmployeeData.embauche}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{mockEmployeeData.statut}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{mockEmployeeData.partsIR}</td>
+                <td className="border-r-2 border-gray-500 p-1 bg-white">{mockEmployeeData.qualification}</td>
+                <td className="p-1 bg-white">{mockEmployeeData.dateNaissance}</td>
               </tr>
             </tbody>
           </table>
@@ -195,18 +250,18 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
             <tbody>
               <tr className="even:bg-gray-50">
                 <td className="border-r-2 border-gray-500 p-1">102 Salaire de base du mois</td>
-                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
-                <td className="border-r-2 border-gray-500 p-1">{employeeData.tauxJournalier.base}</td>
-                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.tauxJournalier.base}</td>
+                <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
               </tr>
               <tr className="odd:bg-white">
                 <td className="border-r-2 border-gray-500 p-1">105 Sursalaire</td>
-                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
-                <td className="border-r-2 border-gray-500 p-1">{employeeData.tauxJournalier.sursalaire}</td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.gain.salaireBrut.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.tauxJournalier.sursalaire}</td>
+                <td className="border-r-2 border-gray-500 p-1">{salaire.sursalaire.toLocaleString('fr-FR')}</td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
@@ -215,7 +270,7 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
                 <td className="border-r-2 border-gray-500 p-1">217 Indemnité de déplacement</td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1">{employeeData.gain.indemniteLogement.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1">{salaire.indemnite_deplacement.toLocaleString('fr-FR')}</td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
@@ -225,8 +280,8 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1">89 308</td>
-                <td className="border-r-2 border-gray-500 p-1 font-semibold">{employeeData.cotisations.ir.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1 font-semibold">{salaire.retenue_ir.toLocaleString('fr-FR')}</td>
                 <td className="p-1"></td>
               </tr>
               <tr className="even:bg-gray-50">
@@ -234,8 +289,8 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1">24 838</td>
-                <td className="border-r-2 border-gray-500 p-1 font-semibold">{employeeData.cotisations.ipresGen.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1 font-semibold">{salaire.ipres_general.toLocaleString('fr-FR')}</td>
                 <td className="p-1">37 255</td>
               </tr>
               <tr className="odd:bg-white">
@@ -244,32 +299,14 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1 font-semibold">{employeeData.cotisations.trimf.toLocaleString('fr-FR')}</td>
+                <td className="border-r-2 border-gray-500 p-1 font-semibold">{salaire.trimf.toLocaleString('fr-FR')}</td>
                 <td className="p-1"></td>
               </tr>
               <tr className="even:bg-gray-50">
                 <td className="border-r-2 border-gray-500 p-1">420 Prime de transport</td>
                 <td className="border-r-2 border-gray-500 p-1">26 000</td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1">26 000</td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="p-1"></td>
-              </tr>
-              <tr className="odd:bg-white">
-                <td className="border-r-2 border-gray-500 p-1">0673 Arrondi mois précédent</td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1">71</td>
-                <td className="p-1"></td>
-              </tr>
-              <tr className="even:bg-gray-50">
-                <td className="border-r-2 border-gray-500 p-1">0670 Arrondi du mois</td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
-                <td className="border-r-2 border-gray-500 p-1"></td>
+                <td className="border-r-2 border-gray-500 p-1">{salaire.prime_transport.toLocaleString('fr-FR')}</td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="border-r-2 border-gray-500 p-1"></td>
                 <td className="p-1"></td>
@@ -319,17 +356,17 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
                   <td className="border-r-2 border-gray-500 p-1 font-bold">MOIS</td>
                   <td className="border-r-2 border-gray-500 p-1">{salaireBrut.toLocaleString('fr-FR')}</td>
                   <td className="border-r-2 border-gray-500 p-1">{salaireBrut.toLocaleString('fr-FR')}</td>
-                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cotisations.ipresGen.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{salaire.ipres_general.toLocaleString('fr-FR')}</td>
                   <td className="border-r-2 border-gray-500 p-1"></td>
-                  <td className="p-1">{employeeData.cotisations.ir.toLocaleString('fr-FR')}</td>
+                  <td className="p-1">{salaire.retenue_ir.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr className="bg-gray-50">
                   <td className="border-r-2 border-gray-500 p-1 font-bold">CUMUL</td>
-                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cumul.brut.toLocaleString('fr-FR')}</td>
-                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cumul.ir.toLocaleString('fr-FR')}</td>
-                  <td className="border-r-2 border-gray-500 p-1">{employeeData.cumul.ipresGen.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.cumul.brut.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.cumul.ir.toLocaleString('fr-FR')}</td>
+                  <td className="border-r-2 border-gray-500 p-1">{mockEmployeeData.cumul.ipresGen.toLocaleString('fr-FR')}</td>
                   <td className="border-r-2 border-gray-500 p-1"></td>
-                  <td className="p-1">{employeeData.cumul.trimf.toLocaleString('fr-FR')}</td>
+                  <td className="p-1">{mockEmployeeData.cumul.trimf.toLocaleString('fr-FR')}</td>
                 </tr>
               </tbody>
             </table>
@@ -343,10 +380,10 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
               </thead>
               <tbody>
                 <tr>
-                  <td className="p-1">{employeeData.cotisations.trimf.toLocaleString('fr-FR')}</td>
+                  <td className="p-1">{salaire.trimf.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr className="bg-gray-50">
-                  <td className="p-1">{employeeData.cumul.trimf.toLocaleString('fr-FR')}</td>
+                  <td className="p-1">{mockEmployeeData.cumul.trimf.toLocaleString('fr-FR')}</td>
                 </tr>
               </tbody>
             </table>
@@ -363,7 +400,7 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
                   <td className="p-1 text-center font-bold text-xl bg-gray-100">{salaire.net_a_payer.toLocaleString('fr-FR')}</td>
                 </tr>
                 <tr className="bg-gray-50">
-                  <td className="p-1 text-center">{employeeData.cumul.netAPayer.toLocaleString('fr-FR')}</td>
+                  <td className="p-1 text-center">{mockEmployeeData.cumul.netAPayer.toLocaleString('fr-FR')}</td>
                 </tr>
               </tbody>
             </table>
@@ -377,7 +414,7 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
               <div className="font-bold">CONGES PAYES</div>
               <div className="grid grid-cols-2">
                 <div>Montant:</div>
-                <div className="font-semibold">{employeeData.congesPaies.toLocaleString('fr-FR')}</div>
+                <div className="font-semibold">{mockEmployeeData.congesPaies.toLocaleString('fr-FR')}</div>
               </div>
             </div>
           </div>
@@ -386,11 +423,11 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
               <div className="font-bold">PRIX PAR ENTREPRISE</div>
               <div className="grid grid-cols-2">
                 <div>Mois:</div>
-                <div className="font-semibold">{employeeData.prixEntreprise.toLocaleString('fr-FR')}</div>
+                <div className="font-semibold">{mockEmployeeData.prixEntreprise.toLocaleString('fr-FR')}</div>
               </div>
               <div className="grid grid-cols-2">
                 <div>Cumul:</div>
-                <div className="font-semibold">{employeeData.cumul.netAPayer.toLocaleString('fr-FR')}</div>
+                <div className="font-semibold">{mockEmployeeData.cumul.netAPayer.toLocaleString('fr-FR')}</div>
               </div>
             </div>
           </div>

@@ -125,6 +125,40 @@ export const deletePayslip = async (payslipId: string) => {
 
 export const generatePayslipPDF = async (payslip: Payslip) => {
   try {
+    // Fetch employee details from database
+    const { data: employeeData, error: employeeError } = await supabase
+      .from('listes_employées')
+      .select('*')
+      .eq('matricule', payslip.matricule)
+      .single();
+    
+    if (employeeError) {
+      console.error("Erreur lors de la récupération des données de l'employé:", employeeError);
+      toast.error("Erreur lors de la récupération des données de l'employé");
+    }
+    
+    // Use employee data from database if available, fallback to payslip data
+    const employeeInfo = employeeData || { 
+      nom: payslip.nom,
+      prenom: '',
+      matricule: payslip.matricule,
+      poste: 'Non spécifié',
+      date_naissance: null
+    };
+    
+    const employeeName = employeeData ? 
+      `${employeeInfo.prenom} ${employeeInfo.nom}` : 
+      payslip.nom;
+    
+    const dateNaissance = employeeInfo.date_naissance ? 
+      new Date(employeeInfo.date_naissance).toLocaleDateString('fr-FR') : 
+      '10/10/1988'; // Fallback date
+      
+    // Calculate total values
+    const salaireBrut = payslip.salaire_base + payslip.sursalaire;
+    const totalBrut = salaireBrut + payslip.indemnite_deplacement + payslip.prime_transport;
+    const totalDeductions = payslip.ipres_general + payslip.trimf + payslip.retenue_ir;
+    
     // Génération du contenu HTML pour le PDF
     const html = `
       <html>
@@ -139,74 +173,104 @@ export const generatePayslipPDF = async (payslip: Payslip) => {
             th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
             th { background-color: #f2f2f2; }
             .total-row { font-weight: bold; background-color: #f9f9f9; }
+            
+            /* Improved styling for payslip */
+            .payslip-container { border: 2px solid #333; padding: 20px; }
+            .company-header { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            .employee-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+            .employee-details { border: 1px solid #ddd; padding: 10px; }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>Bulletin de Paie</h1>
-            <p>Période: ${payslip.periode_paie}</p>
-          </div>
-          
-          <div class="info-section">
-            <div class="info-block">
-              <h3>Informations Employé</h3>
-              <p><strong>Nom:</strong> ${payslip.nom}</p>
-              <p><strong>Matricule:</strong> ${payslip.matricule}</p>
+          <div class="payslip-container">
+            <div class="company-header">
+              <div>
+                <h2>EIFFAGE ENERGIE</h2>
+                <p>T&D Sénégal</p>
+              </div>
+              <div>
+                <h1>Bulletin de Paie</h1>
+                <p>Période: ${payslip.periode_paie}</p>
+              </div>
             </div>
-            <div class="info-block">
-              <h3>Informations Paiement</h3>
-              <p><strong>Statut:</strong> ${payslip.statut_paiement}</p>
-              <p><strong>Mode de paiement:</strong> ${payslip.mode_paiement || 'Non défini'}</p>
-              <p><strong>Date de paiement:</strong> ${payslip.date_paiement || 'Non défini'}</p>
+            
+            <div class="employee-info">
+              <div class="employee-details">
+                <h3>Informations Employé</h3>
+                <p><strong>Matricule:</strong> ${payslip.matricule}</p>
+                <p><strong>Nom:</strong> ${employeeName}</p>
+                <p><strong>Date de naissance:</strong> ${dateNaissance}</p>
+                <p><strong>Poste:</strong> ${employeeInfo.poste || 'Non spécifié'}</p>
+              </div>
+              <div class="employee-details">
+                <h3>Informations Paiement</h3>
+                <p><strong>Statut:</strong> ${payslip.statut_paiement}</p>
+                <p><strong>Mode de paiement:</strong> ${payslip.mode_paiement || 'Non défini'}</p>
+                <p><strong>Date de paiement:</strong> ${payslip.date_paiement || 'Non défini'}</p>
+              </div>
+            </div>
+            
+            <table>
+              <thead>
+                <tr>
+                  <th>Désignation</th>
+                  <th style="text-align: right;">Base</th>
+                  <th style="text-align: right;">Montant (FCFA)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Salaire de base</td>
+                  <td style="text-align: right;">${payslip.salaire_base.toLocaleString('fr-FR')}</td>
+                  <td style="text-align: right;">${payslip.salaire_base.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Sursalaire</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${payslip.sursalaire.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Prime de transport</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${payslip.prime_transport.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Indemnité de déplacement</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${payslip.indemnite_deplacement.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Total Brut</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${totalBrut.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>IPRES Général</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">-${payslip.ipres_general.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>TRIMF</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">-${payslip.trimf.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr>
+                  <td>Retenue IR</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">-${payslip.retenue_ir.toLocaleString('fr-FR')}</td>
+                </tr>
+                <tr class="total-row">
+                  <td>Net à Payer</td>
+                  <td style="text-align: right;"></td>
+                  <td style="text-align: right;">${payslip.net_a_payer.toLocaleString('fr-FR')}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div style="margin-top: 30px; text-align: right;">
+              <p><strong>Date d'émission:</strong> ${new Date().toLocaleDateString('fr-FR')}</p>
             </div>
           </div>
-          
-          <table>
-            <thead>
-              <tr>
-                <th>Désignation</th>
-                <th>Montant (FCFA)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Salaire de base</td>
-                <td>${payslip.salaire_base.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr>
-                <td>Sursalaire</td>
-                <td>${payslip.sursalaire.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr>
-                <td>Prime de transport</td>
-                <td>${payslip.prime_transport.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr>
-                <td>Indemnité de déplacement</td>
-                <td>${payslip.indemnite_deplacement.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr class="total-row">
-                <td>Total Brut</td>
-                <td>${payslip.total_brut.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr>
-                <td>IPRES Général</td>
-                <td>-${payslip.ipres_general.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr>
-                <td>TRIMF</td>
-                <td>-${payslip.trimf.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr>
-                <td>Retenue IR</td>
-                <td>-${payslip.retenue_ir.toLocaleString('fr-FR')}</td>
-              </tr>
-              <tr class="total-row">
-                <td>Net à Payer</td>
-                <td>${payslip.net_a_payer.toLocaleString('fr-FR')}</td>
-              </tr>
-            </tbody>
-          </table>
         </body>
       </html>
     `;
