@@ -284,8 +284,8 @@ export function SalaireTable({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showPayslip} onOpenChange={setShowPayslip} className="w-full max-w-4xl">
-        <DialogContent className="max-w-4xl w-full max-h-[95vh] overflow-y-auto">
+      <Dialog open={showPayslip} onOpenChange={setShowPayslip}>
+        <DialogContent maxWidth="4xl">
           <DialogHeader>
             <DialogTitle>Bulletin de Paie</DialogTitle>
             <DialogDescription>
