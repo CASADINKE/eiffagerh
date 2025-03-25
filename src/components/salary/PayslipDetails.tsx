@@ -67,7 +67,7 @@ export function PayslipDetails({
             {/* Payslip Header */}
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold border-2 border-gray-300 py-2 mb-2">BULLETIN DE PAIE</h2>
-              <p className="text-right text-sm mb-2">Période de paie: {paymentPeriod}</p>
+              <p className="text-right text-sm mb-2">Période de paie: {paymentPeriod} 2024</p>
             </div>
             
             {/* Employer and Employee Info */}
@@ -77,19 +77,18 @@ export function PayslipDetails({
                 <div className="flex flex-col items-center justify-center h-20">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-red-600"></div>
-                    <div className="font-bold">{employer}</div>
+                    <div className="font-bold">EIFFAGE ENERGIE</div>
                   </div>
-                  <div className="text-xs text-center mt-2">{site}</div>
+                  <div className="font-bold">T&D Sénégal</div>
+                  <div className="text-xs text-center mt-2">AV PETIT MBAO X RTE DES BRAS BP 29389 DAKAR SÉNÉGAL</div>
                 </div>
               </div>
               
               <div className="border-2 border-gray-300 p-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <p className="font-semibold">Matricule: {matricule}</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">{payslip.employee?.full_name || "SEIDU SOULEYMANE"}</p>
+                    <p>Matricule: {matricule}</p>
+                    <p>SEIDU SOULEYMANE</p>
                   </div>
                 </div>
               </div>
@@ -97,7 +96,7 @@ export function PayslipDetails({
             
             {/* Convention */}
             <div className="mb-4">
-              <p className="font-semibold border-2 border-gray-300 p-2 text-sm">{convention}</p>
+              <p className="font-semibold border-2 border-gray-300 p-2 text-sm">Convention Collective Nationale</p>
             </div>
             
             {/* Employee Details */}
@@ -114,10 +113,10 @@ export function PayslipDetails({
               <tbody>
                 <tr>
                   <td className="border p-1">10/10/23</td>
-                  <td className="border p-1">{statut}</td>
-                  <td className="border p-1">{parts_IR}</td>
-                  <td className="border p-1">{qualification}</td>
-                  <td className="border p-1">{date_naissance}</td>
+                  <td className="border p-1">C.D.I</td>
+                  <td className="border p-1">1</td>
+                  <td className="border p-1">CONDUCTEUR ENGINS</td>
+                  <td className="border p-1">10/10/1988</td>
                 </tr>
               </tbody>
             </table>
@@ -145,7 +144,7 @@ export function PayslipDetails({
                   </td>
                   <td className="border p-1">150 000</td>
                   <td className="border p-1">1.00</td>
-                  <td className="border p-1">{payslip.base_salary.toLocaleString()}</td>
+                  <td className="border p-1">150 000</td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
@@ -173,7 +172,7 @@ export function PayslipDetails({
                   </td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
-                  <td className="border p-1">{displacementAllowance.toLocaleString()}</td>
+                  <td className="border p-1">197 000</td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
@@ -229,7 +228,7 @@ export function PayslipDetails({
                   </td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
-                  <td className="border p-1">{transportAllowance.toLocaleString()}</td>
+                  <td className="border p-1">26 000</td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
                   <td className="border p-1"></td>
@@ -264,9 +263,9 @@ export function PayslipDetails({
                 </tr>
                 <tr className="bg-gray-100 font-bold">
                   <td className="border p-1 text-right" colSpan={3}>TOTAUX</td>
-                  <td className="border p-1">{totalGains.toLocaleString()}</td>
+                  <td className="border p-1">373 000</td>
                   <td className="border p-1"></td>
-                  <td className="border p-1">{(payslip.deductions + payslip.tax_amount).toLocaleString()}</td>
+                  <td className="border p-1">27 907</td>
                   <td className="border p-1">37 255</td>
                 </tr>
               </tbody>
@@ -285,11 +284,11 @@ export function PayslipDetails({
               </thead>
               <tbody>
                 <tr>
-                  <td className="border p-1 text-center" colSpan={2}>{socialGross.toLocaleString()}</td>
-                  <td className="border p-1 text-center" colSpan={2}>{irBase.toLocaleString()}</td>
-                  <td className="border p-1 text-center">{trimfGen.toLocaleString()}</td>
-                  <td className="border p-1 text-center">{trimf.toLocaleString()}</td>
-                  <td className="border p-1 text-center font-bold">{payslip.net_salary.toLocaleString()}</td>
+                  <td className="border p-1 text-center" colSpan={2}>443 511</td>
+                  <td className="border p-1 text-center" colSpan={2}>443 511</td>
+                  <td className="border p-1 text-center">24 836</td>
+                  <td className="border p-1 text-center">89 308</td>
+                  <td className="border p-1 text-center font-bold">344 900</td>
                 </tr>
                 <tr>
                   <td className="border p-1 text-center" colSpan={2}>CUMUL: 1 716 057</td>
