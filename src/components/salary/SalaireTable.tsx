@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -15,7 +14,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
 import {
@@ -31,13 +29,23 @@ import {
   SalairePaiementStatus,
   ModePaiement 
 } from "@/services/salaireService";
-import { CalendarIcon, CheckCircle2, Download, FileText } from "lucide-react";
+import { CalendarIcon, CheckCircle2, Download, FileText, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { PayslipGenerator } from "./PayslipGenerator";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SalaireTableProps {
   salaires: Salaire[];
@@ -51,6 +59,10 @@ interface SalaireTableProps {
   isUpdating: boolean;
   statusFilter?: SalairePaiementStatus;
   showActions?: boolean;
+  onDeleteSalaire?: (salaireId: string) => void;
+  isDeleting?: boolean;
+  onDownloadSalaire?: (salaireId: string) => void;
+  isDownloading?: boolean;
 }
 
 export function SalaireTable({
@@ -59,7 +71,11 @@ export function SalaireTable({
   onUpdateStatus,
   isUpdating,
   statusFilter,
-  showActions = true
+  showActions = true,
+  onDeleteSalaire,
+  isDeleting = false,
+  onDownloadSalaire,
+  isDownloading = false
 }: SalaireTableProps) {
   const [selectedSalaire, setSelectedSalaire] = useState<Salaire | null>(null);
   const [modePaiement, setModePaiement] = useState<ModePaiement | "none">("none");
@@ -67,6 +83,8 @@ export function SalaireTable({
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [showPayslip, setShowPayslip] = useState<boolean>(false);
   const [selectedPayslipSalaire, setSelectedPayslipSalaire] = useState<Salaire | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [salaireToDelete, setSalaireToDelete] = useState<string | null>(null);
   
   const handleValidate = (salaire: Salaire) => {
     onUpdateStatus(salaire.id, 'Validé');
@@ -94,6 +112,25 @@ export function SalaireTable({
   const handleGeneratePayslip = (salaire: Salaire) => {
     setSelectedPayslipSalaire(salaire);
     setShowPayslip(true);
+  };
+  
+  const handleDeleteClick = (salaireId: string) => {
+    setSalaireToDelete(salaireId);
+    setDeleteDialogOpen(true);
+  };
+  
+  const confirmDelete = () => {
+    if (salaireToDelete && onDeleteSalaire) {
+      onDeleteSalaire(salaireToDelete);
+    }
+    setDeleteDialogOpen(false);
+    setSalaireToDelete(null);
+  };
+
+  const handleDownload = (salaireId: string) => {
+    if (onDownloadSalaire) {
+      onDownloadSalaire(salaireId);
+    }
   };
   
   const filteredSalaires = statusFilter 
@@ -180,6 +217,30 @@ export function SalaireTable({
                         <FileText className="h-4 w-4 mr-1" />
                         Bulletin
                       </Button>
+                      
+                      {onDownloadSalaire && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownload(salaire.id)}
+                          disabled={isDownloading}
+                        >
+                          <Download className="h-4 w-4" />
+                          <span className="sr-only">Télécharger</span>
+                        </Button>
+                      )}
+                      
+                      {onDeleteSalaire && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteClick(salaire.id)}
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <span className="sr-only">Supprimer</span>
+                        </Button>
+                      )}
                       
                       {salaire.statut_paiement === 'En attente' && (
                         <Button 
@@ -301,6 +362,27 @@ export function SalaireTable({
           )}
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce bulletin de salaire ?
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

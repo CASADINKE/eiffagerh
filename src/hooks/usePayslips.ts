@@ -6,7 +6,8 @@ import {
   deletePayslip,
   generatePayslipPDF,
   PayslipStatus, 
-  PaymentMethod 
+  PaymentMethod,
+  Payslip 
 } from "@/services/payslipService";
 
 export const usePayslips = () => {
@@ -51,7 +52,7 @@ export const usePayslips = () => {
   });
   
   const downloadPayslipMutation = useMutation({
-    mutationFn: (payslip: Parameters<typeof generatePayslipPDF>[0]) => {
+    mutationFn: (payslip: Payslip) => {
       return generatePayslipPDF(payslip);
     },
   });

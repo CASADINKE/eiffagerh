@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   fetchSalaires, 
@@ -6,6 +5,8 @@ import {
   updateSalaireStatus, 
   getSalairesByMatricule,
   getSalaireById,
+  deleteSalaire as deleteSalaireService,
+  generatePDF as generatePDFService,
   SalaireFormData,
   Salaire,
   SalairePaiementStatus,
@@ -39,6 +40,17 @@ export const useSalaires = () => {
     }
   });
   
+  const { mutate: deleteSalaire, isPending: isDeleting } = useMutation({
+    mutationFn: (salaireId: string) => deleteSalaireService(salaireId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['salaires'] });
+    }
+  });
+
+  const { mutate: generatePDF, isPending: isGenerating } = useMutation({
+    mutationFn: (salaireId: string) => generatePDFService(salaireId),
+  });
+  
   return {
     salaires,
     isLoading,
@@ -46,7 +58,11 @@ export const useSalaires = () => {
     createSalaire: createSalaireMutation,
     isCreating,
     updateStatus,
-    isUpdating
+    isUpdating,
+    deleteSalaire,
+    isDeleting,
+    generatePDF,
+    isGenerating
   };
 };
 

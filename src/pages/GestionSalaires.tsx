@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +20,7 @@ import { toast } from "sonner";
 export default function GestionSalaires() {
   const { 
     salaires, 
-    isLoading, 
+    isLoading,
     updateStatus, 
     isUpdating,
     deleteSalaire,
@@ -46,7 +45,6 @@ export default function GestionSalaires() {
     return matchesSearch && matchesStatus;
   });
   
-  // Calculs pour les statistiques
   const getStatsByStatus = () => {
     if (!salaires) return { pending: 0, validated: 0, paid: 0, total: 0 };
     
@@ -67,7 +65,6 @@ export default function GestionSalaires() {
   
   const stats = getStatsByStatus();
   
-  // Comptes par statut pour les onglets
   const getCounts = () => {
     if (!salaires) return { pending: 0, validated: 0, paid: 0, all: 0 };
     
@@ -100,6 +97,7 @@ export default function GestionSalaires() {
   const handleDeleteSalaire = (salaireId: string) => {
     if (deleteSalaire) {
       deleteSalaire(salaireId);
+      toast.success("Salaire en cours de suppression...");
     }
   };
   
