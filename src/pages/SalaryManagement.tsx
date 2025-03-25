@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Tabs, 
@@ -24,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PayslipsTable } from "@/components/salary/PayslipsTable";
 import { usePayslips } from "@/hooks/usePayslips";
-import { Payslip, PayslipStatus } from "@/services/payslipService";
+import { Payslip, PayslipStatus, PaymentMethod } from "@/services/payslipService";
 import { Search, FileCheck, FileClock, Download } from "lucide-react";
 
 const SalaryManagement = () => {

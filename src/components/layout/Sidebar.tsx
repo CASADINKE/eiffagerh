@@ -1,16 +1,19 @@
-
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users,
+  ClipboardList,
   Calendar, 
-  Clock, 
+  Wallet,
   Settings,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Building,
-  CreditCard
+  CreditCard,
+  Wallet,
+  CheckCircle
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -26,13 +29,25 @@ import {
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const navigationItems = [
+const navItems = [
   { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
   { path: "/salary", title: "Gestion des paies", icon: CreditCard },
   { path: "/settings", title: "Paramètres", icon: Settings },
+  {
+    title: "Gestion des Salaires",
+    href: "/salary-management",
+    icon: <Wallet className="h-5 w-5" />,
+    roles: ["super_admin", "admin", "rh"],
+  },
+  {
+    title: "Validation des Paiements",
+    href: "/validate-salary",
+    icon: <CheckCircle className="h-5 w-5" />,
+    roles: ["super_admin", "admin", "rh"],
+  },
 ];
 
 const Sidebar = () => {
@@ -88,11 +103,11 @@ const Sidebar = () => {
           </SidebarGroupLabel>
           <SidebarGroupContent className="mt-2 px-2">
             <SidebarMenu>
-              {navigationItems.map((item) => (
+              {navItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton asChild>
                     <NavLink
-                      to={item.path}
+                      to={item.href}
                       className={({ isActive }) => cn(
                         "flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 my-1",
                         isActive
