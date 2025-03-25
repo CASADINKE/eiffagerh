@@ -3,25 +3,17 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Check, Filter, X } from "lucide-react";
+import { CalendarIcon, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Employee } from "@/hooks/useEmployees";
 import { Card } from "@/components/ui/card";
-import { mapEmployeeToUI } from "@/types/employee";
 import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
 
 export interface TimeTrackingFiltersProps {
   employees: Employee[];
@@ -39,17 +31,11 @@ export interface TimeTrackingFilters {
 }
 
 export const TimeTrackingFilters: React.FC<TimeTrackingFiltersProps> = ({
-  employees,
   onFilterChange,
   filters,
   onResetFilters,
 }) => {
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
-
-  const handleFilterChange = (key: keyof TimeTrackingFilters, value: any) => {
-    const newFilters = { ...filters, [key]: value };
-    onFilterChange(newFilters);
-  };
 
   const handleDateChange = (date: { from?: Date | null; to?: Date | null }) => {
     handleFilterChange("dateRange", {
@@ -58,37 +44,18 @@ export const TimeTrackingFilters: React.FC<TimeTrackingFiltersProps> = ({
     });
   };
 
+  const handleFilterChange = (key: keyof TimeTrackingFilters, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    onFilterChange(newFilters);
+  };
+
   const handleResetDate = () => {
     handleFilterChange("dateRange", null);
   };
 
-  // Map employees for display
-  const mappedEmployees = employees.map(mapEmployeeToUI);
-
   return (
     <Card className="p-4 mb-6">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-        <div className="w-full sm:w-auto">
-          <Label htmlFor="employee-filter" className="mb-2 block">
-            Employé
-          </Label>
-          <Select
-            value={filters.employeeId || "all"}
-            onValueChange={(value) => handleFilterChange("employeeId", value === "all" ? null : value)}
-          >
-            <SelectTrigger id="employee-filter" className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Tous les employés" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les employés</SelectItem>
-              {mappedEmployees.map((employee) => (
-                <SelectItem key={employee.id} value={employee.id}>
-                  {employee.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
         <div className="w-full sm:w-auto">
           <Label htmlFor="date-filter" className="mb-2 block">
             Période

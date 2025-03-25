@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
@@ -40,7 +41,7 @@ const TimeTracking = () => {
     data: timeEntries = [], 
     isLoading: entriesLoading,
     isError: entriesError
-  } = useTimeEntries(filters.employeeId || undefined);
+  } = useTimeEntries();
   const clockOutMutation = useClockOutMutation();
 
   console.log("TimeTracking: Loaded time entries:", timeEntries.length);
