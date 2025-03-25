@@ -19,6 +19,8 @@ import { Toaster } from "sonner";
 import Layout from "@/components/layout/Layout";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import EmployeePayslipsPage from "@/pages/EmployeePayslips";
+import GestionSalaires from "@/pages/GestionSalaires";
+import EmployeeSalaires from "@/pages/EmployeeSalaires";
 
 function App() {
   const queryClient = new QueryClient();
@@ -80,6 +82,26 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <EmployeePayslipsPage />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/employee-salaires/:matricule"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <EmployeeSalaires />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/gestion-salaires"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <GestionSalaires />
                     </Layout>
                   </ProtectedRoute>
                 }

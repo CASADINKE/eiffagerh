@@ -317,6 +317,66 @@ export type Database = {
         }
         Relationships: []
       }
+      salaires: {
+        Row: {
+          created_at: string | null
+          date_paiement: string | null
+          id: string
+          indemnite_deplacement: number
+          ipres_general: number
+          matricule: string
+          mode_paiement: string | null
+          net_a_payer: number
+          nom: string
+          periode_paie: string
+          prime_transport: number
+          retenue_ir: number
+          salaire_base: number
+          statut_paiement: string
+          sursalaire: number
+          trimf: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_paiement?: string | null
+          id?: string
+          indemnite_deplacement?: number
+          ipres_general?: number
+          matricule: string
+          mode_paiement?: string | null
+          net_a_payer?: number
+          nom: string
+          periode_paie: string
+          prime_transport?: number
+          retenue_ir?: number
+          salaire_base?: number
+          statut_paiement?: string
+          sursalaire?: number
+          trimf?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_paiement?: string | null
+          id?: string
+          indemnite_deplacement?: number
+          ipres_general?: number
+          matricule?: string
+          mode_paiement?: string | null
+          net_a_payer?: number
+          nom?: string
+          periode_paie?: string
+          prime_transport?: number
+          retenue_ir?: number
+          salaire_base?: number
+          statut_paiement?: string
+          sursalaire?: number
+          trimf?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       salary_details: {
         Row: {
           base_salary: number
