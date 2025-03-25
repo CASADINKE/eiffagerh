@@ -10,9 +10,13 @@ import {
   PaymentMethod,
   Payslip 
 } from "@/services/payslipService";
+import { useState } from "react";
+import { Salaire } from "@/services/salaireService";
 
 export const usePayslips = () => {
   const queryClient = useQueryClient();
+  const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   
   const {
     data: payslips,
@@ -58,6 +62,16 @@ export const usePayslips = () => {
     },
   });
   
+  const viewPayslip = (payslip: Payslip) => {
+    setSelectedPayslip(payslip);
+    setIsPrintModalOpen(true);
+  };
+  
+  const closePayslipModal = () => {
+    setIsPrintModalOpen(false);
+    setSelectedPayslip(null);
+  };
+  
   return {
     payslips,
     isLoading,
@@ -68,6 +82,10 @@ export const usePayslips = () => {
     deletePayslip: deletePayslipMutation.mutate,
     isDeleting: deletePayslipMutation.isPending,
     downloadPayslip: downloadPayslipMutation.mutate,
-    isDownloading: downloadPayslipMutation.isPending
+    isDownloading: downloadPayslipMutation.isPending,
+    selectedPayslip,
+    isPrintModalOpen,
+    viewPayslip,
+    closePayslipModal
   };
 };
