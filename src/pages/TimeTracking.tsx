@@ -42,6 +42,8 @@ const TimeTracking = () => {
   } = useTimeEntries(filters.employeeId || undefined);
   const clockOutMutation = useClockOutMutation();
 
+  console.log("TimeTracking: Loaded time entries:", timeEntries.length);
+
   // Filter time entries based on date range if present
   const filteredTimeEntries = timeEntries.filter(entry => {
     if (!filters.dateRange?.from) return true;
@@ -58,6 +60,8 @@ const TimeTracking = () => {
     return entryDateOnly >= fromDateOnly && entryDateOnly <= toDateOnly;
   });
 
+  console.log("TimeTracking: Filtered by date range:", filteredTimeEntries.length);
+
   // Filter based on active tab
   const today = format(new Date(), "yyyy-MM-dd");
   const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
@@ -69,6 +73,8 @@ const TimeTracking = () => {
     if (activeTab === "yesterday") return entryDate === yesterday;
     return true; // "history" tab shows all entries
   });
+
+  console.log(`TimeTracking: Tab filtered (${activeTab}):`, tabFilteredEntries.length);
 
   const activeEmployeeCount = timeEntries.filter(
     entry => !entry.clock_out && format(new Date(entry.date), "yyyy-MM-dd") === today
@@ -110,6 +116,8 @@ const TimeTracking = () => {
   const handleExport = (format = 'csv') => {
     handleExportTimeEntries(filteredTimeEntries, activeTab, format);
   };
+
+  console.log("TimeTracking: Rendering with", tabFilteredEntries.length, "entries");
 
   return (
     <div className="container mx-auto">

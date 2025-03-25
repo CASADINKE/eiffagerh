@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Employee } from "./useEmployees";
@@ -15,18 +16,10 @@ export interface TimeEntry {
   employee?: EmployeeUI;
 }
 
-// Define a type for the profile data returned from Supabase
-interface ProfileData {
-  id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  departments?: {
-    name: string | null;
-  } | null;
-}
-
 // Fetch all time entries with employee details
 export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
+  console.log("Fetching time entries...");
+  
   const { data, error } = await supabase
     .from("time_entries")
     .select(`
@@ -45,10 +38,17 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
     throw new Error(`Error fetching time entries: ${error.message}`);
   }
 
+  console.log("Time entries fetched:", data?.length || 0);
+  
+  // Si aucune donnée n'est retournée, on retourne un tableau vide
+  if (!data || data.length === 0) {
+    return [];
+  }
+
   // Process and format the data
   return data.map((entry) => {
     // Create an empty profile object if profiles is null
-    const profileData = entry.profiles as ProfileData | null;
+    const profileData = entry.profiles as { id: string; full_name: string | null; avatar_url: string | null } | null;
     
     return {
       id: entry.id,
@@ -76,6 +76,8 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
 
 // Clock in an employee
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
+  console.log("Clocking in employee:", employeeId);
+  
   const { data, error } = await supabase
     .from("time_entries")
     .insert({
@@ -90,11 +92,14 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     throw new Error(`Error clocking in employee: ${error.message}`);
   }
 
+  console.log("Clock in successful:", data);
   return data;
 };
 
 // Clock out an employee (update existing time entry)
 export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
+  console.log("Clocking out employee, entry ID:", entryId);
+  
   const { data, error } = await supabase
     .from("time_entries")
     .update({
@@ -109,6 +114,7 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
     throw new Error(`Error clocking out employee: ${error.message}`);
   }
 
+  console.log("Clock out successful:", data);
   return data;
 };
 
@@ -139,10 +145,13 @@ export const useTimeEntries = (employeeFilter?: string) => {
     queryKey: ["timeEntries", employeeFilter],
     queryFn: async () => {
       const entries = await fetchTimeEntries();
+      console.log("Entries fetched, total:", entries.length);
       
       // Filter by employee if specified
       if (employeeFilter && employeeFilter !== "all") {
-        return entries.filter(entry => entry.employee_id === employeeFilter);
+        const filtered = entries.filter(entry => entry.employee_id === employeeFilter);
+        console.log(`Filtered by employee ${employeeFilter}:`, filtered.length);
+        return filtered;
       }
       
       return entries;

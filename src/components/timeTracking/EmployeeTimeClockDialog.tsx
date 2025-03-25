@@ -23,7 +23,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface EmployeeTimeClockDialogProps {
   className?: string;
@@ -59,57 +58,6 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
     console.log("Handling clock in/out for employee:", employeeId);
     
     try {
-      // First check if this employee exists in the profiles table
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", employeeId)
-        .single();
-        
-      if (profileError) {
-        console.log("Profile not found, creating one:", profileError);
-        
-        // Find the employee in our local state to get their name
-        const employee = employees.find(emp => emp.id === employeeId);
-        
-        if (!employee) {
-          toast.error("Employé non trouvé dans la liste locale.");
-          return;
-        }
-        
-        // Create a profile for this employee with better error handling
-        try {
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert({
-              id: employeeId,
-              full_name: employee.name,
-              role: 'employee'
-            });
-            
-          if (insertError) {
-            console.error("Error creating profile:", insertError);
-            
-            // Provide more specific error message based on error type
-            if (insertError.code === '23505') {
-              toast.error("Un profil existe déjà pour cet employé.");
-            } else if (insertError.code === '42501') {
-              toast.error("Vous n'avez pas les permissions nécessaires pour créer un profil.");
-            } else {
-              toast.error(`Erreur lors de la création du profil: ${insertError.message}`);
-            }
-            return;
-          }
-          
-          console.log("Created profile for employee:", employee.name);
-          toast.success(`Profil créé pour ${employee.name}`);
-        } catch (e) {
-          console.error("Exception creating profile:", e);
-          toast.error("Erreur lors de la création du profil. Veuillez réessayer.");
-          return;
-        }
-      }
-      
       // Check if employee is already clocked in
       const activeEntry = getActiveTimeEntry(timeEntries, employeeId);
       
