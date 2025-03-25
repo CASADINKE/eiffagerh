@@ -14,9 +14,6 @@ import TimeTracking from "./pages/TimeTracking";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import Salary from "./pages/Salary";
-import SalaryPayment from "./pages/SalaryPayment";
-import EmployeePayslips from "./pages/EmployeePayslips";
 
 const queryClient = new QueryClient();
 
@@ -55,34 +52,6 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <TimeTracking />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/salary" element={
-              <ProtectedRoute>
-                <Layout>
-                  <Salary />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/salary-payment" element={
-              <ProtectedRoute>
-                <Layout>
-                  <SalaryPayment />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/salary-payment/:id" element={
-              <ProtectedRoute>
-                <Layout>
-                  <SalaryPayment />
-                </Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/employee-payslips" element={
-              <ProtectedRoute>
-                <Layout>
-                  <EmployeePayslips />
                 </Layout>
               </ProtectedRoute>
             } />
