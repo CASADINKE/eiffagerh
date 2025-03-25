@@ -31,12 +31,13 @@ import {
   SalairePaiementStatus,
   ModePaiement 
 } from "@/services/salaireService";
-import { CalendarIcon, CheckCircle2, Download } from "lucide-react";
+import { CalendarIcon, CheckCircle2, Download, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { PayslipGenerator } from "./PayslipGenerator";
 
 interface SalaireTableProps {
   salaires: Salaire[];
@@ -61,9 +62,11 @@ export function SalaireTable({
   showActions = true
 }: SalaireTableProps) {
   const [selectedSalaire, setSelectedSalaire] = useState<Salaire | null>(null);
-  const [modePaiement, setModePaiement] = useState<ModePaiement | "">("");
+  const [modePaiement, setModePaiement] = useState<ModePaiement | "none">("none");
   const [datePaiement, setDatePaiement] = useState<Date | undefined>();
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [showPayslip, setShowPayslip] = useState<boolean>(false);
+  const [selectedPayslipSalaire, setSelectedPayslipSalaire] = useState<Salaire | null>(null);
   
   const handleValidate = (salaire: Salaire) => {
     onUpdateStatus(salaire.id, 'Validé');
@@ -71,13 +74,13 @@ export function SalaireTable({
   
   const handleOpenPayment = (salaire: Salaire) => {
     setSelectedSalaire(salaire);
-    setModePaiement("");
+    setModePaiement("none");
     setDatePaiement(undefined);
     setOpenDialog(true);
   };
   
   const handlePay = () => {
-    if (selectedSalaire && modePaiement) {
+    if (selectedSalaire && modePaiement !== "none") {
       onUpdateStatus(
         selectedSalaire.id, 
         'Payé', 
@@ -86,6 +89,11 @@ export function SalaireTable({
       );
       setOpenDialog(false);
     }
+  };
+
+  const handleGeneratePayslip = (salaire: Salaire) => {
+    setSelectedPayslipSalaire(salaire);
+    setShowPayslip(true);
   };
   
   const filteredSalaires = statusFilter 
@@ -163,38 +171,39 @@ export function SalaireTable({
                 )}
                 {showActions && (
                   <TableCell className="text-right">
-                    {salaire.statut_paiement === 'En attente' && (
+                    <div className="flex justify-end gap-2">
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => handleValidate(salaire)}
-                        disabled={isUpdating}
+                        onClick={() => handleGeneratePayslip(salaire)}
                       >
-                        <CheckCircle2 className="h-4 w-4 mr-1" />
-                        Valider
+                        <FileText className="h-4 w-4 mr-1" />
+                        Bulletin
                       </Button>
-                    )}
-                    {salaire.statut_paiement === 'Validé' && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleOpenPayment(salaire)}
-                        disabled={isUpdating}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        Payer
-                      </Button>
-                    )}
-                    {salaire.statut_paiement === 'Payé' && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {}}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        PDF
-                      </Button>
-                    )}
+                      
+                      {salaire.statut_paiement === 'En attente' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleValidate(salaire)}
+                          disabled={isUpdating}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Valider
+                        </Button>
+                      )}
+                      {salaire.statut_paiement === 'Validé' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleOpenPayment(salaire)}
+                          disabled={isUpdating}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Payer
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 )}
               </TableRow>
@@ -223,6 +232,7 @@ export function SalaireTable({
                   <SelectValue placeholder="Sélectionnez un mode de paiement" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">Sélectionner un mode</SelectItem>
                   <SelectItem value="Virement">Virement</SelectItem>
                   <SelectItem value="Espèces">Espèces</SelectItem>
                   <SelectItem value="Mobile Money">Mobile Money</SelectItem>
@@ -266,11 +276,29 @@ export function SalaireTable({
             <Button variant="outline" onClick={() => setOpenDialog(false)}>Annuler</Button>
             <Button 
               onClick={handlePay} 
-              disabled={!modePaiement || isUpdating}
+              disabled={modePaiement === "none" || isUpdating}
             >
               {isUpdating ? "Traitement..." : "Confirmer le paiement"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPayslip} onOpenChange={setShowPayslip} className="w-full max-w-4xl">
+        <DialogContent className="max-w-4xl w-full max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Bulletin de Paie</DialogTitle>
+            <DialogDescription>
+              Bulletin de paie pour {selectedPayslipSalaire?.nom} - {selectedPayslipSalaire?.periode_paie}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedPayslipSalaire && (
+            <PayslipGenerator 
+              salaire={selectedPayslipSalaire} 
+              onClose={() => setShowPayslip(false)} 
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>

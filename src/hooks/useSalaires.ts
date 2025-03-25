@@ -5,6 +5,7 @@ import {
   createSalaire, 
   updateSalaireStatus, 
   getSalairesByMatricule,
+  getSalaireById,
   SalaireFormData,
   Salaire,
   SalairePaiementStatus,
@@ -58,6 +59,20 @@ export const useEmployeeSalaires = (matricule: string) => {
   
   return {
     salaires,
+    isLoading,
+    error
+  };
+};
+
+export const useSalaireById = (salaireId: string) => {
+  const { data: salaire, isLoading, error } = useQuery({
+    queryKey: ['salaires', salaireId],
+    queryFn: () => getSalaireById(salaireId),
+    enabled: !!salaireId
+  });
+  
+  return {
+    salaire,
     isLoading,
     error
   };
