@@ -25,11 +25,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SalaireFormData } from "@/services/salaireService";
 import { useSalaires } from "@/hooks/useSalaires";
+import { useEmployees } from "@/hooks/useEmployees";
 import { Calculator } from "lucide-react";
 
 const formSchema = z.object({
-  matricule: z.string().min(1, "Le matricule est requis"),
-  nom: z.string().min(1, "Le nom est requis"),
+  employee: z.string().min(1, "Sélectionnez un employé"),
   periode_paie: z.string().min(1, "La période de paie est requise"),
   salaire_base: z.coerce.number().min(0, "Le salaire de base ne peut pas être négatif"),
   sursalaire: z.coerce.number().min(0, "Le sursalaire ne peut pas être négatif").default(0),
@@ -51,13 +51,14 @@ const months = [
 
 export function SalaireForm() {
   const { createSalaire, isCreating } = useSalaires();
+  const { data: employees } = useEmployees();
   const [netAPayer, setNetAPayer] = useState<number>(0);
+  const [selectedEmployee, setSelectedEmployee] = useState<{ matricule: string; nom: string; prenom: string } | null>(null);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      matricule: "",
-      nom: "",
+      employee: "",
       periode_paie: "",
       salaire_base: 0,
       sursalaire: 0,
@@ -73,6 +74,21 @@ export function SalaireForm() {
   const years = [currentYear - 1, currentYear, currentYear + 1];
   
   const watchAllFields = form.watch();
+  
+  // Mettre à jour les informations de l'employé sélectionné
+  useEffect(() => {
+    const employeeId = form.getValues().employee;
+    if (employeeId && employees) {
+      const employee = employees.find(emp => emp.id === employeeId);
+      if (employee) {
+        setSelectedEmployee({
+          matricule: employee.matricule,
+          nom: employee.nom,
+          prenom: employee.prenom
+        });
+      }
+    }
+  }, [form.watch("employee"), employees]);
   
   useEffect(() => {
     const totalBrut = 
@@ -90,10 +106,16 @@ export function SalaireForm() {
   }, [watchAllFields]);
   
   function onSubmit(values: FormValues) {
+    // Vérifier que l'employé est sélectionné
+    if (!selectedEmployee) {
+      console.error("Aucun employé sélectionné");
+      return;
+    }
+    
     // Create a properly typed SalaireFormData object with all required fields
     const formData: SalaireFormData = {
-      matricule: values.matricule,
-      nom: values.nom,
+      matricule: selectedEmployee.matricule,
+      nom: `${selectedEmployee.prenom} ${selectedEmployee.nom}`,
       periode_paie: values.periode_paie,
       salaire_base: values.salaire_base,
       sursalaire: values.sursalaire,
@@ -106,8 +128,10 @@ export function SalaireForm() {
       statut_paiement: 'En attente'
     };
     
+    console.log("Création du salaire avec les données:", formData);
     createSalaire(formData);
     form.reset();
+    setSelectedEmployee(null);
   }
   
   return (
@@ -121,35 +145,41 @@ export function SalaireForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="matricule"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Matricule</FormLabel>
+            <FormField
+              control={form.control}
+              name="employee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Employé</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
                     <FormControl>
-                      <Input placeholder="Entrez le matricule" {...field} />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez un employé" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="nom"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Entrez le nom complet" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                    <SelectContent>
+                      {employees?.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.matricule} - {employee.prenom} {employee.nom}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {selectedEmployee && (
+              <div className="bg-muted p-3 rounded-md">
+                <p className="text-sm font-medium">Employé sélectionné:</p>
+                <p className="text-sm">Matricule: {selectedEmployee.matricule}</p>
+                <p className="text-sm">Nom: {selectedEmployee.prenom} {selectedEmployee.nom}</p>
+              </div>
+            )}
               
             <FormField
               control={form.control}
@@ -293,7 +323,7 @@ export function SalaireForm() {
               <div className="text-xl font-bold">{netAPayer.toLocaleString('fr-FR')} FCFA</div>
             </div>
               
-            <Button type="submit" className="w-full" disabled={isCreating}>
+            <Button type="submit" className="w-full" disabled={isCreating || !selectedEmployee}>
               {isCreating ? "Création en cours..." : "Créer le bulletin de salaire"}
             </Button>
           </form>
