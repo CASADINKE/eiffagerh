@@ -1,3 +1,4 @@
+
 import { UserCheck, UserX, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,7 +103,7 @@ export const EmployeeClockStatus = ({
                         {clockOutTime && <span className="text-sm ml-1">- {clockOutTime}</span>}
                       </div>
                       <div className="flex items-center mt-1">
-                        <span className="h-2 w-2 rounded-full mr-2 {isActive ? 'bg-green-500' : 'bg-blue-500'}"></span>
+                        <span className={`h-2 w-2 rounded-full mr-2 ${isActive ? 'bg-green-500' : 'bg-blue-500'}`}></span>
                         <span className="text-xs">
                           {isActive ? "En cours" : `Durée: ${duration}`}
                         </span>

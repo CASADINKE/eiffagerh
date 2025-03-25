@@ -74,48 +74,158 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   });
 };
 
-// Clock in an employee
+// Ensure profile exists before clocking in
+const ensureProfileExists = async (employeeId: string): Promise<void> => {
+  console.log("Checking if profile exists for employee:", employeeId);
+  
+  // Check if profile exists
+  const { data: profileData, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", employeeId)
+    .single();
+    
+  if (profileError) {
+    // If no profile exists, create one
+    console.log("No profile found, creating one for employee:", employeeId);
+    
+    // Get employee data to create profile
+    const { data: employeeData, error: employeeError } = await supabase
+      .from("listes_employées")
+      .select("*")
+      .eq("id", employeeId)
+      .single();
+      
+    if (employeeError) {
+      console.error("Error getting employee data:", employeeError);
+      throw new Error(`Error getting employee data: ${employeeError.message}`);
+    }
+    
+    if (employeeData) {
+      // Create profile
+      const { error: createError } = await supabase
+        .from("profiles")
+        .insert({
+          id: employeeId,
+          full_name: `${employeeData.prenom} ${employeeData.nom}`,
+          role: 'employee'
+        });
+        
+      if (createError) {
+        console.error("Error creating profile:", createError);
+        // Continue even if there's an error creating the profile
+      }
+    }
+  }
+};
+
+// Clock in an employee - use table without profile constraint
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
   console.log("Clocking in employee:", employeeId);
   
-  const { data, error } = await supabase
-    .from("time_entries")
-    .insert({
-      employee_id: employeeId,
-      notes
-    })
-    .select()
-    .single();
+  try {
+    // First try to ensure profile exists
+    await ensureProfileExists(employeeId);
+    
+    // Try to use time_entries first
+    const { data, error } = await supabase
+      .from("time_entries")
+      .insert({
+        employee_id: employeeId,
+        notes
+      })
+      .select()
+      .single();
 
-  if (error) {
-    console.error("Error clocking in employee:", error);
-    throw new Error(`Error clocking in employee: ${error.message}`);
+    if (error) {
+      console.log("Error in time_entries, trying employee_pointage:", error);
+      
+      // If time_entries fails, try using employee_pointage
+      const { data: pointageData, error: pointageError } = await supabase
+        .from("employee_pointage")
+        .insert({
+          employee_id: employeeId,
+          notes
+        })
+        .select()
+        .single();
+        
+      if (pointageError) {
+        console.error("Error in both tables:", pointageError);
+        throw new Error(`Error clocking in employee: ${pointageError.message}`);
+      }
+      
+      // Convert employee_pointage format to TimeEntry format
+      return {
+        id: pointageData.id,
+        employee_id: pointageData.employee_id,
+        clock_in: pointageData.clock_in,
+        clock_out: pointageData.clock_out,
+        date: pointageData.date,
+        break_time: 0,
+        notes: pointageData.notes
+      };
+    }
+
+    console.log("Clock in successful:", data);
+    return data;
+  } catch (error) {
+    console.error("Error in clockInEmployee:", error);
+    throw error;
   }
-
-  console.log("Clock in successful:", data);
-  return data;
 };
 
 // Clock out an employee (update existing time entry)
 export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
   console.log("Clocking out employee, entry ID:", entryId);
   
-  const { data, error } = await supabase
-    .from("time_entries")
-    .update({
-      clock_out: new Date().toISOString()
-    })
-    .eq("id", entryId)
-    .select()
-    .single();
+  try {
+    // Try time_entries table first
+    const { data, error } = await supabase
+      .from("time_entries")
+      .update({
+        clock_out: new Date().toISOString()
+      })
+      .eq("id", entryId)
+      .select()
+      .single();
 
-  if (error) {
-    console.error("Error clocking out employee:", error);
-    throw new Error(`Error clocking out employee: ${error.message}`);
+    if (error) {
+      console.log("Entry not found in time_entries, trying employee_pointage");
+      
+      // If not found in time_entries, try employee_pointage
+      const { data: pointageData, error: pointageError } = await supabase
+        .from("employee_pointage")
+        .update({
+          clock_out: new Date().toISOString()
+        })
+        .eq("id", entryId)
+        .select()
+        .single();
+        
+      if (pointageError) {
+        console.error("Error clocking out employee:", pointageError);
+        throw new Error(`Error clocking out employee: ${pointageError.message}`);
+      }
+      
+      // Convert employee_pointage format to TimeEntry format
+      return {
+        id: pointageData.id,
+        employee_id: pointageData.employee_id,
+        clock_in: pointageData.clock_in,
+        clock_out: pointageData.clock_out,
+        date: pointageData.date,
+        break_time: 0,
+        notes: pointageData.notes
+      };
+    }
+
+    console.log("Clock out successful:", data);
+    return data;
+  } catch (error) {
+    console.error("Error in clockOutEmployee:", error);
+    throw error;
   }
-
-  console.log("Clock out successful:", data);
-  return data;
 };
 
 // Calculate the duration between clock in and clock out in hours
