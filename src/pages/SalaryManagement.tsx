@@ -21,15 +21,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PayslipsTable } from "@/components/salary/PayslipsTable";
 import { usePayslips } from "@/hooks/usePayslips";
 import { Payslip, PayslipStatus, PaymentMethod } from "@/services/payslipService";
 import { Search, FileCheck, FileClock, Download } from "lucide-react";
+import { toast } from "sonner";
 
 const SalaryManagement = () => {
-  const { payslips, isLoading, updateStatus, isUpdating } = usePayslips();
+  const { 
+    payslips, 
+    isLoading, 
+    updateStatus, 
+    isUpdating,
+    deletePayslip,
+    isDeleting,
+    downloadPayslip,
+    isDownloading 
+  } = usePayslips();
+  
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentTab, setCurrentTab] = useState("all");
@@ -102,6 +112,15 @@ const SalaryManagement = () => {
       paymentMethod: paymentMethod as PaymentMethod, 
       paymentDate 
     });
+  };
+  
+  const handleDeletePayslip = (payslipId: string) => {
+    deletePayslip(payslipId);
+  };
+  
+  const handleDownloadPayslip = (payslip: Payslip) => {
+    downloadPayslip(payslip);
+    toast.success("Génération du bulletin de paie en cours...");
   };
   
   // Get counts for tabs
@@ -260,7 +279,11 @@ const SalaryManagement = () => {
                   payslips={filteredPayslips}
                   isLoading={isLoading}
                   onUpdateStatus={handleUpdateStatus}
+                  onDeletePayslip={handleDeletePayslip}
+                  onDownloadPayslip={handleDownloadPayslip}
                   isUpdating={isUpdating}
+                  isDeleting={isDeleting}
+                  isDownloading={isDownloading}
                 />
               </TabsContent>
               
@@ -269,7 +292,11 @@ const SalaryManagement = () => {
                   payslips={filteredPayslips}
                   isLoading={isLoading}
                   onUpdateStatus={handleUpdateStatus}
+                  onDeletePayslip={handleDeletePayslip}
+                  onDownloadPayslip={handleDownloadPayslip}
                   isUpdating={isUpdating}
+                  isDeleting={isDeleting}
+                  isDownloading={isDownloading}
                 />
               </TabsContent>
               
@@ -278,7 +305,11 @@ const SalaryManagement = () => {
                   payslips={filteredPayslips}
                   isLoading={isLoading}
                   onUpdateStatus={handleUpdateStatus}
+                  onDeletePayslip={handleDeletePayslip}
+                  onDownloadPayslip={handleDownloadPayslip}
                   isUpdating={isUpdating}
+                  isDeleting={isDeleting}
+                  isDownloading={isDownloading}
                 />
               </TabsContent>
               
@@ -287,7 +318,11 @@ const SalaryManagement = () => {
                   payslips={filteredPayslips}
                   isLoading={isLoading}
                   onUpdateStatus={handleUpdateStatus}
+                  onDeletePayslip={handleDeletePayslip}
+                  onDownloadPayslip={handleDownloadPayslip}
                   isUpdating={isUpdating}
+                  isDeleting={isDeleting}
+                  isDownloading={isDownloading}
                 />
               </TabsContent>
             </Tabs>

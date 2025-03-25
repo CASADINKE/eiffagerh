@@ -9,32 +9,71 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Payslip, PayslipStatus, PaymentMethod } from "@/services/payslipService";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { PaymentProcessDialog } from "./PaymentProcessDialog";
-import { EyeIcon, FileText } from "lucide-react";
+import { EyeIcon, FileText, Download, Trash2 } from "lucide-react";
 
 interface PayslipsTableProps {
   payslips: Payslip[];
   isLoading: boolean;
   onUpdateStatus: (payslipId: string, status: PayslipStatus, paymentMethod?: PaymentMethod, paymentDate?: string) => void;
+  onDeletePayslip?: (payslipId: string) => void;
+  onDownloadPayslip?: (payslip: Payslip) => void;
   isUpdating: boolean;
+  isDeleting?: boolean;
+  isDownloading?: boolean;
 }
 
 export const PayslipsTable = ({
   payslips,
   isLoading,
   onUpdateStatus,
+  onDeletePayslip,
+  onDownloadPayslip,
   isUpdating,
+  isDeleting = false,
+  isDownloading = false,
 }: PayslipsTableProps) => {
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [payslipToDelete, setPayslipToDelete] = useState<string | null>(null);
   
   const handleProcessPayment = (payslip: Payslip) => {
     setSelectedPayslip(payslip);
     setDialogOpen(true);
+  };
+  
+  const handleDeleteClick = (payslipId: string) => {
+    setPayslipToDelete(payslipId);
+    setDeleteDialogOpen(true);
+  };
+  
+  const confirmDelete = () => {
+    if (payslipToDelete && onDeletePayslip) {
+      onDeletePayslip(payslipToDelete);
+    }
+    setDeleteDialogOpen(false);
+    setPayslipToDelete(null);
+  };
+  
+  const handleDownload = (payslip: Payslip) => {
+    if (onDownloadPayslip) {
+      onDownloadPayslip(payslip);
+    }
   };
   
   if (isLoading) {
@@ -92,15 +131,40 @@ export const PayslipsTable = ({
                     : "-"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleProcessPayment(payslip)}
-                    className="ml-2"
-                  >
-                    <EyeIcon className="h-4 w-4 mr-1" />
-                    Traiter
-                  </Button>
+                  <div className="flex justify-end space-x-2">
+                    {onDownloadPayslip && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(payslip)}
+                        disabled={isDownloading}
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="sr-only">Télécharger</span>
+                      </Button>
+                    )}
+                    
+                    {onDeletePayslip && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteClick(payslip.id)}
+                        disabled={isDeleting}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <span className="sr-only">Supprimer</span>
+                      </Button>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleProcessPayment(payslip)}
+                    >
+                      <EyeIcon className="h-4 w-4 mr-1" />
+                      Traiter
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -115,6 +179,27 @@ export const PayslipsTable = ({
         onConfirm={onUpdateStatus}
         isProcessing={isUpdating}
       />
+      
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmation de suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce bulletin de paie ?
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

@@ -16,9 +16,20 @@ import {
 import { Search, FileCheck, FileClock, Download, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SalairePaiementStatus, ModePaiement } from "@/services/salaireService";
+import { toast } from "sonner";
 
 export default function GestionSalaires() {
-  const { salaires, isLoading, updateStatus, isUpdating } = useSalaires();
+  const { 
+    salaires, 
+    isLoading, 
+    updateStatus, 
+    isUpdating,
+    deleteSalaire,
+    isDeleting,
+    generatePDF,
+    isGenerating
+  } = useSalaires();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [showForm, setShowForm] = useState(false);
@@ -84,6 +95,19 @@ export default function GestionSalaires() {
     datePaiement?: string
   ) => {
     updateStatus({ salaireId, status, modePaiement, datePaiement });
+  };
+  
+  const handleDeleteSalaire = (salaireId: string) => {
+    if (deleteSalaire) {
+      deleteSalaire(salaireId);
+    }
+  };
+  
+  const handleDownloadSalaire = (salaireId: string) => {
+    if (generatePDF) {
+      generatePDF(salaireId);
+      toast.success("Génération du bulletin de salaire...");
+    }
   };
   
   return (
@@ -240,6 +264,10 @@ export default function GestionSalaires() {
                 isLoading={isLoading}
                 onUpdateStatus={handleUpdateStatus}
                 isUpdating={isUpdating}
+                onDeleteSalaire={handleDeleteSalaire}
+                isDeleting={isDeleting}
+                onDownloadSalaire={handleDownloadSalaire}
+                isDownloading={isGenerating}
               />
             </TabsContent>
             
@@ -250,6 +278,10 @@ export default function GestionSalaires() {
                 onUpdateStatus={handleUpdateStatus}
                 isUpdating={isUpdating}
                 statusFilter="En attente"
+                onDeleteSalaire={handleDeleteSalaire}
+                isDeleting={isDeleting}
+                onDownloadSalaire={handleDownloadSalaire}
+                isDownloading={isGenerating}
               />
             </TabsContent>
             
@@ -260,6 +292,10 @@ export default function GestionSalaires() {
                 onUpdateStatus={handleUpdateStatus}
                 isUpdating={isUpdating}
                 statusFilter="Validé"
+                onDeleteSalaire={handleDeleteSalaire}
+                isDeleting={isDeleting}
+                onDownloadSalaire={handleDownloadSalaire}
+                isDownloading={isGenerating}
               />
             </TabsContent>
             
@@ -270,6 +306,10 @@ export default function GestionSalaires() {
                 onUpdateStatus={handleUpdateStatus}
                 isUpdating={isUpdating}
                 statusFilter="Payé"
+                onDeleteSalaire={handleDeleteSalaire}
+                isDeleting={isDeleting}
+                onDownloadSalaire={handleDownloadSalaire}
+                isDownloading={isGenerating}
               />
             </TabsContent>
           </Tabs>
