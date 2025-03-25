@@ -12,6 +12,8 @@ export interface TimeEntry {
   break_time: number;
   date: string;
   notes: string | null;
+  created_at: string;
+  updated_at: string;
   employee?: EmployeeUI;
 }
 
@@ -62,6 +64,8 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       break_time: entry.break_time || 0,
       date: entry.date,
       notes: entry.notes,
+      created_at: entry.created_at,
+      updated_at: entry.updated_at,
       employee: {
         id: profileData.id || entry.employee_id,
         name: profileData.full_name || "Sans nom",
@@ -141,7 +145,9 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
       clock_out: data.clock_out,
       date: data.date,
       break_time: data.break_time || 0,
-      notes: data.notes
+      notes: data.notes,
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
   } catch (error) {
     console.error("Error in clockInEmployee:", error);
@@ -178,7 +184,9 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
       clock_out: data.clock_out,
       date: data.date,
       break_time: data.break_time || 0,
-      notes: data.notes
+      notes: data.notes,
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
   } catch (error) {
     console.error("Error in clockOutEmployee:", error);
