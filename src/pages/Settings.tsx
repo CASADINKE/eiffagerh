@@ -375,387 +375,169 @@ const Settings = () => {
                     </div>
                   </div>
                 </Card>
-                
-                <Card className="p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="text-md font-medium">Holidays</h4>
-                    <Button variant="outline" size="sm" className="h-8">Add Holiday</Button>
-                  </div>
-                  
-                  <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2">
-                    {[
-                      { name: "New Year's Day", date: "2023-01-01" },
-                      { name: "Martin Luther King Jr. Day", date: "2023-01-16" },
-                      { name: "Memorial Day", date: "2023-05-29" },
-                      { name: "Independence Day", date: "2023-07-04" },
-                      { name: "Labor Day", date: "2023-09-04" },
-                      { name: "Thanksgiving Day", date: "2023-11-23" },
-                      { name: "Christmas Day", date: "2023-12-25" },
-                    ].map((holiday, index) => (
-                      <div key={index} className="flex justify-between items-center py-2 border-b border-border last:border-0">
-                        <span>{holiday.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(holiday.date).toLocaleDateString()}
-                          </span>
-                          <Button variant="ghost" size="icon" className="h-7 w-7">
-                            <span className="sr-only">Delete</span>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="15"
-                              height="15"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="text-muted-foreground hover:text-destructive"
-                            >
-                              <path d="M18 6 6 18" />
-                              <path d="m6 6 12 12" />
-                            </svg>
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
               </div>
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <Button>Save Company Settings</Button>
             </div>
           </TabsContent>
           
           <TabsContent value="notifications" className="p-6">
             <h2 className="text-xl font-semibold mb-6">Notification Settings</h2>
+            <p className="text-muted-foreground mb-6">
+              Configure how and when you receive notifications.
+            </p>
             
             <div className="space-y-6">
-              <Card className="p-4">
-                <h3 className="text-lg font-medium mb-4">Email Notifications</h3>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-sm font-medium">New Employee Registered</h4>
-                      <p className="text-xs text-muted-foreground">Notify when a new employee is added to the system</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-sm font-medium">Leave Request</h4>
-                      <p className="text-xs text-muted-foreground">Notify when an employee submits a leave request</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-sm font-medium">Leave Approval</h4>
-                      <p className="text-xs text-muted-foreground">Notify employees when their leave is approved or rejected</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-sm font-medium">Salary Updates</h4>
-                      <p className="text-xs text-muted-foreground">Notify employees when their salary is updated</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-sm font-medium">Payroll Processing</h4>
-                      <p className="text-xs text-muted-foreground">Notify employees when payroll is processed</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Email Notifications</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Receive notifications via email
+                  </p>
                 </div>
-              </Card>
+                <Switch />
+              </div>
               
-              <Card className="p-4">
-                <h3 className="text-lg font-medium mb-4">System Notifications</h3>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Push Notifications</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Receive notifications via browser push
+                  </p>
+                </div>
+                <Switch />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">SMS Notifications</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Receive important notifications via SMS
+                  </p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            
+            <div className="mt-8">
+              <h3 className="text-lg font-medium mb-4">Notification Categories</h3>
+              
+              <div className="space-y-4">
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-medium">System Updates</h4>
-                      <p className="text-xs text-muted-foreground">Notify administrators about system updates</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-sm font-medium">Security Alerts</h4>
-                      <p className="text-xs text-muted-foreground">Send alerts for suspicious login attempts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="text-sm font-medium">Data Backup Notifications</h4>
-                      <p className="text-xs text-muted-foreground">Notify when data backups are completed</p>
+                      <h4 className="text-md font-medium">Leave Requests</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Notifications for leave requests and approvals
+                      </p>
                     </div>
                     <Switch />
                   </div>
-                </div>
-              </Card>
-              
-              <Card className="p-4">
-                <h3 className="text-lg font-medium mb-4">Reminder Settings</h3>
+                </Card>
                 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-medium">Probation Period Ending</h4>
-                      <p className="text-xs text-muted-foreground">Send reminders before employee probation periods end</p>
+                      <h4 className="text-md font-medium">Payroll</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Notifications for salary processing and payments
+                      </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Select defaultValue="7">
-                        <SelectTrigger className="w-[100px]">
-                          <SelectValue placeholder="Days before" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="3">3 days</SelectItem>
-                          <SelectItem value="7">7 days</SelectItem>
-                          <SelectItem value="14">14 days</SelectItem>
-                          <SelectItem value="30">30 days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Switch defaultChecked />
-                    </div>
+                    <Switch />
                   </div>
-                  
-                  <div className="flex justify-between items-center">
+                </Card>
+                
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-medium">Contract Renewal</h4>
-                      <p className="text-xs text-muted-foreground">Send reminders before employee contracts expire</p>
+                      <h4 className="text-md font-medium">Time Tracking</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Notifications for clock-in/out and approvals
+                      </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Select defaultValue="30">
-                        <SelectTrigger className="w-[100px]">
-                          <SelectValue placeholder="Days before" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="14">14 days</SelectItem>
-                          <SelectItem value="30">30 days</SelectItem>
-                          <SelectItem value="60">60 days</SelectItem>
-                          <SelectItem value="90">90 days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Switch defaultChecked />
-                    </div>
+                    <Switch />
                   </div>
-                  
-                  <div className="flex justify-between items-center">
+                </Card>
+                
+                <Card className="p-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-medium">Employee Birthdays</h4>
-                      <p className="text-xs text-muted-foreground">Send birthday reminders</p>
+                      <h4 className="text-md font-medium">System Updates</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Notifications for system changes and updates
+                      </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Select defaultValue="1">
-                        <SelectTrigger className="w-[100px]">
-                          <SelectValue placeholder="Days before" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">Same day</SelectItem>
-                          <SelectItem value="1">1 day</SelectItem>
-                          <SelectItem value="3">3 days</SelectItem>
-                          <SelectItem value="7">7 days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Switch defaultChecked />
-                    </div>
+                    <Switch />
                   </div>
-                </div>
-              </Card>
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <Button>Save Notification Settings</Button>
+                </Card>
+              </div>
             </div>
           </TabsContent>
           
           <TabsContent value="integrations" className="p-6">
             <h2 className="text-xl font-semibold mb-6">Integrations</h2>
+            <p className="text-muted-foreground mb-6">
+              Connect your HR system with other services and applications.
+            </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium">Email Integration</h3>
-                    <p className="text-sm text-muted-foreground">Connect your email service provider</p>
+            <div className="space-y-6">
+              <Card className="p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="mb-4 sm:mb-0">
+                    <h3 className="text-lg font-medium">Google Workspace</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Connect with Google Calendar, Gmail, and Drive.
+                    </p>
                   </div>
-                  <Switch defaultChecked />
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="smtp-server">SMTP Server</Label>
-                    <Input id="smtp-server" defaultValue="smtp.example.com" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="smtp-port">SMTP Port</Label>
-                    <Input id="smtp-port" defaultValue="587" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="smtp-username">Username</Label>
-                    <Input id="smtp-username" defaultValue="notifications@hrzenith.com" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="smtp-password">Password</Label>
-                    <Input id="smtp-password" type="password" defaultValue="••••••••••••" />
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <Button variant="outline" size="sm">Test Connection</Button>
+                  <Button variant="outline">Connect</Button>
                 </div>
               </Card>
               
-              <Card className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium">Calendar Integration</h3>
-                    <p className="text-sm text-muted-foreground">Connect with Google Calendar or Outlook</p>
+              <Card className="p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="mb-4 sm:mb-0">
+                    <h3 className="text-lg font-medium">Microsoft 365</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Connect with Outlook, Teams, and OneDrive.
+                    </p>
                   </div>
-                  <Switch />
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="calendar-provider">Calendar Provider</Label>
-                    <Select>
-                      <SelectTrigger id="calendar-provider">
-                        <SelectValue placeholder="Select provider" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="google">Google Calendar</SelectItem>
-                        <SelectItem value="outlook">Microsoft Outlook</SelectItem>
-                        <SelectItem value="apple">Apple Calendar</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="calendar-sync">Sync Events</Label>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="sync-holidays" />
-                        <label htmlFor="sync-holidays" className="text-sm">Company Holidays</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="sync-leave" />
-                        <label htmlFor="sync-leave" className="text-sm">Employee Leave</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="sync-meetings" />
-                        <label htmlFor="sync-meetings" className="text-sm">Team Meetings</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <Button>Connect Calendar</Button>
+                  <Button variant="outline">Connect</Button>
                 </div>
               </Card>
               
-              <Card className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium">Slack Integration</h3>
-                    <p className="text-sm text-muted-foreground">Connect with your Slack workspace</p>
+              <Card className="p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="mb-4 sm:mb-0">
+                    <h3 className="text-lg font-medium">Slack</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Send notifications and updates to Slack channels.
+                    </p>
                   </div>
-                  <Switch />
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="slack-webhook">Slack Webhook URL</Label>
-                    <Input id="slack-webhook" placeholder="https://hooks.slack.com/services/..." />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Notification Events</Label>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="slack-leave" />
-                        <label htmlFor="slack-leave" className="text-sm">Leave Requests</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="slack-new-employee" />
-                        <label htmlFor="slack-new-employee" className="text-sm">New Employees</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="slack-birthdays" />
-                        <label htmlFor="slack-birthdays" className="text-sm">Birthday Reminders</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <Button>Connect Slack</Button>
+                  <Button variant="outline">Connect</Button>
                 </div>
               </Card>
               
-              <Card className="p-4">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
+              <Card className="p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="mb-4 sm:mb-0">
+                    <h3 className="text-lg font-medium">QuickBooks</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Sync payroll data with your accounting system.
+                    </p>
+                  </div>
+                  <Button variant="outline">Connect</Button>
+                </div>
+              </Card>
+              
+              <Card className="p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div className="mb-4 sm:mb-0">
                     <h3 className="text-lg font-medium">API Access</h3>
-                    <p className="text-sm text-muted-foreground">Manage API tokens for external integrations</p>
+                    <p className="text-sm text-muted-foreground">
+                      Generate API keys for custom integrations.
+                    </p>
                   </div>
-                  <Switch />
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="api-key">API Key</Label>
-                    <div className="flex gap-2">
-                      <Input id="api-key" defaultValue="••••••••••••••••••••••••••••••" readOnly />
-                      <Button variant="outline" size="sm">Generate</Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>API Access Permissions</Label>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="api-read" />
-                        <label htmlFor="api-read" className="text-sm">Read Data</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="api-write" />
-                        <label htmlFor="api-write" className="text-sm">Write Data</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="api-delete" />
-                        <label htmlFor="api-delete" className="text-sm">Delete Data</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <Button variant="outline" size="sm">View API Documentation</Button>
+                  <Button variant="outline">Manage Keys</Button>
                 </div>
               </Card>
-            </div>
-            
-            <div className="mt-6 flex justify-end">
-              <Button>Save Integration Settings</Button>
             </div>
           </TabsContent>
         </Tabs>

@@ -30,7 +30,7 @@ import { Search, FileCheck, FileClock, Download } from "lucide-react";
 
 const SalaryManagement = () => {
   const { payslips, isLoading, updateStatus, isUpdating } = usePayslips();
-  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentTab, setCurrentTab] = useState("all");
   
@@ -49,7 +49,7 @@ const SalaryManagement = () => {
     }
     
     // Filter by status dropdown
-    if (filterStatus) {
+    if (filterStatus !== "all") {
       filtered = filtered.filter(p => p.statut_paiement === filterStatus);
     }
     
@@ -245,7 +245,7 @@ const SalaryManagement = () => {
                         <SelectValue placeholder="Filtrer par statut" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Tous les statuts</SelectItem>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
                         <SelectItem value="En attente">En attente</SelectItem>
                         <SelectItem value="Validé">Validé</SelectItem>
                         <SelectItem value="Payé">Payé</SelectItem>

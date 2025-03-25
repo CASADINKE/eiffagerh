@@ -38,13 +38,13 @@ export const PaymentProcessDialog = ({
   onConfirm,
   isProcessing,
 }: PaymentProcessDialogProps) => {
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
-  const [newStatus, setNewStatus] = useState<PayslipStatus | "">("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "none">("none");
+  const [newStatus, setNewStatus] = useState<PayslipStatus | "none">("none");
   
   const handleConfirm = () => {
     if (!payslip) return;
     
-    if (newStatus === 'Payé' && !paymentMethod) {
+    if (newStatus === 'Payé' && paymentMethod === "none") {
       toast.error("Veuillez sélectionner un mode de paiement");
       return;
     }
@@ -57,8 +57,8 @@ export const PaymentProcessDialog = ({
   };
   
   const resetForm = () => {
-    setPaymentMethod("");
-    setNewStatus("");
+    setPaymentMethod("none");
+    setNewStatus("none");
   };
   
   return (
@@ -123,6 +123,7 @@ export const PaymentProcessDialog = ({
                     <SelectValue placeholder="Sélectionner un statut" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Sélectionner un statut</SelectItem>
                     <SelectItem value="En attente">En attente</SelectItem>
                     <SelectItem value="Validé">Validé</SelectItem>
                     <SelectItem value="Payé">Payé</SelectItem>
@@ -141,6 +142,7 @@ export const PaymentProcessDialog = ({
                       <SelectValue placeholder="Sélectionner un mode de paiement" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">Sélectionner un mode</SelectItem>
                       <SelectItem value="Virement">Virement bancaire</SelectItem>
                       <SelectItem value="Espèces">Espèces</SelectItem>
                       <SelectItem value="Mobile Money">Mobile Money</SelectItem>
@@ -161,7 +163,7 @@ export const PaymentProcessDialog = ({
           </Button>
           <Button 
             onClick={handleConfirm} 
-            disabled={!newStatus || (newStatus === 'Payé' && !paymentMethod) || isProcessing}
+            disabled={newStatus === "none" || (newStatus === 'Payé' && paymentMethod === "none") || isProcessing}
           >
             {isProcessing ? "Traitement..." : "Confirmer"}
           </Button>

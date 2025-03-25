@@ -20,7 +20,7 @@ import { SalairePaiementStatus, ModePaiement } from "@/services/salaireService";
 export default function GestionSalaires() {
   const { salaires, isLoading, updateStatus, isUpdating } = useSalaires();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [showForm, setShowForm] = useState(false);
   const [currentTab, setCurrentTab] = useState("all");
   
@@ -30,7 +30,7 @@ export default function GestionSalaires() {
       s.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.periode_paie.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = filterStatus ? s.statut_paiement === filterStatus : true;
+    const matchesStatus = filterStatus === "all" ? true : s.statut_paiement === filterStatus;
     
     return matchesSearch && matchesStatus;
   });
@@ -224,7 +224,7 @@ export default function GestionSalaires() {
                       <SelectValue placeholder="Filtrer par statut" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tous les statuts</SelectItem>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
                       <SelectItem value="En attente">En attente</SelectItem>
                       <SelectItem value="Validé">Validé</SelectItem>
                       <SelectItem value="Payé">Payé</SelectItem>
