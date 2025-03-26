@@ -34,6 +34,8 @@ import {
 import { formatDistance } from "date-fns";
 import { fr } from "date-fns/locale";
 import { LeaveTypeIcon } from "./LeaveTypeIcon";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
 type LeaveRequest = Tables<"leave_requests">;
 
@@ -47,11 +49,11 @@ export function LeaveAdminPanel({ leaveRequests, onUpdate }: LeaveAdminPanelProp
   const { user, userRole } = useAuth();
   const [selectedRequest, setSelectedRequest] = useState<LeaveRequest | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [status, setStatus] = useState<string>("pending");
   const [comments, setComments] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filtrer les demandes en attente pour le panel d'admin
   const pendingRequests = leaveRequests.filter(
     (request) => request.status === "pending"
   );
@@ -129,6 +131,35 @@ export function LeaveAdminPanel({ leaveRequests, onUpdate }: LeaveAdminPanelProp
     }
   };
 
+  const handleDeleteRequest = async () => {
+    if (!selectedRequest) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("leave_requests")
+        .delete()
+        .eq("id", selectedRequest.id);
+
+      if (error) throw error;
+
+      toast.success("Demande supprimée", {
+        description: "La demande de congé a été supprimée avec succès.",
+      });
+
+      setIsDeleteDialogOpen(false);
+      handleCloseDialog();
+      onUpdate();
+    } catch (error: any) {
+      console.error("Erreur lors de la suppression:", error.message);
+      toast.error("Erreur de suppression", {
+        description: "Une erreur est survenue lors de la suppression de la demande.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Si l'utilisateur n'est pas un super_admin, ne pas afficher le panneau
   if (userRole !== "super_admin") {
     return null;
@@ -142,7 +173,7 @@ export function LeaveAdminPanel({ leaveRequests, onUpdate }: LeaveAdminPanelProp
             Administration des Demandes de Congé
           </CardTitle>
           <CardDescription>
-            Vous pouvez approuver ou rejeter les demandes de congé en attente
+            Vous pouvez approuver, rejeter ou supprimer les demandes de congé en attente
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -196,7 +227,7 @@ export function LeaveAdminPanel({ leaveRequests, onUpdate }: LeaveAdminPanelProp
           <DialogHeader>
             <DialogTitle>Examiner la demande de congé</DialogTitle>
             <DialogDescription>
-              Approuvez ou rejetez cette demande de congé.
+              Approuvez, rejetez ou supprimez cette demande de congé.
             </DialogDescription>
           </DialogHeader>
 
@@ -267,19 +298,50 @@ export function LeaveAdminPanel({ leaveRequests, onUpdate }: LeaveAdminPanelProp
             </div>
           )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>
-              Annuler
-            </Button>
-            <Button 
-              onClick={handleUpdateRequest} 
-              disabled={isSubmitting || status === "pending" || status === selectedRequest?.status}
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2">
+            <Button
+              variant="destructive"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isSubmitting}
             >
-              {isSubmitting ? "Mise à jour..." : "Confirmer"}
+              <Trash2 className="mr-2 h-4 w-4" />
+              Supprimer
             </Button>
+            <div className="flex flex-col-reverse sm:flex-row gap-2">
+              <Button variant="outline" onClick={handleCloseDialog}>
+                Annuler
+              </Button>
+              <Button 
+                onClick={handleUpdateRequest} 
+                disabled={isSubmitting || status === "pending" || status === selectedRequest?.status}
+              >
+                {isSubmitting ? "Mise à jour..." : "Confirmer"}
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action ne peut pas être annulée. La demande de congé sera définitivement supprimée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteRequest}
+              disabled={isSubmitting}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {isSubmitting ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -52,20 +52,23 @@ const Leave = () => {
     setActiveTab(value);
   };
 
+  // Afficher d'abord le panneau d'administration pour les super_admin
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <LeaveNotification />
+      
+      {/* Panneau d'administration pour les super_admin en premier */}
+      {userRole === "super_admin" && (
+        <LeaveAdminPanel 
+          leaveRequests={leaveRequests} 
+          onUpdate={fetchLeaveRequests}
+        />
+      )}
       
       <LeaveHeader 
         openLeaveRequestDialog={() => setIsDialogOpen(true)} 
         isLoading={isLoading}
         leaveRequests={leaveRequests}
-      />
-
-      {/* Panneau d'administration pour les super_admin */}
-      <LeaveAdminPanel 
-        leaveRequests={leaveRequests} 
-        onUpdate={fetchLeaveRequests}
       />
 
       <Card className="shadow-sm border-slate-200 dark:border-slate-700">
