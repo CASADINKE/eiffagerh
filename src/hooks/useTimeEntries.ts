@@ -16,6 +16,15 @@ export interface TimeEntry {
   employee?: EmployeeUI;
 }
 
+// Add type definition for the RPC function parameters
+interface InsertTimeEntryParams {
+  p_id: string;
+  p_employee_id: string;
+  p_notes: string | null;
+  p_date: string;
+  p_clock_in: string;
+}
+
 // Fetch all time entries with employee details
 export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   console.log("Fetching time entries...");
@@ -81,15 +90,6 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   });
 };
 
-// Add type definition for the RPC function parameters
-interface InsertTimeEntryParams {
-  p_id: string;
-  p_employee_id: string;
-  p_notes: string | null;
-  p_date: string;
-  p_clock_in: string;
-}
-
 // Clock in an employee - with improved error handling and profile/foreign key constraint resolution
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
   console.log("Clocking in employee:", employeeId);
@@ -152,8 +152,8 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
         // Note: This is a workaround solution for the current issue
         const tempEntryId = crypto.randomUUID();
         
-        // Update the RPC call with proper typing
-        const { data: funcData, error: funcError } = await supabase.rpc<TimeEntry, InsertTimeEntryParams>(
+        // Fix the RPC call typing
+        const { data: funcData, error: funcError } = await supabase.rpc(
           'insert_time_entry_bypass_fk',
           {
             p_id: tempEntryId,
