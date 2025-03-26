@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmployeeUI, mapEmployeesToUI } from "@/types/employee";
@@ -82,6 +81,15 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
   });
 };
 
+// Add type definition for the RPC function parameters
+interface InsertTimeEntryParams {
+  p_id: string;
+  p_employee_id: string;
+  p_notes: string | null;
+  p_date: string;
+  p_clock_in: string;
+}
+
 // Clock in an employee - with improved error handling and profile/foreign key constraint resolution
 export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
   console.log("Clocking in employee:", employeeId);
@@ -144,40 +152,35 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
         // Note: This is a workaround solution for the current issue
         const tempEntryId = crypto.randomUUID();
         
-        // Try using a custom function call as a last resort
-        try {
-          const { data: funcData, error: funcError } = await supabase.rpc(
-            'insert_time_entry_bypass_fk', 
-            { 
-              p_id: tempEntryId,
-              p_employee_id: employeeId,
-              p_notes: notes || null,
-              p_date: today,
-              p_clock_in: new Date().toISOString()
-            }
-          );
-          
-          if (funcError) {
-            console.error("Error inserting time entry with bypass function:", funcError);
-            throw new Error(`Failed to clock in: ${funcError.message}`);
-          }
-          
-          // If the function succeeded, return a constructed time entry
-          return {
-            id: tempEntryId,
-            employee_id: employeeId,
-            clock_in: new Date().toISOString(),
-            clock_out: null,
-            date: today,
-            break_time: 0,
-            notes: notes || null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        } catch (rpcError) {
-          console.error("RPC call failed:", rpcError);
-          throw new Error(`Error clocking in employee: ${String(rpcError)}`);
+        // Update the RPC call with proper typing
+        const { data: funcData, error: funcError } = await supabase.rpc<TimeEntry>(
+          'insert_time_entry_bypass_fk',
+          {
+            p_id: tempEntryId,
+            p_employee_id: employeeId,
+            p_notes: notes || null,
+            p_date: today,
+            p_clock_in: new Date().toISOString()
+          } satisfies InsertTimeEntryParams
+        );
+        
+        if (funcError) {
+          console.error("Error inserting time entry with bypass function:", funcError);
+          throw new Error(`Failed to clock in: ${funcError.message}`);
         }
+        
+        // If the function succeeded, return a constructed time entry
+        return {
+          id: tempEntryId,
+          employee_id: employeeId,
+          clock_in: new Date().toISOString(),
+          clock_out: null,
+          date: today,
+          break_time: 0,
+          notes: notes || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
       }
       
       // For other errors, throw normally
