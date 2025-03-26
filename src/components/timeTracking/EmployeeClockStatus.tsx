@@ -1,13 +1,11 @@
-
 import { UserCheck, UserX, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TimeEntry, calculateDuration } from "@/hooks/useTimeEntries";
+import { TimeEntry, calculateDuration, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/timeEntries";
 import { EmployeeUI } from "@/types/employee";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
 import { toast } from "sonner";
 
 interface EmployeeClockStatusProps {
@@ -28,17 +26,13 @@ export const EmployeeClockStatus = ({
     return <div className="p-4 text-center">Chargement des données...</div>;
   }
 
-  // Get today's date in YYYY-MM-DD format for filtering
   const today = format(new Date(), "yyyy-MM-dd");
   
-  // Find all employees who have clocked in today and their latest entries
   const todaysEntries = timeEntries.filter(entry => entry.date === today);
   
-  // Create a map of employee IDs to their latest entry for today
   const latestEntryMap = new Map<string, TimeEntry>();
   todaysEntries.forEach(entry => {
     const existingEntry = latestEntryMap.get(entry.employee_id);
-    // Only keep the latest entry based on clock_in time
     if (!existingEntry || new Date(entry.clock_in) > new Date(existingEntry.clock_in)) {
       latestEntryMap.set(entry.employee_id, entry);
     }
@@ -46,11 +40,10 @@ export const EmployeeClockStatus = ({
   
   const clockedInEmployeeIds = new Set(
     Array.from(latestEntryMap.values())
-      .filter(entry => !entry.clock_out) // Only consider employees who haven't clocked out
+      .filter(entry => !entry.clock_out)
       .map(entry => entry.employee_id)
   );
 
-  // Separate employees into clocked in and not clocked in
   const clockedInEmployees = employees.filter(emp => clockedInEmployeeIds.has(emp.id));
   const notClockedInEmployees = employees.filter(emp => !clockedInEmployeeIds.has(emp.id));
 
@@ -62,7 +55,6 @@ export const EmployeeClockStatus = ({
       .toUpperCase();
   };
 
-  // Format time to HH:MM format
   const formatTime = (dateString: string) => {
     return format(new Date(dateString), "HH:mm", { locale: fr });
   };

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEmployeesUI } from "@/hooks/useEmployees";
-import { useTimeEntries, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/useTimeEntries";
+import { useTimeEntries, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/timeEntries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

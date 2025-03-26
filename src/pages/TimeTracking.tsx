@@ -8,7 +8,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useTimeEntries, useClockOutMutation, calculateDuration, getActiveTimeEntry } from "@/hooks/useTimeEntries";
+import { useTimeEntries, useClockOutMutation, calculateDuration, getActiveTimeEntry } from "@/hooks/timeEntries";
 import { useEmployees, useEmployeesUI } from "@/hooks/useEmployees";
 import { TimeTrackingHeader } from "@/components/timeTracking/TimeTrackingHeader";
 import { TimeTrackingStats } from "@/components/timeTracking/TimeTrackingStats";

@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2, Square, Clock } from "lucide-react";
@@ -12,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TimeEntry, calculateDuration } from "@/hooks/useTimeEntries";
+import { TimeEntry, calculateDuration } from "@/hooks/timeEntries";
 
 interface TimeEntriesTableProps {
   timeEntries: TimeEntry[];
