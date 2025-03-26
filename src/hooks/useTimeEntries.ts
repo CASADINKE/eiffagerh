@@ -153,7 +153,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
         const tempEntryId = crypto.randomUUID();
         
         // Fix the RPC call typing
-        const { data: funcData, error: funcError } = await supabase.rpc(
+        const { data: funcData, error: funcError } = await supabase.rpc<TimeEntry>(
           'insert_time_entry_bypass_fk',
           {
             p_id: tempEntryId,
@@ -161,7 +161,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
             p_notes: notes || null,
             p_date: today,
             p_clock_in: new Date().toISOString()
-          } as InsertTimeEntryParams
+          }
         );
         
         if (funcError) {
