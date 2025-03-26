@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -245,7 +244,7 @@ export function LeaveRequestForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit">
             {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>
         </div>

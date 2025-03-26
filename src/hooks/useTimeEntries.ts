@@ -161,7 +161,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
             p_notes: notes || null,
             p_date: today,
             p_clock_in: new Date().toISOString()
-          }
+          } as InsertTimeEntryParams
         );
         
         if (funcError) {
