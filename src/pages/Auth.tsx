@@ -61,12 +61,15 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center auth-backdrop">
-      <div className="w-full max-w-md">
-        <Card className="w-full auth-card">
+    <div className="min-h-screen flex items-center justify-center auth-backdrop bg-cover bg-center relative" 
+         style={{ backgroundImage: 'url("/lovable-uploads/cddedd45-18dd-4be4-ab2b-85812e1d0fe2.png")' }}>
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      <div className="w-full max-w-md relative z-10">
+        <Card className="w-full auth-card backdrop-blur-md bg-white/10 border border-white/20">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold text-primary">EIFFAGE</CardTitle>
-            <CardDescription className="text-foreground/80">
+            <CardTitle className="text-3xl font-bold text-white">EIFFAGE</CardTitle>
+            <CardDescription className="text-white/90">
               Plateforme de gestion des ressources humaines
             </CardDescription>
           </CardHeader>
@@ -78,18 +81,18 @@ const Auth = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-white">Email</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                           <Input
                             placeholder="vous@exemple.com"
-                            className="pl-10 auth-input"
+                            className="pl-10 auth-input bg-white/10 border-white/20 text-white placeholder:text-white/50"
                             {...field}
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-300" />
                     </FormItem>
                   )}
                 />
@@ -98,30 +101,30 @@ const Auth = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mot de passe</FormLabel>
+                      <FormLabel className="text-white">Mot de passe</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                           <Input
                             type="password"
                             placeholder="••••••••"
-                            className="pl-10 auth-input"
+                            className="pl-10 auth-input bg-white/10 border-white/20 text-white placeholder:text-white/50"
                             {...field}
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-300" />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-white/20 text-white hover:bg-white/30" disabled={isLoading}>
                   {isLoading ? "Connexion en cours..." : "Se connecter"}
                 </Button>
               </form>
             </Form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
-            <p className="text-xs text-center text-foreground/70">
+            <p className="text-xs text-center text-white/70">
               En vous connectant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
             </p>
           </CardFooter>

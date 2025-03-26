@@ -25,7 +25,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       throw new Error(`Error fetching time entries: ${error.message}`);
     }
 
-    return data || [];
+    return data as TimeEntry[] || [];
   } catch (error) {
     console.error("Unexpected error fetching time entries:", error);
     throw error;
@@ -40,7 +40,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     const formattedTime = now.toISOString(); // ISO format time
 
     // Use a stored procedure to handle the clock-in logic
-    const { data, error } = await supabase.rpc<TimeEntry>("insert_time_entry", {
+    const { data, error } = await supabase.rpc<TimeEntry, {}>("insert_time_entry", {
       p_id: crypto.randomUUID(),
       p_employee_id: employeeId,
       p_notes: notes || null,
@@ -70,15 +70,15 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
           poste
         )
       `)
-      .eq("id", data.id)
+      .eq("id", (data as any).id)
       .single();
 
     if (fetchError) {
       console.warn("Error fetching employee details after clock in:", fetchError);
-      return data;
+      return data as TimeEntry;
     }
 
-    return entryWithEmployee;
+    return entryWithEmployee as TimeEntry;
   } catch (error) {
     console.error("Unexpected error in clockInEmployee:", error);
     throw error;
@@ -115,7 +115,7 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
       throw new Error("No data returned after clock out");
     }
 
-    return data;
+    return data as TimeEntry;
   } catch (error) {
     console.error("Unexpected error in clockOutEmployee:", error);
     throw error;

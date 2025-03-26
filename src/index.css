@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -86,6 +87,19 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Auth page specific styles */
+  .auth-backdrop {
+    @apply min-h-screen bg-cover bg-center;
+  }
+  
+  .auth-card {
+    @apply shadow-2xl;
+  }
+  
+  .auth-input {
+    @apply focus:border-primary/50 focus:ring-primary/50;
   }
 
   @media print {
