@@ -25,24 +25,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       throw new Error(`Error fetching time entries: ${error.message}`);
     }
 
-    // Process the data to ensure it matches our TimeEntry type
-    const processedData = (data || []).map(entry => {
-      // Format the employee data correctly
-      const employeeData = entry.employee;
-      
-      return {
-        ...entry,
-        employee: employeeData ? {
-          id: employeeData.id,
-          nom: employeeData.nom,
-          prenom: employeeData.prenom,
-          matricule: employeeData.matricule,
-          poste: employeeData.poste
-        } : undefined
-      } as TimeEntry;
-    });
-
-    return processedData;
+    return data as TimeEntry[] || [];
   } catch (error) {
     console.error("Unexpected error fetching time entries:", error);
     throw error;
@@ -57,7 +40,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     const formattedTime = now.toISOString(); // ISO format time
 
     // Use a stored procedure to handle the clock-in logic
-    const { data: rpcData, error: rpcError } = await supabase.rpc("insert_time_entry", {
+    const { data, error } = await supabase.rpc<TimeEntry, {}>("insert_time_entry", {
       p_id: crypto.randomUUID(),
       p_employee_id: employeeId,
       p_notes: notes || null,
@@ -65,12 +48,12 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
       p_clock_in: formattedTime
     });
 
-    if (rpcError) {
-      console.error("Error clocking in employee:", rpcError);
-      throw new Error(`Error clocking in: ${rpcError.message}`);
+    if (error) {
+      console.error("Error clocking in employee:", error);
+      throw new Error(`Error clocking in: ${error.message}`);
     }
 
-    if (!rpcData) {
+    if (!data) {
       throw new Error("No data returned after clock in");
     }
 
@@ -87,38 +70,15 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
           poste
         )
       `)
-      .eq("id", (rpcData as any).id)
+      .eq("id", (data as any).id)
       .single();
 
     if (fetchError) {
       console.warn("Error fetching employee details after clock in:", fetchError);
-      // If we can't fetch the employee details, return a minimal TimeEntry object
-      return {
-        id: (rpcData as any).id,
-        employee_id: employeeId,
-        clock_in: formattedTime,
-        clock_out: null,
-        break_time: 0,
-        date: formattedDate,
-        notes: notes || null,
-        created_at: formattedTime,
-        updated_at: formattedTime
-      } as TimeEntry;
+      return data as TimeEntry;
     }
 
-    // Process the data to ensure it matches our TimeEntry type
-    const employeeData = entryWithEmployee.employee;
-    
-    return {
-      ...entryWithEmployee,
-      employee: employeeData ? {
-        id: employeeData.id,
-        nom: employeeData.nom,
-        prenom: employeeData.prenom,
-        matricule: employeeData.matricule,
-        poste: employeeData.poste
-      } : undefined
-    } as TimeEntry;
+    return entryWithEmployee as TimeEntry;
   } catch (error) {
     console.error("Unexpected error in clockInEmployee:", error);
     throw error;
@@ -155,19 +115,7 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
       throw new Error("No data returned after clock out");
     }
 
-    // Process the data to ensure it matches our TimeEntry type
-    const employeeData = data.employee;
-    
-    return {
-      ...data,
-      employee: employeeData ? {
-        id: employeeData.id,
-        nom: employeeData.nom,
-        prenom: employeeData.prenom,
-        matricule: employeeData.matricule,
-        poste: employeeData.poste
-      } : undefined
-    } as TimeEntry;
+    return data as TimeEntry;
   } catch (error) {
     console.error("Unexpected error in clockOutEmployee:", error);
     throw error;
