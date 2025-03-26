@@ -33,29 +33,29 @@ import {
 const roles = [
   {
     id: "1",
-    name: "Administrator",
-    description: "Full access to all settings and features",
+    name: "Administrateur",
+    description: "Accès complet à tous les paramètres et fonctionnalités",
     usersCount: 2,
     permissions: ["all"],
   },
   {
     id: "2",
-    name: "HR Manager",
-    description: "Can manage employees, leaves and payroll",
+    name: "Responsable RH",
+    description: "Peut gérer les employés, les congés et la paie",
     usersCount: 5,
     permissions: ["employees", "leaves", "salary"],
   },
   {
     id: "3",
-    name: "Employee",
-    description: "Basic access to personal information and time tracking",
+    name: "Employé",
+    description: "Accès de base aux informations personnelles et au suivi du temps",
     usersCount: 120,
     permissions: ["profile", "time", "leave-request"],
   },
   {
     id: "4",
-    name: "Team Lead",
-    description: "Can manage team members and approve team leaves",
+    name: "Chef d'équipe",
+    description: "Peut gérer les membres de l'équipe et approuver les congés d'équipe",
     usersCount: 10,
     permissions: ["team-view", "leave-approve", "time-approve"],
   },
@@ -67,8 +67,8 @@ const Settings = () => {
   return (
     <div className="container mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-semibold">Settings</h1>
-        <p className="text-muted-foreground">Manage your HR system configuration</p>
+        <h1 className="text-3xl font-semibold">Paramètres</h1>
+        <p className="text-muted-foreground">Gérez la configuration de votre système RH</p>
       </div>
       
       <Card>
@@ -76,11 +76,11 @@ const Settings = () => {
           <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full p-0">
             <TabsTrigger value="roles" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
               <Shield size={16} />
-              <span>Roles & Permissions</span>
+              <span>Rôles & Permissions</span>
             </TabsTrigger>
             <TabsTrigger value="company" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
               <Building size={16} />
-              <span>Company</span>
+              <span>Entreprise</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
               <Bell size={16} />
@@ -88,22 +88,22 @@ const Settings = () => {
             </TabsTrigger>
             <TabsTrigger value="integrations" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
               <Mail size={16} />
-              <span>Integrations</span>
+              <span>Intégrations</span>
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="roles" className="p-6">
             <div className="flex justify-between mb-6">
-              <h2 className="text-xl font-semibold">Roles & Permissions</h2>
-              <Button>Add New Role</Button>
+              <h2 className="text-xl font-semibold">Rôles & Permissions</h2>
+              <Button>Ajouter un nouveau rôle</Button>
             </div>
             
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Role Name</TableHead>
+                  <TableHead>Nom du rôle</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead>Users</TableHead>
+                  <TableHead>Utilisateurs</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -114,9 +114,9 @@ const Settings = () => {
                     <TableCell>{role.description}</TableCell>
                     <TableCell>{role.usersCount}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm" className="mr-2">Edit</Button>
-                      {role.name !== "Administrator" && (
-                        <Button variant="outline" size="sm">Delete</Button>
+                      <Button variant="outline" size="sm" className="mr-2">Modifier</Button>
+                      {role.name !== "Administrateur" && (
+                        <Button variant="outline" size="sm">Supprimer</Button>
                       )}
                     </TableCell>
                   </TableRow>
@@ -125,184 +125,184 @@ const Settings = () => {
             </Table>
             
             <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">Permission Groups</h3>
+              <h3 className="text-lg font-medium mb-4">Groupes de permissions</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Employee Management</h4>
+                  <h4 className="text-md font-medium mb-3">Gestion des employés</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-view-employees" />
-                      <label htmlFor="perm-view-employees" className="text-sm">View Employees</label>
+                      <label htmlFor="perm-view-employees" className="text-sm">Voir les employés</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-add-employees" />
-                      <label htmlFor="perm-add-employees" className="text-sm">Add Employees</label>
+                      <label htmlFor="perm-add-employees" className="text-sm">Ajouter des employés</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-edit-employees" />
-                      <label htmlFor="perm-edit-employees" className="text-sm">Edit Employees</label>
+                      <label htmlFor="perm-edit-employees" className="text-sm">Modifier les employés</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-delete-employees" />
-                      <label htmlFor="perm-delete-employees" className="text-sm">Delete Employees</label>
+                      <label htmlFor="perm-delete-employees" className="text-sm">Supprimer des employés</label>
                     </div>
                   </div>
                 </Card>
                 
                 <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Leave Management</h4>
+                  <h4 className="text-md font-medium mb-3">Gestion des congés</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-view-leaves" />
-                      <label htmlFor="perm-view-leaves" className="text-sm">View Leaves</label>
+                      <label htmlFor="perm-view-leaves" className="text-sm">Voir les congés</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-approve-leaves" />
-                      <label htmlFor="perm-approve-leaves" className="text-sm">Approve Leaves</label>
+                      <label htmlFor="perm-approve-leaves" className="text-sm">Approuver les congés</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-add-leaves" />
-                      <label htmlFor="perm-add-leaves" className="text-sm">Add Leave Types</label>
+                      <label htmlFor="perm-add-leaves" className="text-sm">Ajouter des types de congés</label>
                     </div>
                   </div>
                 </Card>
                 
                 <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Payroll & Salary</h4>
+                  <h4 className="text-md font-medium mb-3">Paie & Salaire</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-view-salary" />
-                      <label htmlFor="perm-view-salary" className="text-sm">View Salaries</label>
+                      <label htmlFor="perm-view-salary" className="text-sm">Voir les salaires</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-edit-salary" />
-                      <label htmlFor="perm-edit-salary" className="text-sm">Edit Salaries</label>
+                      <label htmlFor="perm-edit-salary" className="text-sm">Modifier les salaires</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-run-payroll" />
-                      <label htmlFor="perm-run-payroll" className="text-sm">Run Payroll</label>
+                      <label htmlFor="perm-run-payroll" className="text-sm">Exécuter la paie</label>
                     </div>
                   </div>
                 </Card>
                 
                 <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Time Tracking</h4>
+                  <h4 className="text-md font-medium mb-3">Suivi du temps</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-view-time" />
-                      <label htmlFor="perm-view-time" className="text-sm">View Time Records</label>
+                      <label htmlFor="perm-view-time" className="text-sm">Voir les enregistrements de temps</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-edit-time" />
-                      <label htmlFor="perm-edit-time" className="text-sm">Edit Time Records</label>
+                      <label htmlFor="perm-edit-time" className="text-sm">Modifier les enregistrements de temps</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-approve-time" />
-                      <label htmlFor="perm-approve-time" className="text-sm">Approve Timesheets</label>
+                      <label htmlFor="perm-approve-time" className="text-sm">Approuver les feuilles de temps</label>
                     </div>
                   </div>
                 </Card>
                 
                 <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Reports</h4>
+                  <h4 className="text-md font-medium mb-3">Rapports</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-view-reports" />
-                      <label htmlFor="perm-view-reports" className="text-sm">View Reports</label>
+                      <label htmlFor="perm-view-reports" className="text-sm">Voir les rapports</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-export-reports" />
-                      <label htmlFor="perm-export-reports" className="text-sm">Export Reports</label>
+                      <label htmlFor="perm-export-reports" className="text-sm">Exporter les rapports</label>
                     </div>
                   </div>
                 </Card>
                 
                 <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">System Settings</h4>
+                  <h4 className="text-md font-medium mb-3">Paramètres système</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-view-settings" />
-                      <label htmlFor="perm-view-settings" className="text-sm">View Settings</label>
+                      <label htmlFor="perm-view-settings" className="text-sm">Voir les paramètres</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-edit-settings" />
-                      <label htmlFor="perm-edit-settings" className="text-sm">Edit Settings</label>
+                      <label htmlFor="perm-edit-settings" className="text-sm">Modifier les paramètres</label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="perm-manage-roles" />
-                      <label htmlFor="perm-manage-roles" className="text-sm">Manage Roles</label>
+                      <label htmlFor="perm-manage-roles" className="text-sm">Gérer les rôles</label>
                     </div>
                   </div>
                 </Card>
               </div>
               
               <div className="mt-6 flex justify-end">
-                <Button>Save Changes</Button>
+                <Button>Enregistrer les modifications</Button>
               </div>
             </div>
           </TabsContent>
           
           <TabsContent value="company" className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Company Settings</h2>
+            <h2 className="text-xl font-semibold mb-6">Paramètres de l'entreprise</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="company-name">Company Name</Label>
+                  <Label htmlFor="company-name">Nom de l'entreprise</Label>
                   <Input id="company-name" defaultValue="HR Zenith Inc." />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company-email">Company Email</Label>
+                  <Label htmlFor="company-email">Email de l'entreprise</Label>
                   <Input id="company-email" type="email" defaultValue="admin@hrzenith.com" />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company-phone">Company Phone</Label>
+                  <Label htmlFor="company-phone">Téléphone de l'entreprise</Label>
                   <Input id="company-phone" type="tel" defaultValue="+1 234 567 890" />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company-website">Company Website</Label>
+                  <Label htmlFor="company-website">Site web de l'entreprise</Label>
                   <Input id="company-website" type="url" defaultValue="https://hrzenith.com" />
                 </div>
               </div>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="company-address">Company Address</Label>
+                  <Label htmlFor="company-address">Adresse de l'entreprise</Label>
                   <Input id="company-address" defaultValue="123 Business Ave." />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company-city">City</Label>
+                  <Label htmlFor="company-city">Ville</Label>
                   <Input id="company-city" defaultValue="San Francisco" />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="company-state">State</Label>
+                    <Label htmlFor="company-state">État/Région</Label>
                     <Input id="company-state" defaultValue="California" />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="company-zip">Zip Code</Label>
+                    <Label htmlFor="company-zip">Code postal</Label>
                     <Input id="company-zip" defaultValue="94105" />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company-country">Country</Label>
+                  <Label htmlFor="company-country">Pays</Label>
                   <Select defaultValue="usa">
                     <SelectTrigger id="company-country">
-                      <SelectValue placeholder="Select country" />
+                      <SelectValue placeholder="Sélectionner le pays" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="usa">United States</SelectItem>
+                      <SelectItem value="usa">États-Unis</SelectItem>
                       <SelectItem value="canada">Canada</SelectItem>
-                      <SelectItem value="uk">United Kingdom</SelectItem>
-                      <SelectItem value="australia">Australia</SelectItem>
+                      <SelectItem value="uk">Royaume-Uni</SelectItem>
+                      <SelectItem value="australia">Australie</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -310,19 +310,19 @@ const Settings = () => {
             </div>
             
             <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">Working Hours & Holidays</h3>
+              <h3 className="text-lg font-medium mb-4">Heures de travail & Jours fériés</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Working Hours</h4>
+                  <h4 className="text-md font-medium mb-3">Heures de travail</h4>
                   
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span>Monday to Friday</span>
+                      <span>Lundi à Vendredi</span>
                       <div className="flex gap-2">
                         <Select defaultValue="9">
                           <SelectTrigger className="w-[80px]">
-                            <SelectValue placeholder="Start" />
+                            <SelectValue placeholder="Début" />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 12 }, (_, i) => (
@@ -330,10 +330,10 @@ const Settings = () => {
                             ))}
                           </SelectContent>
                         </Select>
-                        <span className="self-center">to</span>
+                        <span className="self-center">à</span>
                         <Select defaultValue="17">
                           <SelectTrigger className="w-[80px]">
-                            <SelectValue placeholder="End" />
+                            <SelectValue placeholder="Fin" />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 12 }, (_, i) => (
@@ -345,30 +345,30 @@ const Settings = () => {
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <span>Saturday</span>
+                      <span>Samedi</span>
                       <div className="flex gap-2">
                         <Select defaultValue="closed">
                           <SelectTrigger className="w-[100px]">
-                            <SelectValue placeholder="Status" />
+                            <SelectValue placeholder="Statut" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="open">Open</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
+                            <SelectItem value="open">Ouvert</SelectItem>
+                            <SelectItem value="closed">Fermé</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
                     
                     <div className="flex justify-between items-center">
-                      <span>Sunday</span>
+                      <span>Dimanche</span>
                       <div className="flex gap-2">
                         <Select defaultValue="closed">
                           <SelectTrigger className="w-[100px]">
-                            <SelectValue placeholder="Status" />
+                            <SelectValue placeholder="Statut" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="open">Open</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
+                            <SelectItem value="open">Ouvert</SelectItem>
+                            <SelectItem value="closed">Fermé</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -380,17 +380,17 @@ const Settings = () => {
           </TabsContent>
           
           <TabsContent value="notifications" className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Notification Settings</h2>
+            <h2 className="text-xl font-semibold mb-6">Paramètres de notifications</h2>
             <p className="text-muted-foreground mb-6">
-              Configure how and when you receive notifications.
+              Configurez comment et quand vous recevez des notifications.
             </p>
             
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">Email Notifications</h3>
+                  <h3 className="font-medium">Notifications par email</h3>
                   <p className="text-sm text-muted-foreground">
-                    Receive notifications via email
+                    Recevoir des notifications par email
                   </p>
                 </div>
                 <Switch />
@@ -398,9 +398,9 @@ const Settings = () => {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">Push Notifications</h3>
+                  <h3 className="font-medium">Notifications push</h3>
                   <p className="text-sm text-muted-foreground">
-                    Receive notifications via browser push
+                    Recevoir des notifications par push navigateur
                   </p>
                 </div>
                 <Switch />
@@ -408,9 +408,9 @@ const Settings = () => {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">SMS Notifications</h3>
+                  <h3 className="font-medium">Notifications SMS</h3>
                   <p className="text-sm text-muted-foreground">
-                    Receive important notifications via SMS
+                    Recevoir des notifications importantes par SMS
                   </p>
                 </div>
                 <Switch />
@@ -418,15 +418,15 @@ const Settings = () => {
             </div>
             
             <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">Notification Categories</h3>
+              <h3 className="text-lg font-medium mb-4">Catégories de notifications</h3>
               
               <div className="space-y-4">
                 <Card className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-md font-medium">Leave Requests</h4>
+                      <h4 className="text-md font-medium">Demandes de congés</h4>
                       <p className="text-sm text-muted-foreground">
-                        Notifications for leave requests and approvals
+                        Notifications pour les demandes et approbations de congés
                       </p>
                     </div>
                     <Switch />
@@ -436,9 +436,9 @@ const Settings = () => {
                 <Card className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-md font-medium">Payroll</h4>
+                      <h4 className="text-md font-medium">Paie</h4>
                       <p className="text-sm text-muted-foreground">
-                        Notifications for salary processing and payments
+                        Notifications pour le traitement des salaires et les paiements
                       </p>
                     </div>
                     <Switch />
@@ -448,9 +448,9 @@ const Settings = () => {
                 <Card className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-md font-medium">Time Tracking</h4>
+                      <h4 className="text-md font-medium">Suivi du temps</h4>
                       <p className="text-sm text-muted-foreground">
-                        Notifications for clock-in/out and approvals
+                        Notifications pour les pointages et approbations
                       </p>
                     </div>
                     <Switch />
@@ -460,9 +460,9 @@ const Settings = () => {
                 <Card className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-md font-medium">System Updates</h4>
+                      <h4 className="text-md font-medium">Mises à jour système</h4>
                       <p className="text-sm text-muted-foreground">
-                        Notifications for system changes and updates
+                        Notifications pour les changements et mises à jour du système
                       </p>
                     </div>
                     <Switch />
@@ -473,9 +473,9 @@ const Settings = () => {
           </TabsContent>
           
           <TabsContent value="integrations" className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Integrations</h2>
+            <h2 className="text-xl font-semibold mb-6">Intégrations</h2>
             <p className="text-muted-foreground mb-6">
-              Connect your HR system with other services and applications.
+              Connectez votre système RH avec d'autres services et applications.
             </p>
             
             <div className="space-y-6">
@@ -484,10 +484,10 @@ const Settings = () => {
                   <div className="mb-4 sm:mb-0">
                     <h3 className="text-lg font-medium">Google Workspace</h3>
                     <p className="text-sm text-muted-foreground">
-                      Connect with Google Calendar, Gmail, and Drive.
+                      Connexion avec Google Agenda, Gmail et Drive.
                     </p>
                   </div>
-                  <Button variant="outline">Connect</Button>
+                  <Button variant="outline">Connecter</Button>
                 </div>
               </Card>
               
@@ -496,10 +496,10 @@ const Settings = () => {
                   <div className="mb-4 sm:mb-0">
                     <h3 className="text-lg font-medium">Microsoft 365</h3>
                     <p className="text-sm text-muted-foreground">
-                      Connect with Outlook, Teams, and OneDrive.
+                      Connexion avec Outlook, Teams et OneDrive.
                     </p>
                   </div>
-                  <Button variant="outline">Connect</Button>
+                  <Button variant="outline">Connecter</Button>
                 </div>
               </Card>
               
@@ -508,10 +508,10 @@ const Settings = () => {
                   <div className="mb-4 sm:mb-0">
                     <h3 className="text-lg font-medium">Slack</h3>
                     <p className="text-sm text-muted-foreground">
-                      Send notifications and updates to Slack channels.
+                      Envoi de notifications et mises à jour vers les canaux Slack.
                     </p>
                   </div>
-                  <Button variant="outline">Connect</Button>
+                  <Button variant="outline">Connecter</Button>
                 </div>
               </Card>
               
@@ -520,22 +520,22 @@ const Settings = () => {
                   <div className="mb-4 sm:mb-0">
                     <h3 className="text-lg font-medium">QuickBooks</h3>
                     <p className="text-sm text-muted-foreground">
-                      Sync payroll data with your accounting system.
+                      Synchronisation des données de paie avec votre système comptable.
                     </p>
                   </div>
-                  <Button variant="outline">Connect</Button>
+                  <Button variant="outline">Connecter</Button>
                 </div>
               </Card>
               
               <Card className="p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                   <div className="mb-4 sm:mb-0">
-                    <h3 className="text-lg font-medium">API Access</h3>
+                    <h3 className="text-lg font-medium">Accès API</h3>
                     <p className="text-sm text-muted-foreground">
-                      Generate API keys for custom integrations.
+                      Générer des clés API pour des intégrations personnalisées.
                     </p>
                   </div>
-                  <Button variant="outline">Manage Keys</Button>
+                  <Button variant="outline">Gérer les clés</Button>
                 </div>
               </Card>
             </div>
