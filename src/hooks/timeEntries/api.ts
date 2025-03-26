@@ -25,7 +25,8 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       throw new Error(`Error fetching time entries: ${error.message}`);
     }
 
-    return data as TimeEntry[] || [];
+    // Fix type cast issue by ensuring proper typing
+    return (data || []) as TimeEntry[];
   } catch (error) {
     console.error("Unexpected error fetching time entries:", error);
     throw error;
@@ -40,7 +41,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     const formattedTime = now.toISOString(); // ISO format time
 
     // Use a stored procedure to handle the clock-in logic
-    const { data, error } = await supabase.rpc<TimeEntry, {}>("insert_time_entry", {
+    const { data, error } = await supabase.rpc("insert_time_entry", {
       p_id: crypto.randomUUID(),
       p_employee_id: employeeId,
       p_notes: notes || null,
@@ -75,7 +76,8 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
 
     if (fetchError) {
       console.warn("Error fetching employee details after clock in:", fetchError);
-      return data as TimeEntry;
+      // Return the data we have, properly typed
+      return data as unknown as TimeEntry;
     }
 
     return entryWithEmployee as TimeEntry;
@@ -115,6 +117,7 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
       throw new Error("No data returned after clock out");
     }
 
+    // Proper type cast
     return data as TimeEntry;
   } catch (error) {
     console.error("Unexpected error in clockOutEmployee:", error);

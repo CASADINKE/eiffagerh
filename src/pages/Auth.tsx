@@ -62,9 +62,9 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center auth-backdrop bg-cover bg-center relative" 
-         style={{ backgroundImage: 'url("/lovable-uploads/cddedd45-18dd-4be4-ab2b-85812e1d0fe2.png")' }}>
+         style={{ backgroundImage: 'url("/lovable-uploads/5bf70fa7-08a9-4818-b349-27239b6e83cf.png")' }}>
       {/* Overlay for better readability */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
       <div className="w-full max-w-md relative z-10">
         <Card className="w-full auth-card backdrop-blur-md bg-white/10 border border-white/20">
           <CardHeader className="space-y-1 text-center">
