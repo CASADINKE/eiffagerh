@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -78,8 +79,12 @@ export function LeaveRequestForm({
 
   const mappedEmployees = mapEmployeesToUI(employees);
   
-  // Check if the form is valid
-  const isValid = form.formState.isValid;
+  // Set default employee if available and not already set
+  useEffect(() => {
+    if (employees.length > 0 && !form.getValues("employee_id")) {
+      form.setValue("employee_id", employees[0].id);
+    }
+  }, [employees, form]);
   
   return (
     <Form {...form}>
@@ -240,7 +245,7 @@ export function LeaveRequestForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
-          <Button type="submit" disabled={isLoading || !isValid}>
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>
         </div>
