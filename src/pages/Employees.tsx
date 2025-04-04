@@ -74,6 +74,7 @@ const Employees = () => {
     try {
       const fullEmployeeData = await fetchEmployeeById(employee.id);
       if (fullEmployeeData) {
+        console.log("Full employee data:", fullEmployeeData);
         setSelectedEmployee(fullEmployeeData);
         setDetailsDialogOpen(true);
       } else {

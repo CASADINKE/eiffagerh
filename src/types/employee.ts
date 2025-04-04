@@ -16,9 +16,9 @@ export interface EmployeeUI {
 export interface Employee {
   id: string;
   matricule: string;
+  employeur: string;
   nom: string;
   prenom: string;
-  employeur: string;
   poste: string;
   adresse: string;
   telephone: string;
@@ -27,6 +27,12 @@ export interface Employee {
   date_naissance: string;
   created_at: string;
   updated_at: string;
+  // UI-only fields (not in database)
+  categorie?: string;
+  salaire_base?: string;
+  sursalaire?: string;
+  prime_deplacement?: string;
+  commentaire?: string;
 }
 
 export const mapEmployeesToUI = (employees: Employee[]): EmployeeUI[] => {

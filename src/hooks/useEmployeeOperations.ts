@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,8 +27,11 @@ export const useEmployeeOperations = () => {
   const createEmployee = async (employeeData: EmployeeFormData) => {
     setIsLoading(true);
     try {
+      // Extract fields that exist in the database
+      const { categorie, salaire_base, sursalaire, prime_deplacement, commentaire, ...existingFields } = employeeData;
+      
       const formattedData = {
-        ...employeeData,
+        ...existingFields,
         date_naissance: employeeData.date_naissance.toISOString().split('T')[0],
       };
 
@@ -104,7 +108,10 @@ export const useEmployeeOperations = () => {
   const updateEmployee = async (employeeId: string, employeeData: Partial<EmployeeFormData>) => {
     setIsLoading(true);
     try {
-      const formattedData: any = { ...employeeData };
+      // Extract fields that exist in the database
+      const { categorie, salaire_base, sursalaire, prime_deplacement, commentaire, ...existingFields } = employeeData;
+      
+      const formattedData: any = { ...existingFields };
       if (formattedData.date_naissance) {
         formattedData.date_naissance = formattedData.date_naissance.toISOString().split('T')[0];
       }
@@ -204,7 +211,15 @@ export const useEmployeeOperations = () => {
         return null;
       }
 
-      return data;
+      // Add UI-only properties that don't exist in the database
+      return {
+        ...data,
+        categorie: data.categorie || "a", // Default value
+        salaire_base: data.salaire_base || "",
+        sursalaire: data.sursalaire || "",
+        prime_deplacement: data.prime_deplacement || "",
+        commentaire: data.commentaire || ""
+      };
     } catch (err: any) {
       console.error("Exception when fetching employee:", err);
       toast.error(`Erreur: ${err.message}`);

@@ -1,32 +1,131 @@
-
+import { EmployeeUI } from "@/types/employee";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { TimeEntry } from "./types";
+import { TimeEntry, TimeEntryWithEmployee } from "./types";
 
-// Fetch all time entries
-export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
+// Function to format a clock time with timezone correction
+export const formatClockTime = (timestamp: string | null): string => {
+  if (!timestamp) return "";
+  // Create a date object from the timestamp
+  const date = new Date(timestamp);
+  // Format the time as HH:MM
+  return date.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+// Function to calculate hours difference between two ISO timestamps
+export const calculateHours = (clockIn: string, clockOut: string | null): number => {
+  if (!clockOut) return 0;
+  
+  const startTime = new Date(clockIn).getTime();
+  const endTime = new Date(clockOut).getTime();
+  // Calculate the difference in milliseconds and convert to hours
+  return Math.max(0, (endTime - startTime) / (1000 * 60 * 60));
+};
+
+// Format hours as decimal hours for display
+export const formatHours = (hours: number): string => {
+  return hours.toFixed(2);
+};
+
+// Convert break time from minutes to hours for display
+export const breakMinutesToHours = (breakMinutes: number): number => {
+  return breakMinutes / 60;
+};
+
+// Format a date as DD/MM/YYYY
+export const formatDate = (date: string): string => {
+  return new Date(date).toLocaleDateString("fr-FR");
+};
+
+// Format a date as YYYY-MM-DD for form inputs
+export const formatDateForInput = (date: string): string => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export interface TimeEntryResponse {
+  id: string;
+  employee_id: string;
+  date: string;
+  clock_in: string;
+  clock_out: string | null;
+  break_time: number;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+  employee: {
+    id: string;
+    nom: string;
+    prenom: string;
+    matricule: string;
+    poste: string;
+    affectation: string;
+    telephone: string;
+    site: string;
+    employeur: string;
+  };
+}
+
+// Transform TimeEntryResponse to TimeEntryWithEmployee
+export const transformTimeEntryResponse = (entry: TimeEntryResponse): TimeEntryWithEmployee => {
+  return {
+    id: entry.id,
+    employee_id: entry.employee_id,
+    date: entry.date,
+    clock_in: entry.clock_in,
+    clock_out: entry.clock_out,
+    break_time: entry.break_time,
+    notes: entry.notes,
+    created_at: entry.created_at,
+    updated_at: entry.updated_at,
+    employee: {
+      id: entry.employee.id,
+      name: `${entry.employee.prenom} ${entry.employee.nom}`,
+      department: entry.employee.affectation,
+      position: entry.employee.poste,
+      email: "email@example.com", // Default email
+      phone: entry.employee.telephone,
+      status: "active" as const,
+      matricule: entry.employee.matricule,
+      site: entry.employee.site,
+      employer: entry.employee.employeur,
+      avatar: null,
+    },
+  };
+};
+
+// Function to fetch all time entries
+export const fetchTimeEntries = async (): Promise<TimeEntryWithEmployee[]> => {
   try {
     const { data, error } = await supabase
-      .from("time_entries")
+      .from("pointages")
       .select(`
         *,
-        employee:listes_employées(
-          id,
-          nom,
-          prenom,
-          matricule,
-          poste
+        employee:employee_id(
+          id, 
+          nom, 
+          prenom, 
+          matricule, 
+          poste,
+          affectation,
+          telephone,
+          site,
+          employeur
         )
       `)
-      .order("created_at", { ascending: false });
+      .order("date", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching time entries:", error);
-      throw new Error(`Error fetching time entries: ${error.message}`);
-    }
+    if (error) throw error;
 
-    // Transform the data to match the TimeEntry type
-    const formattedEntries = data ? data.map((entry: any) => ({
+    if (!data) return [];
+
+    // Transform data to the expected format
+    const transformedData = data.map((entry: any) => ({
       id: entry.id,
       employee_id: entry.employee_id,
       date: entry.date,
@@ -36,56 +135,56 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       notes: entry.notes,
       created_at: entry.created_at,
       updated_at: entry.updated_at,
-      employee: entry.employee
-    })) : [];
+      employee: {
+        id: entry.employee.id,
+        name: `${entry.employee.prenom} ${entry.employee.nom}`,
+        department: entry.employee.affectation,
+        position: entry.employee.poste,
+        email: "email@example.com", // Default email
+        phone: entry.employee.telephone,
+        status: "active" as const,
+        matricule: entry.employee.matricule,
+        site: entry.employee.site,
+        employer: entry.employee.employeur,
+        avatar: null,
+      },
+    }));
 
-    return formattedEntries as TimeEntry[];
+    return transformedData;
   } catch (error) {
-    console.error("Unexpected error fetching time entries:", error);
+    console.error("Error fetching time entries:", error);
     throw error;
   }
 };
 
-// Clock in an employee
-export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry> => {
+// Function to fetch a time entry by ID
+export const fetchTimeEntryById = async (
+  id: string
+): Promise<TimeEntryWithEmployee | null> => {
   try {
-    const now = new Date();
-    const formattedDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const formattedTime = now.toISOString(); // ISO format time
-
-    // Insert a new time entry
     const { data, error } = await supabase
-      .from("time_entries")
-      .insert({
-        id: crypto.randomUUID(),
-        employee_id: employeeId,
-        date: formattedDate,
-        clock_in: formattedTime,
-        notes: notes || null
-      })
+      .from("pointages")
       .select(`
         *,
-        employee:listes_employées(
-          id,
-          nom,
-          prenom,
-          matricule,
-          poste
+        employee:employee_id(
+          id, 
+          nom, 
+          prenom, 
+          matricule, 
+          poste,
+          affectation,
+          telephone,
+          site,
+          employeur
         )
       `)
+      .eq("id", id)
       .single();
 
-    if (error) {
-      console.error("Error clocking in employee:", error);
-      throw new Error(`Error clocking in: ${error.message}`);
-    }
+    if (error) throw error;
+    if (!data) return null;
 
-    if (!data) {
-      throw new Error("No data returned after clock in");
-    }
-
-    // Transform to ensure type safety
-    const formattedEntry: TimeEntry = {
+    return {
       id: data.id,
       employee_id: data.employee_id,
       date: data.date,
@@ -95,48 +194,54 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
       notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at,
-      employee: data.employee
+      employee: {
+        id: data.employee.id,
+        name: `${data.employee.prenom} ${data.employee.nom}`,
+        department: data.employee.affectation,
+        position: data.employee.poste,
+        email: "email@example.com", // Default email
+        phone: data.employee.telephone,
+        status: "active" as const,
+        matricule: data.employee.matricule,
+        site: data.employee.site,
+        employer: data.employee.employeur,
+        avatar: null,
+      },
     };
-
-    return formattedEntry;
   } catch (error) {
-    console.error("Unexpected error in clockInEmployee:", error);
+    console.error("Error fetching time entry by ID:", error);
     throw error;
   }
 };
 
-// Clock out an employee
-export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
+// Function to create a new time entry
+export const createTimeEntry = async (
+  timeEntry: Omit<TimeEntry, "id" | "employee">
+): Promise<TimeEntryWithEmployee | null> => {
   try {
-    const now = new Date().toISOString();
-
     const { data, error } = await supabase
-      .from("time_entries")
-      .update({ clock_out: now })
-      .eq("id", entryId)
+      .from("pointages")
+      .insert([timeEntry])
       .select(`
         *,
-        employee:listes_employées(
-          id,
-          nom,
-          prenom,
-          matricule,
-          poste
+        employee:employee_id(
+          id, 
+          nom, 
+          prenom, 
+          matricule, 
+          poste,
+          affectation,
+          telephone,
+          site,
+          employeur
         )
       `)
       .single();
 
-    if (error) {
-      console.error("Error clocking out employee:", error);
-      throw new Error(`Error clocking out: ${error.message}`);
-    }
+    if (error) throw error;
+    if (!data) return null;
 
-    if (!data) {
-      throw new Error("No data returned after clock out");
-    }
-
-    // Transform to ensure type safety
-    const formattedEntry: TimeEntry = {
+    return {
       id: data.id,
       employee_id: data.employee_id,
       date: data.date,
@@ -146,12 +251,95 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
       notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at,
-      employee: data.employee
+      employee: {
+        id: data.employee.id,
+        name: `${data.employee.prenom} ${data.employee.nom}`,
+        department: data.employee.affectation,
+        position: data.employee.poste,
+        email: "email@example.com", // Default email
+        phone: data.employee.telephone,
+        status: "active" as const,
+        matricule: data.employee.matricule,
+        site: data.employee.site,
+        employer: data.employee.employeur,
+        avatar: null,
+      },
     };
-
-    return formattedEntry;
   } catch (error) {
-    console.error("Unexpected error in clockOutEmployee:", error);
+    console.error("Error creating time entry:", error);
+    throw error;
+  }
+};
+
+// Function to update an existing time entry
+export const updateTimeEntry = async (
+  id: string,
+  updates: Partial<Omit<TimeEntry, "id" | "employee">>
+): Promise<TimeEntryWithEmployee | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("pointages")
+      .update(updates)
+      .eq("id", id)
+      .select(`
+        *,
+        employee:employee_id(
+          id, 
+          nom, 
+          prenom, 
+          matricule, 
+          poste,
+          affectation,
+          telephone,
+          site,
+          employeur
+        )
+      `)
+      .single();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      employee_id: data.employee_id,
+      date: data.date,
+      clock_in: data.clock_in,
+      clock_out: data.clock_out,
+      break_time: data.break_time,
+      notes: data.notes,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      employee: {
+        id: data.employee.id,
+        name: `${data.employee.prenom} ${data.employee.nom}`,
+        department: data.employee.affectation,
+        position: data.employee.poste,
+        email: "email@example.com", // Default email
+        phone: data.employee.telephone,
+        status: "active" as const,
+        matricule: data.employee.matricule,
+        site: data.employee.site,
+        employer: data.employee.employeur,
+        avatar: null,
+      },
+    };
+  } catch (error) {
+    console.error("Error updating time entry:", error);
+    throw error;
+  }
+};
+
+// Function to delete a time entry by ID
+export const deleteTimeEntry = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase.from("pointages").delete().eq("id", id);
+
+    if (error) throw error;
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting time entry:", error);
     throw error;
   }
 };
