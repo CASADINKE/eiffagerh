@@ -54,18 +54,15 @@ function Calendar({
         dropdown: "relative z-10",
         dropdown_month: cn(
           "flex-1",
-          "bg-black text-white border-0 px-2 py-1 h-auto text-sm font-medium rounded-md" // Merged styles from dropdown_month_button
+          "bg-black text-white border-0 px-2 py-1 h-auto text-sm font-medium rounded-md"
         ),
         dropdown_year: cn(
           "flex-1",
-          "bg-black text-white border-0 px-2 py-1 h-auto text-sm font-medium rounded-md" // Merged styles from dropdown_year_button
+          "bg-black text-white border-0 px-2 py-1 h-auto text-sm font-medium rounded-md"
         ),
         dropdown_icon: "hidden",
-        dropdown_month_content: "bg-black border border-white/10 rounded-md p-1 shadow-lg mt-1",
-        dropdown_year_content: "bg-black border border-white/10 rounded-md p-1 shadow-lg max-h-60 overflow-auto mt-1",
-        dropdown_item: "text-white hover:bg-white/10 rounded px-2 py-1 text-sm",
-        dropdown_item_selected: "bg-primary/20 text-primary-foreground",
-        vhidden: "hidden",
+        // These are custom classes that we want to add, but they aren't part of the DayPicker standard classes
+        // Add styles directly to the valid dropdown_month and dropdown_year properties above
         ...classNames,
       }}
       components={{

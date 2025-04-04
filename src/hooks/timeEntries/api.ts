@@ -43,9 +43,13 @@ const mapTimeEntryWithEmployee = (entry: any): TimeEntryWithEmployee | null => {
 // Get all time entries with employee details
 export const getTimeEntriesWithEmployees = async (): Promise<TimeEntryWithEmployee[]> => {
   try {
+    // Update the query to correctly reference the listes_employées table
     const { data, error } = await supabase
       .from("time_entries")
-      .select("*, employee:employee_id(id, nom, prenom, matricule, poste, affectation, telephone, site, employeur)")
+      .select(`
+        *,
+        employee:employee_id(*)
+      `)
       .order("date", { ascending: false });
 
     if (error) throw error;
@@ -71,7 +75,10 @@ export const getEmployeeTimeEntries = async (employeeId: string): Promise<TimeEn
   try {
     const { data, error } = await supabase
       .from("time_entries")
-      .select("*, employee:employee_id(id, nom, prenom, matricule, poste, affectation, telephone, site, employeur)")
+      .select(`
+        *,
+        employee:employee_id(*)
+      `)
       .eq("employee_id", employeeId)
       .order("date", { ascending: false });
 
@@ -95,7 +102,10 @@ export const getTimeEntryById = async (id: string): Promise<TimeEntryWithEmploye
   try {
     const { data, error } = await supabase
       .from("time_entries")
-      .select("*, employee:employee_id(id, nom, prenom, matricule, poste, affectation, telephone, site, employeur)")
+      .select(`
+        *,
+        employee:employee_id(*)
+      `)
       .eq("id", id)
       .single();
 
@@ -121,7 +131,10 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
     const { data, error } = await supabase
       .from("time_entries")
       .insert([timeEntry])
-      .select("*, employee:employee_id(id, nom, prenom, matricule, poste, affectation, telephone, site, employeur)")
+      .select(`
+        *,
+        employee:employee_id(*)
+      `)
       .single();
 
     if (error) throw error;
@@ -145,7 +158,10 @@ export const clockOutEmployee = async (id: string, breakTime: number = 0): Promi
       .from("time_entries")
       .update(updates)
       .eq("id", id)
-      .select("*, employee:employee_id(id, nom, prenom, matricule, poste, affectation, telephone, site, employeur)")
+      .select(`
+        *,
+        employee:employee_id(*)
+      `)
       .single();
 
     if (error) throw error;
@@ -164,7 +180,10 @@ export const updateTimeEntry = async (id: string, updates: Partial<TimeEntry>): 
       .from("time_entries")
       .update(updates)
       .eq("id", id)
-      .select("*, employee:employee_id(id, nom, prenom, matricule, poste, affectation, telephone, site, employeur)")
+      .select(`
+        *,
+        employee:employee_id(*)
+      `)
       .single();
 
     if (error) throw error;
