@@ -1,17 +1,14 @@
 
 import React, { useState, useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format, addBusinessDays } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,208 +21,135 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Employee } from "@/hooks/useEmployees";
-import { mapEmployeesToUI } from "@/types/employee";
+import { fr } from "date-fns/locale";
+import { useAuth } from "@/contexts/AuthContext";
 
-const LeaveFormSchema = z.object({
-  employee_id: z.string({
-    required_error: "Veuillez sélectionner un employé",
+// Define form schema
+const formSchema = z.object({
+  employee_id: z.string(),
+  type: z.string({
+    required_error: "Veuillez sélectionner un type de congé",
   }),
   start_date: z.date({
     required_error: "Veuillez sélectionner une date de début",
   }),
-  end_date: z.date({
-    required_error: "Veuillez sélectionner une date de fin",
-  }).refine(
-    (date, ctx) => {
-      const { start_date } = ctx.parent;
-      return start_date && date >= start_date;
-    },
-    {
-      message: "La date de fin doit être égale ou postérieure à la date de début",
-    }
-  ),
-  type: z.string({
-    required_error: "Veuillez sélectionner un type de congé",
-  }),
+  end_date: z
+    .date({
+      required_error: "Veuillez sélectionner une date de fin",
+    })
+    .refine(
+      (date, ctx) => {
+        const startDate = ctx.data?.start_date as Date | undefined;
+        return !startDate || date >= startDate;
+      },
+      {
+        message: "La date de fin doit être après la date de début",
+      }
+    ),
   reason: z.string().optional(),
 });
 
-type LeaveFormValues = z.infer<typeof LeaveFormSchema>;
+// Extract form values type
+type FormValues = z.infer<typeof formSchema>;
 
+// Props for the form
 interface LeaveRequestFormProps {
-  employees: Employee[];
-  onSubmit: (values: LeaveFormValues) => void;
+  onSubmit: (data: FormValues) => void;
   onCancel: () => void;
   isLoading: boolean;
+  employees: { id: string; prenom?: string; nom?: string }[];
 }
 
 export function LeaveRequestForm({
-  employees,
   onSubmit,
   onCancel,
   isLoading,
+  employees,
 }: LeaveRequestFormProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const { toast } = useToast();
+  const { user } = useAuth();
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  const form = useForm<LeaveFormValues>({
-    resolver: zodResolver(LeaveFormSchema),
+  // Use react-hook-form with zod validation
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      employee_id: "",
-      start_date: date,
-      end_date: addBusinessDays(date || new Date(), 5),
+      employee_id: user?.id || "",
       type: "",
+      start_date: undefined,
+      end_date: undefined,
       reason: "",
     },
-    mode: "onChange", // Enable validation on change
   });
 
-  const mappedEmployees = mapEmployeesToUI(employees);
+  // Watch form values to check if the form is valid
+  const { type, start_date, end_date } = form.watch();
   
-  // Set default employee if available and not already set
+  // Update form validity whenever watched fields change
   useEffect(() => {
-    if (employees.length > 0 && !form.getValues("employee_id")) {
-      form.setValue("employee_id", employees[0].id);
-    }
-  }, [employees, form]);
-  
-  // Check if form is valid
-  const formState = form.formState;
-  const isValid = form.getValues("employee_id") && 
-                 form.getValues("start_date") && 
-                 form.getValues("end_date") && 
-                 form.getValues("type") && 
-                 !formState.errors.employee_id &&
-                 !formState.errors.start_date &&
-                 !formState.errors.end_date &&
-                 !formState.errors.type;
-  
+    const isValid = !!type && !!start_date && !!end_date && (start_date <= end_date);
+    setIsFormValid(isValid);
+  }, [type, start_date, end_date]);
+
+  // Handle form submission
+  const handleSubmit = form.handleSubmit((data) => {
+    onSubmit(data);
+  });
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Employee selection (hidden if only one employee) */}
         <FormField
           control={form.control}
           name="employee_id"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Employé</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
+            <FormItem className="hidden">
+              <FormControl>
+                <Select
+                  disabled={isLoading}
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un employé" />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {mappedEmployees.map((employee) => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.prenom} {employee.nom}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex flex-col md:flex-row gap-4">
-          <FormField
-            control={form.control}
-            name="start_date"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Date de début</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: fr })
-                        ) : (
-                          <span>Choisir une date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || date > addBusinessDays(new Date(), 90)
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="end_date"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Date de fin</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: fr })
-                        ) : (
-                          <span>Choisir une date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || date > addBusinessDays(new Date(), 90)
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+
+        {/* Leave type */}
         <FormField
           control={form.control}
           name="type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Type de congé</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                disabled={isLoading}
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un type" />
+                    <SelectValue placeholder="Sélectionner un type de congé" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -240,33 +164,126 @@ export function LeaveRequestForm({
             </FormItem>
           )}
         />
+
+        {/* Start date */}
+        <FormField
+          control={form.control}
+          name="start_date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date de début</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      disabled={isLoading}
+                      variant={"outline"}
+                      className={cn(
+                        "pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "P", { locale: fr })
+                      ) : (
+                        <span>Sélectionner une date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* End date */}
+        <FormField
+          control={form.control}
+          name="end_date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date de fin</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      disabled={isLoading}
+                      variant={"outline"}
+                      className={cn(
+                        "pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "P", { locale: fr })
+                      ) : (
+                        <span>Sélectionner une date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < (form.getValues().start_date || new Date())
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Reason */}
         <FormField
           control={form.control}
           name="reason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Raison (optionnel)</FormLabel>
+              <FormLabel>Motif (optionnel)</FormLabel>
               <FormControl>
                 <Textarea
+                  disabled={isLoading}
                   placeholder="Décrivez la raison de votre demande de congé"
                   className="resize-none"
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
-                Fournissez une raison pour votre demande de congé.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onCancel}>
+
+        {/* Form actions */}
+        <div className="flex justify-end space-x-2 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
             Annuler
           </Button>
           <Button 
             type="submit" 
-            disabled={isLoading || !isValid}
+            disabled={isLoading || !isFormValid}
           >
             {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>

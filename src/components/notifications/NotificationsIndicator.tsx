@@ -19,8 +19,8 @@ export function NotificationsIndicator() {
     if (!user) return;
 
     try {
-      // Use the custom query to fetch notifications
-      const { data: notificationsData, error } = await supabase
+      // Query the notifications table
+      const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
@@ -28,8 +28,8 @@ export function NotificationsIndicator() {
 
       if (error) throw error;
 
-      // Use the asNotifications helper for type safety
-      const typedNotifications = asNotifications(notificationsData || []);
+      // Use the helper to type the response
+      const typedNotifications = asNotifications(data || []);
       setNotifications(typedNotifications);
       setUnreadCount(typedNotifications.filter(n => !n.read).length);
     } catch (error: any) {
@@ -64,7 +64,6 @@ export function NotificationsIndicator() {
 
   const markAsRead = async (id: string) => {
     try {
-      // Use type assertion to safely update
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
@@ -89,7 +88,6 @@ export function NotificationsIndicator() {
     if (notifications.length === 0 || unreadCount === 0) return;
     
     try {
-      // Use type assertion to safely update
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })

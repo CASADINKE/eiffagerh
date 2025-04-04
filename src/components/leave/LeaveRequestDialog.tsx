@@ -13,7 +13,6 @@ import { toast as sonnerToast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
-import { asNotifications } from "@/integrations/supabase/types-notifications";
 
 interface LeaveRequestDialogProps {
   open: boolean;
