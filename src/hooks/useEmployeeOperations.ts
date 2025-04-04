@@ -109,13 +109,20 @@ export const useEmployeeOperations = () => {
   const updateEmployee = async (employeeId: string, employeeData: Partial<EmployeeFormData>) => {
     setIsLoading(true);
     try {
+      console.log("Updating employee with ID:", employeeId);
+      console.log("Update data:", employeeData);
+      
       // Extract fields that exist in the database
       const { categorie, salaire_base, sursalaire, prime_deplacement, commentaire, ...existingFields } = employeeData;
       
       const formattedData: any = { ...existingFields };
       if (formattedData.date_naissance) {
-        formattedData.date_naissance = formattedData.date_naissance.toISOString().split('T')[0];
+        formattedData.date_naissance = formattedData.date_naissance instanceof Date 
+          ? formattedData.date_naissance.toISOString().split('T')[0]
+          : formattedData.date_naissance;
       }
+
+      console.log("Formatted data for update:", formattedData);
 
       const { data, error } = await supabase
         .from('listes_employées')
@@ -215,11 +222,11 @@ export const useEmployeeOperations = () => {
       // Add UI-only properties that don't exist in the database
       return {
         ...data,
-        categorie: "a", // Default value
-        salaire_base: "",
-        sursalaire: "",
-        prime_deplacement: "",
-        commentaire: ""
+        categorie: data.categorie || "a", // Default value
+        salaire_base: data.salaire_base || "",
+        sursalaire: data.sursalaire || "",
+        prime_deplacement: data.prime_deplacement || "",
+        commentaire: data.commentaire || ""
       };
     } catch (err: any) {
       console.error("Exception when fetching employee:", err);

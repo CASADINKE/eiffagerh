@@ -88,6 +88,7 @@ const Employees = () => {
   
   const handleEditEmployee = () => {
     setDetailsDialogOpen(false);
+    console.log("Opening edit dialog with employee:", selectedEmployee);
     setEditDialogOpen(true);
   };
   
@@ -141,7 +142,13 @@ const Employees = () => {
       {selectedEmployee && (
         <EmployeeFormDialog 
           open={editDialogOpen} 
-          onOpenChange={setEditDialogOpen} 
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) {
+              // If dialog is closing and not through the success path, reload employees to refresh the list
+              loadEmployees();
+            }
+          }} 
           onSuccess={loadEmployees}
           employeeToEdit={selectedEmployee}
           mode="edit"

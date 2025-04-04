@@ -31,6 +31,7 @@ const EmployeeFormDialog = ({
 
   useEffect(() => {
     if (mode === "edit" && employeeToEdit) {
+      console.log("Initializing form with employee data:", employeeToEdit);
       // Format the data for the form
       setInitialValues({
         ...employeeToEdit,
@@ -43,19 +44,26 @@ const EmployeeFormDialog = ({
 
   const handleSubmit = async (values: EmployeeFormData) => {
     console.log("Form submitted with values:", values);
+    console.log("Current mode:", mode);
     
     let result;
-    if (mode === "edit" && employeeToEdit) {
-      result = await updateEmployee(employeeToEdit.id, values);
-    } else {
-      result = await createEmployee(values);
-    }
-    
-    if (result) {
-      onOpenChange(false);
-      if (onSuccess) {
-        onSuccess();
+    try {
+      if (mode === "edit" && employeeToEdit) {
+        console.log("Updating employee with ID:", employeeToEdit.id);
+        result = await updateEmployee(employeeToEdit.id, values);
+      } else {
+        result = await createEmployee(values);
       }
+      
+      if (result) {
+        console.log("Operation successful, result:", result);
+        onOpenChange(false);
+        if (onSuccess) {
+          onSuccess();
+        }
+      }
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
     }
   };
 
