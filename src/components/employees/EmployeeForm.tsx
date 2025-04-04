@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -110,10 +109,8 @@ const EmployeeForm = ({
     },
   });
 
-  // Reset form with initialValues when they change
   useEffect(() => {
     if (initialValues) {
-      // Reset the form with initial values
       form.reset(initialValues);
     }
   }, [initialValues, form]);
@@ -193,39 +190,51 @@ const EmployeeForm = ({
             control={form.control}
             name="date_naissance"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="text-base">Date de naissance</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={`w-full h-12 p-3 text-base text-left font-normal flex justify-between items-center ${
-                          !field.value ? "text-muted-foreground" : ""
-                        }`}
-                      >
-                        <span>
-                          {field.value ? (
-                            format(field.value, "dd MMMM yyyy", { locale: fr })
-                          ) : (
-                            "Sélectionner une date"
-                          )}
-                        </span>
-                        <CalendarIcon className="ml-auto h-5 w-5" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                      locale={fr}
-                      className="rounded-md border"
-                    />
-                  </PopoverContent>
-                </Popover>
+              <FormItem className="flex flex-col md:col-span-2">
+                <FormLabel className="text-base mb-1">Date de naissance</FormLabel>
+                <div className="bg-muted/20 p-1 border rounded-md">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className="w-full h-12 p-3 text-base text-left font-normal flex justify-between items-center bg-background"
+                        >
+                          <div className="flex items-center">
+                            <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
+                            <span>
+                              {field.value ? (
+                                format(field.value, "dd MMMM yyyy", { locale: fr })
+                              ) : (
+                                "Sélectionner une date"
+                              )}
+                            </span>
+                          </div>
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                        locale={fr}
+                        className="rounded-md border pointer-events-auto"
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1940-01-01")
+                        }
+                        fromYear={1940}
+                        toYear={new Date().getFullYear()}
+                        captionLayout="dropdown-buttons"
+                        showOutsideDays
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 ml-1">
+                  Choisissez une date entre 1940 et aujourd'hui
+                </p>
                 <FormMessage />
               </FormItem>
             )}
