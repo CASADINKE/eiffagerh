@@ -3,7 +3,7 @@ import { Database as SupabaseDatabase } from './types';
 import { Notification } from './types-notifications';
 
 // Define interface for database that includes standard tables and notifications
-export interface DatabaseWithNotifications extends SupabaseDatabase {
+export interface DatabaseWithNotifications extends Omit<SupabaseDatabase, 'public'> {
   public: {
     Tables: SupabaseDatabase['public']['Tables'] & {
       notifications: {
@@ -30,6 +30,10 @@ export interface DatabaseWithNotifications extends SupabaseDatabase {
         };
       };
     };
+    Views: SupabaseDatabase['public']['Views'];
+    Functions: SupabaseDatabase['public']['Functions'];
+    Enums: SupabaseDatabase['public']['Enums'];
+    CompositeTypes: SupabaseDatabase['public']['CompositeTypes'];
   };
 }
 
