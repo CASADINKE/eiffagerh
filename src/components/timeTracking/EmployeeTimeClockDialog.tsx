@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEmployeesUI } from "@/hooks/useEmployees";
-import { useTimeEntries, useClockInMutation, useClockOutMutation, getActiveTimeEntry } from "@/hooks/timeEntries";
+import { useTimeEntries, getActiveTimeEntry } from "@/hooks/timeEntries";
+import { useTimeEntriesOperations } from "@/hooks/timeEntries/useTimeEntriesOperations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,11 +37,10 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployeesUI();
   
   // Fetch time entries to know which employees are already clocked in
-  const { data: timeEntries = [], isLoading: entriesLoading, refetch } = useTimeEntries();
+  const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
   
-  // Mutations for clock in/out
-  const clockInMutation = useClockInMutation();
-  const clockOutMutation = useClockOutMutation();
+  // Time entries operations
+  const { handleClockInOut, isClockingIn, isClockingOut } = useTimeEntriesOperations();
   
   // Loading state combines both employees and entries loading
   const isLoading = employeesLoading || entriesLoading;
@@ -54,30 +54,11 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
     employee.site.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  const handleClockInOut = async (employeeId: string) => {
-    console.log("Handling clock in/out for employee:", employeeId);
-    
-    try {
-      // Check if employee is already clocked in
-      const activeEntry = getActiveTimeEntry(timeEntries, employeeId);
-      
-      if (activeEntry) {
-        // Clock out
-        console.log("Clocking out employee, entry ID:", activeEntry.id);
-        await clockOutMutation.mutateAsync(activeEntry.id);
-        toast.success("Pointage de sortie enregistré avec succès");
-      } else {
-        // Clock in
-        console.log("Clocking in employee:", employeeId);
-        await clockInMutation.mutateAsync({ employeeId });
-        toast.success("Pointage d'entrée enregistré avec succès");
-      }
-      
-      // Refresh the time entries after clocking in/out
-      refetch();
-    } catch (error) {
-      console.error("Error in handleClockInOut:", error);
-      toast.error("Une erreur est survenue lors du pointage");
+  const onClockInOut = async (employeeId: string) => {
+    const success = await handleClockInOut(employeeId, "Pointé via dialogue");
+    if (success) {
+      // Only close dialog on success if needed
+      // setOpen(false);
     }
   };
   
@@ -165,9 +146,14 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
                       <Button
                         variant={isActive ? "destructive" : "secondary"}
                         size="sm"
-                        onClick={() => handleClockInOut(employee.id)}
+                        onClick={() => onClockInOut(employee.id)}
+                        disabled={isClockingIn || isClockingOut}
                       >
-                        <Clock size={14} className="mr-1" />
+                        {(isClockingIn || isClockingOut) ? (
+                          <Loader2 size={14} className="mr-1 animate-spin" />
+                        ) : (
+                          <Clock size={14} className="mr-1" />
+                        )}
                         <span>{isActive ? "Pointer sortie" : "Pointer entrée"}</span>
                       </Button>
                     </TableCell>
