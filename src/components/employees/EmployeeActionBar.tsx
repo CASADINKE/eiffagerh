@@ -32,7 +32,7 @@ const EmployeeActionBar = ({ onAddEmployee, onRefresh, onDeleteEmployees }: Empl
   return (
     <div className="flex justify-between items-center mb-4 mt-6">
       <div className="py-3 px-4 bg-card rounded-t-md border border-border flex-1">
-        <h1 className="text-lg font-medium">Employés</h1>
+        <h1 className="text-lg font-medium text-foreground">Employés</h1>
       </div>
       <div className="flex gap-2">
         <Button 

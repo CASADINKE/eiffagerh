@@ -36,7 +36,7 @@ const EmployeeQuickActions = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="gap-1 text-red-500 hover:text-red-600 hover:bg-red-50" 
+                className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10 border-border" 
                 onClick={onDeleteEmployees}
               >
                 <Trash2 size={16} />
