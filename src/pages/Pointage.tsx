@@ -10,15 +10,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useEmployeePersonalPointage } from "@/hooks/useEmployeePersonalPointage";
+import { usePointages } from "@/hooks/usePointages";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format as formatFns } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Demo: Using a fixed employee ID for now
+// Demo: Using a fixed user ID for now
 // In a real implementation, you'd get this from auth context
-const DEMO_EMPLOYEE_ID = "1";
+const DEMO_USER_ID = "1";
 
 const Pointage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -28,13 +27,14 @@ const Pointage = () => {
   const {
     todayPointage,
     historyPointages,
+    horaireReference,
     loading,
     clockIn,
     clockOut,
     calculateWorkDuration,
     clockInLoading,
     clockOutLoading
-  } = useEmployeePersonalPointage(DEMO_EMPLOYEE_ID);
+  } = usePointages(DEMO_USER_ID);
 
   const handleClockIn = () => {
     clockIn();
@@ -59,6 +59,19 @@ const Pointage = () => {
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd/MM/yyyy");
+  };
+
+  const getStatusBadge = (status: 'present' | 'en_retard' | 'absent') => {
+    switch (status) {
+      case 'present':
+        return <Badge variant="success">Présent</Badge>;
+      case 'en_retard':
+        return <Badge variant="warning">En retard</Badge>;
+      case 'absent':
+        return <Badge variant="destructive">Absent</Badge>;
+      default:
+        return <Badge variant="outline">Inconnu</Badge>;
+    }
   };
 
   const filteredHistory = filterHistoryByDate();
@@ -86,10 +99,18 @@ const Pointage = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {todayPointage?.clock_in ? (
+                {horaireReference && (
+                  <div className="flex items-center text-lg">
+                    <Clock className="mr-2 h-6 w-6 text-slate-500" />
+                    <span>Horaires de référence: {horaireReference.heure_debut} - {horaireReference.heure_fin}</span>
+                  </div>
+                )}
+                
+                {todayPointage?.heure_entree ? (
                   <div className="flex items-center text-lg">
                     <CheckCircle className="mr-2 h-6 w-6 text-green-500" />
-                    <span>Vous avez pointé à {formatTime(todayPointage.clock_in)}</span>
+                    <span>Vous avez pointé à {formatTime(todayPointage.heure_entree)}</span>
+                    <div className="ml-4">{getStatusBadge(todayPointage.statut)}</div>
                   </div>
                 ) : (
                   <div className="flex items-center text-lg">
@@ -98,10 +119,10 @@ const Pointage = () => {
                   </div>
                 )}
                 
-                {todayPointage?.clock_in && (
+                {todayPointage?.heure_entree && (
                   <div className="flex items-center text-lg">
                     <Clock className="mr-2 h-6 w-6 text-blue-500" />
-                    <span>Temps de travail aujourd'hui : {calculateWorkDuration(todayPointage.clock_in, todayPointage.clock_out)}</span>
+                    <span>Temps de travail aujourd'hui : {calculateWorkDuration(todayPointage.heure_entree, todayPointage.heure_sortie)}</span>
                   </div>
                 )}
               </div>
@@ -111,7 +132,7 @@ const Pointage = () => {
             <Button
               size="lg"
               onClick={handleClockIn}
-              disabled={loading || !!todayPointage?.clock_in || clockInLoading}
+              disabled={loading || !!todayPointage?.heure_entree || clockInLoading}
               className="flex items-center"
             >
               {clockInLoading ? (
@@ -124,7 +145,7 @@ const Pointage = () => {
             <Button
               size="lg"
               onClick={handleClockOut}
-              disabled={loading || !todayPointage?.clock_in || !!todayPointage?.clock_out || clockOutLoading}
+              disabled={loading || !todayPointage?.heure_entree || !!todayPointage?.heure_sortie || clockOutLoading}
               variant="destructive"
               className="flex items-center"
             >
@@ -231,25 +252,13 @@ const Pointage = () => {
                   filteredHistory.map((pointage) => (
                     <TableRow key={pointage.id}>
                       <TableCell>{formatDate(pointage.date)}</TableCell>
-                      <TableCell>{formatTime(pointage.clock_in)}</TableCell>
-                      <TableCell>{formatTime(pointage.clock_out)}</TableCell>
+                      <TableCell>{formatTime(pointage.heure_entree)}</TableCell>
+                      <TableCell>{formatTime(pointage.heure_sortie)}</TableCell>
                       <TableCell>
-                        {calculateWorkDuration(pointage.clock_in, pointage.clock_out)}
+                        {calculateWorkDuration(pointage.heure_entree, pointage.heure_sortie)}
                       </TableCell>
                       <TableCell>
-                        {pointage.clock_in && pointage.clock_out ? (
-                          <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-                            Complet
-                          </Badge>
-                        ) : pointage.clock_in ? (
-                          <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
-                            En cours
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">
-                            Non pointé
-                          </Badge>
-                        )}
+                        {getStatusBadge(pointage.statut)}
                       </TableCell>
                     </TableRow>
                   ))

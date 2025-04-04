@@ -122,6 +122,33 @@ export type Database = {
           },
         ]
       }
+      horaires_reference: {
+        Row: {
+          created_at: string
+          heure_debut: string
+          heure_fin: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          heure_debut: string
+          heure_fin: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          heure_debut?: string
+          heure_fin?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leave_requests: {
         Row: {
           approved_by: string | null
@@ -286,6 +313,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pointages: {
+        Row: {
+          created_at: string
+          date: string
+          heure_entree: string | null
+          heure_sortie: string | null
+          id: string
+          statut: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          heure_entree?: string | null
+          heure_sortie?: string | null
+          id?: string
+          statut?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          heure_entree?: string | null
+          heure_sortie?: string | null
+          id?: string
+          statut?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
