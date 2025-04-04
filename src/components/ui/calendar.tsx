@@ -26,7 +26,7 @@ function Calendar({
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-primary border-primary/20"
         ),
         nav_button_previous: "absolute left-1",
         nav_button_next: "absolute right-1",
@@ -43,18 +43,34 @@ function Calendar({
         day_range_end: "day-range-end",
         day_selected:
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
+        day_today: "bg-accent text-accent-foreground border border-primary/20",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
+        caption_dropdowns: "flex justify-center gap-1 items-center",
+        dropdown: "relative z-10",
+        dropdown_month: "flex-1",
+        dropdown_year: "flex-1",
+        dropdown_icon: "hidden",
+        dropdown_month_button: cn(
+          buttonVariants({ variant: "outline" }),
+          "px-2 py-1 h-auto text-sm font-medium border-primary/20 text-primary"
+        ),
+        dropdown_year_button: cn(
+          buttonVariants({ variant: "outline" }),
+          "px-2 py-1 h-auto text-sm font-medium border-primary/20 text-primary"
+        ),
+        dropdown_month_content: "bg-popover border rounded-md p-1 shadow-lg",
+        dropdown_year_content: "bg-popover border rounded-md p-1 shadow-lg max-h-60 overflow-auto",
+        vhidden: "hidden",
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
+        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4 text-primary" />,
+        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4 text-primary" />,
       }}
       {...props}
     />

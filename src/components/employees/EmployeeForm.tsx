@@ -192,13 +192,13 @@ const EmployeeForm = ({
             render={({ field }) => (
               <FormItem className="flex flex-col md:col-span-2">
                 <FormLabel className="text-base mb-1">Date de naissance</FormLabel>
-                <div className="bg-muted/20 p-1 border rounded-md">
+                <div className="bg-muted/10 p-1 border border-primary/10 rounded-md shadow-sm">
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          className="w-full h-12 p-3 text-base text-left font-normal flex justify-between items-center bg-background"
+                          className="w-full h-12 p-3 text-base text-left font-normal flex justify-between items-center bg-background/95 border-primary/20 hover:bg-primary/5 hover:border-primary/30 transition-all"
                         >
                           <div className="flex items-center">
                             <CalendarIcon className="mr-2 h-5 w-5 text-primary" />
@@ -213,14 +213,14 @@ const EmployeeForm = ({
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 border border-primary/20 shadow-md" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
                         locale={fr}
-                        className="rounded-md border pointer-events-auto"
+                        className="rounded-md border-primary/10 pointer-events-auto"
                         disabled={(date) =>
                           date > new Date() || date < new Date("1940-01-01")
                         }
@@ -432,7 +432,7 @@ const EmployeeForm = ({
             type="button" 
             onClick={onCancel} 
             disabled={isLoading}
-            className="px-6 py-2 text-base h-12"
+            className="px-6 py-2 text-base h-12 border-primary/20 hover:bg-primary/5"
           >
             Annuler
           </Button>
