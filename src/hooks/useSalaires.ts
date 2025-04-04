@@ -1,4 +1,6 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   fetchSalaires, 
   createSalaire, 
@@ -95,8 +97,27 @@ export const useSalaireById = (salaireId: string) => {
 };
 
 // Fix Supabase type issues for the pointages and horaires_reference tables
+export interface Pointage {
+  id?: string;
+  user_id: string;
+  date: string;
+  heure_entree: string | null;
+  heure_sortie: string | null;
+  statut: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface HoraireReference {
+  id?: string;
+  user_id: string;
+  heure_debut: string;
+  heure_fin: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export const usePointages = (userId: string) => {
-  // Using the casting approach with unknown as intermediate step to avoid TypeScript errors
   const fetchFromPointages = async () => {
     return supabase
       .from('pointages' as any)
