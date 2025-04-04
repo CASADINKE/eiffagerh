@@ -8,7 +8,6 @@ import EmployeeSearchBar from "@/components/employees/EmployeeSearchBar";
 import EmployeeTable from "@/components/employees/EmployeeTable";
 import DeleteRecentEmployeesDialog from "@/components/employees/DeleteRecentEmployeesDialog";
 import EmployeeDetailsDialog from "@/components/employees/EmployeeDetailsDialog";
-import { Employee } from "@/hooks/useEmployees";
 import { EmployeeUI, mapEmployeesToUI } from "@/types/employee";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AlertTriangle } from "lucide-react";
@@ -23,6 +22,7 @@ const Employees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   
   const { fetchEmployees, fetchEmployeeById, deleteEmployee } = useEmployeeOperations();
   
@@ -86,9 +86,8 @@ const Employees = () => {
   };
   
   const handleEditEmployee = () => {
-    // This would be implemented later - for now just show a toast
-    toast.info("Fonctionnalité de modification à implémenter");
     setDetailsDialogOpen(false);
+    setEditDialogOpen(true);
   };
   
   const handleDeleteEmployeeClick = () => {
@@ -137,6 +136,16 @@ const Employees = () => {
         onOpenChange={setOpenForm} 
         onSuccess={loadEmployees}
       />
+
+      {selectedEmployee && (
+        <EmployeeFormDialog 
+          open={editDialogOpen} 
+          onOpenChange={setEditDialogOpen} 
+          onSuccess={loadEmployees}
+          employeeToEdit={selectedEmployee}
+          mode="edit"
+        />
+      )}
 
       <DeleteRecentEmployeesDialog
         open={deleteRecentDialogOpen}
