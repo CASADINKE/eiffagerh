@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, parse, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon, Search, FileDown, FileText, Clock, CheckCircle, XCircle } from "lucide-react";
@@ -15,24 +15,51 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format as formatFns } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Demo: Using a fixed employee ID for now
-// In a real implementation, you'd get this from auth context
-const DEMO_EMPLOYEE_ID = "1";
+import { supabase } from "@/integrations/supabase/client";
 
 const Pointage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [month, setMonth] = useState<Date>(new Date());
   const [searchDate, setSearchDate] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Récupérer l'ID de l'employé connecté (pour démonstration, nous utilisons le premier employé trouvé)
+    const fetchEmployee = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('listes_employées')
+          .select('id')
+          .limit(1)
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          console.log("Employé récupéré:", data);
+          setEmployeeId(data.id);
+        }
+      } catch (err) {
+        console.error("Erreur lors de la récupération de l'employé:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployee();
+  }, []);
 
   const {
     todayPointage,
     historyPointages,
-    loading,
+    loading: pointageLoading,
     clockIn,
     clockOut,
-    calculateWorkDuration
-  } = useEmployeePersonalPointage(DEMO_EMPLOYEE_ID);
+    calculateWorkDuration,
+    employeeDetails
+  } = useEmployeePersonalPointage(employeeId);
 
   const handleClockIn = () => {
     clockIn();
@@ -61,6 +88,23 @@ const Pointage = () => {
 
   const filteredHistory = filterHistoryByDate();
 
+  if (loading || !employeeId) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">📍 Pointage du jour</h1>
+        </div>
+        <Card className="p-8">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-5 w-36" />
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
@@ -73,11 +117,15 @@ const Pointage = () => {
           <CardHeader>
             <CardTitle>État du jour • {format(new Date(), "EEEE dd MMMM yyyy", { locale: fr })}</CardTitle>
             <CardDescription>
-              Suivez votre pointage quotidien
+              {employeeDetails ? (
+                <span>Employé: {employeeDetails.prenom} {employeeDetails.nom} - {employeeDetails.poste}</span>
+              ) : (
+                "Suivez votre pointage quotidien"
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {pointageLoading ? (
               <div className="space-y-3">
                 <Skeleton className="h-8 w-3/4" />
                 <Skeleton className="h-8 w-1/2" />
@@ -109,7 +157,7 @@ const Pointage = () => {
             <Button
               size="lg"
               onClick={handleClockIn}
-              disabled={loading || !!todayPointage?.clock_in}
+              disabled={pointageLoading || !!todayPointage?.clock_in}
               className="flex items-center"
             >
               <span className="mr-2">🟢</span>
@@ -118,7 +166,7 @@ const Pointage = () => {
             <Button
               size="lg"
               onClick={handleClockOut}
-              disabled={loading || !todayPointage?.clock_in || !!todayPointage?.clock_out}
+              disabled={pointageLoading || !todayPointage?.clock_in || !!todayPointage?.clock_out}
               variant="destructive"
               className="flex items-center"
             >
@@ -193,7 +241,7 @@ const Pointage = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {pointageLoading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, index) => (
                 <Skeleton key={index} className="h-12 w-full" />

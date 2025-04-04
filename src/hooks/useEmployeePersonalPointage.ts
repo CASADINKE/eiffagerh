@@ -18,6 +18,7 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
   const [historyPointages, setHistoryPointages] = useState<EmployeePersonalPointage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [employeeDetails, setEmployeeDetails] = useState<any>(null);
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -33,6 +34,23 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
     const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
     
     return `${diffHrs}h ${diffMins}min`;
+  };
+
+  const fetchEmployeeDetails = async () => {
+    try {
+      // Récupérer les détails de l'employé de la table listes_employées
+      const { data, error } = await supabase
+        .from('listes_employées')
+        .select('*')
+        .eq('id', employeeId)
+        .maybeSingle();
+
+      if (error) throw error;
+      
+      setEmployeeDetails(data);
+    } catch (err: any) {
+      console.error('Erreur lors de la récupération des détails de l\'employé:', err);
+    }
   };
 
   const fetchTodayPointage = async () => {
@@ -157,6 +175,7 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
 
   useEffect(() => {
     if (employeeId) {
+      fetchEmployeeDetails();
       fetchTodayPointage();
       fetchHistoryPointages();
     }
@@ -171,6 +190,7 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
     clockOut,
     fetchTodayPointage,
     fetchHistoryPointages,
-    calculateWorkDuration
+    calculateWorkDuration,
+    employeeDetails
   };
 };
