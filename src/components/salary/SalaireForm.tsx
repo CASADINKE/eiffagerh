@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -54,8 +53,9 @@ export function SalaireForm() {
   const { createSalaire, isCreating } = useSalaires();
   const { data: employees } = useEmployees();
   const [netAPayer, setNetAPayer] = useState<number>(0);
-  const [selectedEmployee, setSelectedEmployee] = useState<{ matricule: string; nom: string; prenom: string } | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<{ matricule: string; nom: string; prenom: string; salary?: number; sursalaire?: number } | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoadingSalaryData, setIsLoadingSalaryData] = useState(false);
   
   // Get the current user ID
   useEffect(() => {
@@ -89,6 +89,71 @@ export function SalaireForm() {
   
   const watchAllFields = form.watch();
   
+  // Fetch salary details when employee is selected
+  const fetchEmployeeSalaryData = async (employeeId: string) => {
+    if (!employeeId) return;
+    
+    setIsLoadingSalaryData(true);
+    try {
+      // First try to get salary from salary_details table
+      const { data: salaryData, error: salaryError } = await supabase
+        .from('salary_details')
+        .select('*')
+        .eq('employee_id', employeeId)
+        .maybeSingle();
+      
+      if (salaryError) {
+        console.error("Error fetching salary details:", salaryError);
+      }
+      
+      // If we have salary data from the salary_details table
+      if (salaryData) {
+        form.setValue('salaire_base', salaryData.base_salary || 0);
+        
+        // Try to get sursalaire from the most recent salary record
+        const { data: lastSalaire, error: lastSalaireError } = await supabase
+          .from('salaires')
+          .select('*')
+          .eq('matricule', selectedEmployee?.matricule || '')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+          
+        if (!lastSalaireError && lastSalaire) {
+          form.setValue('sursalaire', lastSalaire.sursalaire || 0);
+        }
+        
+        return;
+      }
+      
+      // Fallback: check if the employee has a previous salary record
+      if (selectedEmployee?.matricule) {
+        const { data: lastSalaire, error: lastSalaireError } = await supabase
+          .from('salaires')
+          .select('*')
+          .eq('matricule', selectedEmployee.matricule)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+          
+        if (lastSalaireError) {
+          console.error("Error fetching last salary:", lastSalaireError);
+        }
+        
+        if (lastSalaire) {
+          form.setValue('salaire_base', lastSalaire.salaire_base || 0);
+          form.setValue('sursalaire', lastSalaire.sursalaire || 0);
+          form.setValue('prime_transport', lastSalaire.prime_transport || 0);
+          form.setValue('indemnite_deplacement', lastSalaire.indemnite_deplacement || 0);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching employee salary data:", error);
+    } finally {
+      setIsLoadingSalaryData(false);
+    }
+  };
+  
   // Mettre à jour les informations de l'employé sélectionné
   useEffect(() => {
     const employeeId = form.getValues().employee;
@@ -100,6 +165,9 @@ export function SalaireForm() {
           nom: employee.nom,
           prenom: employee.prenom
         });
+        
+        // Fetch and set salary data
+        fetchEmployeeSalaryData(employeeId);
       }
     }
   }, [form.watch("employee"), employees]);
@@ -193,6 +261,7 @@ export function SalaireForm() {
                 <p className="text-sm font-medium">Employé sélectionné:</p>
                 <p className="text-sm">Matricule: {selectedEmployee.matricule}</p>
                 <p className="text-sm">Nom: {selectedEmployee.prenom} {selectedEmployee.nom}</p>
+                {isLoadingSalaryData && <p className="text-sm italic">Chargement des données salariales...</p>}
               </div>
             )}
               
@@ -234,7 +303,11 @@ export function SalaireForm() {
                   <FormItem>
                     <FormLabel>Salaire de base</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field}
+                        disabled={isLoadingSalaryData}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -248,7 +321,11 @@ export function SalaireForm() {
                   <FormItem>
                     <FormLabel>Sursalaire</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field}
+                        disabled={isLoadingSalaryData}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -338,7 +415,7 @@ export function SalaireForm() {
               <div className="text-xl font-bold">{netAPayer.toLocaleString('fr-FR')} FCFA</div>
             </div>
               
-            <Button type="submit" className="w-full" disabled={isCreating || !selectedEmployee}>
+            <Button type="submit" className="w-full" disabled={isCreating || !selectedEmployee || isLoadingSalaryData}>
               {isCreating ? "Création en cours..." : "Créer le bulletin de salaire"}
             </Button>
           </form>

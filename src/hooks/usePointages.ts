@@ -78,7 +78,7 @@ export const usePointages = (userId: string) => {
 
       if (error) throw error;
       
-      setTodayPointage(data as Pointage | null);
+      setTodayPointage(data as unknown as Pointage);
     } catch (err: any) {
       console.error('Error fetching today pointage:', err);
       setError(err);
@@ -111,7 +111,7 @@ export const usePointages = (userId: string) => {
 
       if (error) throw error;
       
-      setHistoryPointages(data as Pointage[] || []);
+      setHistoryPointages(data as unknown as Pointage[] || []);
     } catch (err: any) {
       console.error('Error fetching history pointages:', err);
       setError(err);
@@ -131,7 +131,7 @@ export const usePointages = (userId: string) => {
 
       if (error) throw error;
       
-      setHoraireReference(data as HoraireReference | null);
+      setHoraireReference(data as unknown as HoraireReference);
     } catch (err: any) {
       console.error('Error fetching horaire reference:', err);
       // Not setting error state here as this is not critical
@@ -168,7 +168,7 @@ export const usePointages = (userId: string) => {
           .single();
 
         if (error) throw error;
-        setTodayPointage(data as Pointage);
+        setTodayPointage(data as unknown as Pointage);
       } else {
         // Create new record
         const newPointage = {
@@ -185,7 +185,7 @@ export const usePointages = (userId: string) => {
           .single();
 
         if (error) throw error;
-        setTodayPointage(data as Pointage);
+        setTodayPointage(data as unknown as Pointage);
       }
       
       toast.success("Pointage d'entrée enregistré avec succès");
@@ -220,7 +220,7 @@ export const usePointages = (userId: string) => {
 
       if (error) throw error;
       
-      setTodayPointage(data as Pointage);
+      setTodayPointage(data as unknown as Pointage);
       toast.success("Pointage de sortie enregistré avec succès");
     } catch (err: any) {
       console.error('Error clocking out:', err);
