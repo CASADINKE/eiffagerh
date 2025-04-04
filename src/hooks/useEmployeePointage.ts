@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { EmployeeUI } from '@/types/employee';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 export interface EmployeePointage {
   id: string;
@@ -16,6 +18,27 @@ export interface EmployeePointage {
   employee: EmployeeUI;
 }
 
+// Calculate the duration between clock in and clock out in hours and minutes
+export const calculatePointageDuration = (clockIn: string, clockOut: string | null): string => {
+  if (!clockOut) return "En cours";
+  
+  const start = new Date(clockIn);
+  const end = new Date(clockOut);
+  
+  // Calculate difference in milliseconds
+  const diff = end.getTime() - start.getTime();
+  
+  // Convert to hours and minutes
+  const totalMinutes = Math.floor(diff / 60000);
+  
+  if (totalMinutes <= 0) return "0h 0m";
+  
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
+  return `${hours}h ${minutes}m`;
+};
+
 export const useEmployeePointage = (employeeId?: string) => {
   const [pointages, setPointages] = useState<EmployeePointage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +52,7 @@ export const useEmployeePointage = (employeeId?: string) => {
     setLoading(true);
     try {
       const query = supabase
-        .from('pointages')
+        .from('time_entries')
         .select(`
           *,
           employee:employee_id(
@@ -93,7 +116,7 @@ export const useEmployeePointage = (employeeId?: string) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('pointages')
+        .from('time_entries')
         .insert(pointage)
         .select('*');
 
@@ -116,7 +139,7 @@ export const useEmployeePointage = (employeeId?: string) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('pointages')
+        .from('time_entries')
         .update(updates)
         .eq('id', id)
         .select('*');
@@ -140,7 +163,7 @@ export const useEmployeePointage = (employeeId?: string) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('pointages')
+        .from('time_entries')
         .delete()
         .eq('id', id);
 

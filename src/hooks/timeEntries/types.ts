@@ -15,6 +15,11 @@ export interface TimeEntry {
   employee?: EmployeeUI;
 }
 
+// Time entry with employee details
+export interface TimeEntryWithEmployee extends TimeEntry {
+  employee: EmployeeUI;
+}
+
 // Define the InsertTimeEntryParams interface
 export interface InsertTimeEntryParams {
   p_id: string;

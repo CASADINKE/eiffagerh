@@ -1,3 +1,4 @@
+
 import { EmployeeUI } from "@/types/employee";
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "./types";
@@ -46,6 +47,55 @@ export const formatDateForInput = (date: string): string => {
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+};
+
+// Clock in an employee
+export const clockInEmployee = async (employeeId: string, notes?: string): Promise<TimeEntry | null> => {
+  const today = new Date().toISOString().split('T')[0];
+  
+  try {
+    const { data, error } = await supabase
+      .from('time_entries')
+      .insert({
+        employee_id: employeeId,
+        date: today,
+        clock_in: new Date().toISOString(),
+        notes: notes || null,
+        break_time: 0
+      })
+      .select('*')
+      .single();
+    
+    if (error) throw error;
+    
+    console.log("Clock in successful:", data);
+    return data;
+  } catch (error) {
+    console.error("Error clocking in employee:", error);
+    throw error;
+  }
+};
+
+// Clock out an employee
+export const clockOutEmployee = async (entryId: string): Promise<TimeEntry | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('time_entries')
+      .update({
+        clock_out: new Date().toISOString()
+      })
+      .eq('id', entryId)
+      .select('*')
+      .single();
+    
+    if (error) throw error;
+    
+    console.log("Clock out successful:", data);
+    return data;
+  } catch (error) {
+    console.error("Error clocking out employee:", error);
+    throw error;
+  }
 };
 
 export interface TimeEntryResponse {
@@ -103,7 +153,7 @@ export const transformTimeEntryResponse = (entry: TimeEntryResponse): TimeEntryW
 export const fetchTimeEntries = async (): Promise<TimeEntryWithEmployee[]> => {
   try {
     const { data, error } = await supabase
-      .from("pointages")
+      .from("time_entries")
       .select(`
         *,
         employee:employee_id(
@@ -131,7 +181,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntryWithEmployee[]> => {
       date: entry.date,
       clock_in: entry.clock_in,
       clock_out: entry.clock_out,
-      break_time: entry.break_time,
+      break_time: entry.break_time || 0,
       notes: entry.notes,
       created_at: entry.created_at,
       updated_at: entry.updated_at,
@@ -163,7 +213,7 @@ export const fetchTimeEntryById = async (
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
     const { data, error } = await supabase
-      .from("pointages")
+      .from("time_entries")
       .select(`
         *,
         employee:employee_id(
@@ -190,7 +240,7 @@ export const fetchTimeEntryById = async (
       date: data.date,
       clock_in: data.clock_in,
       clock_out: data.clock_out,
-      break_time: data.break_time,
+      break_time: data.break_time || 0,
       notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at,
@@ -220,7 +270,7 @@ export const createTimeEntry = async (
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
     const { data, error } = await supabase
-      .from("pointages")
+      .from("time_entries")
       .insert([timeEntry])
       .select(`
         *,
@@ -247,7 +297,7 @@ export const createTimeEntry = async (
       date: data.date,
       clock_in: data.clock_in,
       clock_out: data.clock_out,
-      break_time: data.break_time,
+      break_time: data.break_time || 0,
       notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at,
@@ -278,7 +328,7 @@ export const updateTimeEntry = async (
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
     const { data, error } = await supabase
-      .from("pointages")
+      .from("time_entries")
       .update(updates)
       .eq("id", id)
       .select(`
@@ -306,7 +356,7 @@ export const updateTimeEntry = async (
       date: data.date,
       clock_in: data.clock_in,
       clock_out: data.clock_out,
-      break_time: data.break_time,
+      break_time: data.break_time || 0,
       notes: data.notes,
       created_at: data.created_at,
       updated_at: data.updated_at,
@@ -333,7 +383,7 @@ export const updateTimeEntry = async (
 // Function to delete a time entry by ID
 export const deleteTimeEntry = async (id: string): Promise<boolean> => {
   try {
-    const { error } = await supabase.from("pointages").delete().eq("id", id);
+    const { error } = await supabase.from("time_entries").delete().eq("id", id);
 
     if (error) throw error;
 

@@ -14,7 +14,8 @@ export interface EmployeeFormData {
   telephone: string;
   affectation: string;
   site: string;
-  categorie: string;
+  // UI-only fields (not stored in database)
+  categorie?: string;
   salaire_base?: string;
   sursalaire?: string;
   prime_deplacement?: string;
@@ -53,7 +54,7 @@ export const useEmployeeOperations = () => {
       toast.error(`Erreur: ${err.message}`);
       return null;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -214,11 +215,11 @@ export const useEmployeeOperations = () => {
       // Add UI-only properties that don't exist in the database
       return {
         ...data,
-        categorie: data.categorie || "a", // Default value
-        salaire_base: data.salaire_base || "",
-        sursalaire: data.sursalaire || "",
-        prime_deplacement: data.prime_deplacement || "",
-        commentaire: data.commentaire || ""
+        categorie: "a", // Default value
+        salaire_base: "",
+        sursalaire: "",
+        prime_deplacement: "",
+        commentaire: ""
       };
     } catch (err: any) {
       console.error("Exception when fetching employee:", err);
