@@ -20,22 +20,66 @@ const Leave = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { userRole } = useAuth();
+  const { userRole, user } = useAuth();
 
   useEffect(() => {
     fetchLeaveRequests();
+    
+    // Subscribe to real-time updates for leave requests
+    const channel = supabase
+      .channel('leave-requests-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leave_requests',
+        },
+        () => fetchLeaveRequests()
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchLeaveRequests = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("leave_requests")
         .select("*")
         .order("created_at", { ascending: false });
+      
+      if (userRole !== 'super_admin') {
+        // Filter to only show current user's requests if not an admin
+        query = query.eq('employee_id', user?.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setLeaveRequests(data || []);
+      
+      // If admin, mark notifications as read for leave requests
+      if (userRole === 'super_admin' && user?.id) {
+        // Get all notification IDs for this admin related to leave requests
+        const { data: notifications } = await supabase
+          .from('notifications')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('type', 'leave_request')
+          .eq('read', false);
+        
+        if (notifications && notifications.length > 0) {
+          // Mark them as read
+          await supabase
+            .from('notifications')
+            .update({ read: true })
+            .in('id', notifications.map(n => n.id));
+        }
+      }
     } catch (error: any) {
       console.error("Erreur lors du chargement des demandes:", error.message);
       toast({

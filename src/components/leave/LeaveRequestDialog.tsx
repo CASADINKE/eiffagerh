@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
 import { z } from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LeaveRequestDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export function LeaveRequestDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { data: employees, isLoading: employeesLoading } = useEmployees();
+  const { user } = useAuth();
   
   const handleSubmit = async (formData: LeaveFormValues) => {
     setIsSubmitting(true);
@@ -51,16 +53,53 @@ export function LeaveRequestDialog({
         throw new Error("Aucun employé sélectionné ou disponible");
       }
 
-      const { error } = await supabase.from("leave_requests").insert({
+      // Find the employee details to include in notification
+      const selectedEmployee = employees?.find(emp => emp.id === employee_id);
+      const employeeName = selectedEmployee?.full_name || "Un employé";
+
+      // Format dates for display
+      const startDate = formData.start_date.toLocaleDateString('fr-FR');
+      const endDate = formData.end_date.toLocaleDateString('fr-FR');
+
+      // Insert the leave request
+      const { data: leaveRequest, error } = await supabase.from("leave_requests").insert({
         type: formData.type,
         start_date: formData.start_date.toISOString(),
         end_date: formData.end_date.toISOString(),
         reason: formData.reason || null,
         status: "pending",
         employee_id: employee_id,
-      });
+      }).select('*').single();
 
       if (error) throw error;
+
+      // Get all super_admin users to notify them
+      const { data: adminUsers } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'super_admin');
+
+      if (adminUsers && adminUsers.length > 0) {
+        // Create notifications in the database for admins
+        const notifications = adminUsers.map(admin => ({
+          user_id: admin.id,
+          title: "Nouvelle demande de congé",
+          message: `${employeeName} a soumis une demande de congé du ${startDate} au ${endDate}`,
+          read: false,
+          created_at: new Date().toISOString(),
+          related_id: leaveRequest.id,
+          type: 'leave_request'
+        }));
+
+        // Insert notifications
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert(notifications);
+
+        if (notificationError) {
+          console.error("Erreur lors de l'envoi des notifications:", notificationError);
+        }
+      }
 
       // Afficher les deux types de notifications
       toast({
