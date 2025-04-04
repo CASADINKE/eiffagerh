@@ -18,6 +18,8 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
   const [historyPointages, setHistoryPointages] = useState<EmployeePersonalPointage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [clockInLoading, setClockInLoading] = useState(false);
+  const [clockOutLoading, setClockOutLoading] = useState(false);
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -94,7 +96,7 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
       return;
     }
     
-    setLoading(true);
+    setClockInLoading(true);
     try {
       const newPointage = {
         employee_id: employeeId,
@@ -118,7 +120,7 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
       setError(err);
       toast.error("Erreur lors du pointage d'entrée");
     } finally {
-      setLoading(false);
+      setClockInLoading(false);
     }
   };
 
@@ -133,7 +135,7 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
       return;
     }
     
-    setLoading(true);
+    setClockOutLoading(true);
     try {
       const { data, error } = await supabase
         .from('time_entries')
@@ -151,7 +153,7 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
       setError(err);
       toast.error("Erreur lors du pointage de sortie");
     } finally {
-      setLoading(false);
+      setClockOutLoading(false);
     }
   };
 
@@ -171,6 +173,8 @@ export const useEmployeePersonalPointage = (employeeId: string) => {
     clockOut,
     fetchTodayPointage,
     fetchHistoryPointages,
-    calculateWorkDuration
+    calculateWorkDuration,
+    clockInLoading,
+    clockOutLoading
   };
 };

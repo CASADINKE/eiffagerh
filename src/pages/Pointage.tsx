@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { format, parse, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Search, FileDown, FileText, Clock, CheckCircle, XCircle } from "lucide-react";
+import { CalendarIcon, Search, FileDown, FileText, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -31,7 +31,9 @@ const Pointage = () => {
     loading,
     clockIn,
     clockOut,
-    calculateWorkDuration
+    calculateWorkDuration,
+    clockInLoading,
+    clockOutLoading
   } = useEmployeePersonalPointage(DEMO_EMPLOYEE_ID);
 
   const handleClockIn = () => {
@@ -109,20 +111,28 @@ const Pointage = () => {
             <Button
               size="lg"
               onClick={handleClockIn}
-              disabled={loading || !!todayPointage?.clock_in}
+              disabled={loading || !!todayPointage?.clock_in || clockInLoading}
               className="flex items-center"
             >
-              <span className="mr-2">🟢</span>
+              {clockInLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <span className="mr-2">🟢</span>
+              )}
               Pointer l'entrée
             </Button>
             <Button
               size="lg"
               onClick={handleClockOut}
-              disabled={loading || !todayPointage?.clock_in || !!todayPointage?.clock_out}
+              disabled={loading || !todayPointage?.clock_in || !!todayPointage?.clock_out || clockOutLoading}
               variant="destructive"
               className="flex items-center"
             >
-              <span className="mr-2">🔴</span>
+              {clockOutLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <span className="mr-2">🔴</span>
+              )}
               Pointer la sortie
             </Button>
           </CardFooter>
