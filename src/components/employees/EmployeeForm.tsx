@@ -48,6 +48,15 @@ const siteOptions = [
   { value: "ziguinchor", label: "Ziguinchor" },
 ];
 
+const categoryOptions = [
+  { value: "a", label: "Catégorie A" },
+  { value: "b", label: "Catégorie B" },
+  { value: "c", label: "Catégorie C" },
+  { value: "d", label: "Catégorie D" },
+  { value: "e", label: "Catégorie E" },
+  { value: "f", label: "Catégorie F" },
+];
+
 const employeeFormSchema = z.object({
   matricule: z.string().min(1, { message: "Le matricule est requis" }),
   employeur: z.string().min(1, { message: "L'employeur est requis" }),
@@ -59,6 +68,11 @@ const employeeFormSchema = z.object({
   telephone: z.string().min(1, { message: "Le téléphone est requis" }),
   affectation: z.string().min(1, { message: "L'affectation est requise" }),
   site: z.string().min(1, { message: "Le site est requis" }),
+  categorie: z.string().min(1, { message: "La catégorie est requise" }),
+  salaire_base: z.string().optional(),
+  sursalaire: z.string().optional(),
+  prime_deplacement: z.string().optional(),
+  commentaire: z.string().optional(),
 });
 
 interface EmployeeFormProps {
@@ -88,6 +102,11 @@ const EmployeeForm = ({
       telephone: "",
       affectation: "",
       site: "",
+      categorie: "",
+      salaire_base: "",
+      sursalaire: "",
+      prime_deplacement: "",
+      commentaire: "",
     },
   });
 
@@ -228,6 +247,88 @@ const EmployeeForm = ({
 
           <FormField
             control={form.control}
+            name="categorie"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Catégorie</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="p-3 text-base h-12">
+                      <SelectValue placeholder="Sélectionner une catégorie" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value} className="text-base">
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="salaire_base"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Salaire de base</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Ex: 350000" 
+                    {...field} 
+                    className="p-3 text-base h-12" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="sursalaire"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Sursalaire</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Ex: 50000" 
+                    {...field} 
+                    className="p-3 text-base h-12" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="prime_deplacement"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel className="text-base">Prime de déplacement</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Ex: 25000" 
+                    {...field} 
+                    className="p-3 text-base h-12" 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="adresse"
             render={({ field }) => (
               <FormItem className="flex flex-col">
@@ -292,6 +393,24 @@ const EmployeeForm = ({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="commentaire"
+            render={({ field }) => (
+              <FormItem className="flex flex-col md:col-span-2">
+                <FormLabel className="text-base">Commentaire</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Commentaire sur les primes ou autres informations complémentaires" 
+                    {...field} 
+                    className="p-3 text-base min-h-[5rem] resize-none" 
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

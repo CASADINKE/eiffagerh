@@ -25,7 +25,21 @@ export const fetchTimeEntries = async (): Promise<TimeEntry[]> => {
       throw new Error(`Error fetching time entries: ${error.message}`);
     }
 
-    return data as TimeEntry[] || [];
+    // Transform the data to match the TimeEntry type
+    const formattedEntries = data ? data.map((entry: any) => ({
+      id: entry.id,
+      employee_id: entry.employee_id,
+      date: entry.date,
+      clock_in: entry.clock_in,
+      clock_out: entry.clock_out,
+      break_time: entry.break_time,
+      notes: entry.notes,
+      created_at: entry.created_at,
+      updated_at: entry.updated_at,
+      employee: entry.employee
+    })) : [];
+
+    return formattedEntries as TimeEntry[];
   } catch (error) {
     console.error("Unexpected error fetching time entries:", error);
     throw error;
@@ -40,7 +54,7 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
     const formattedTime = now.toISOString(); // ISO format time
 
     // Use a stored procedure to handle the clock-in logic
-    const { data, error } = await supabase.rpc<TimeEntry, {}>("insert_time_entry", {
+    const { data: procData, error: procError } = await supabase.rpc("insert_time_entry", {
       p_id: crypto.randomUUID(),
       p_employee_id: employeeId,
       p_notes: notes || null,
@@ -48,12 +62,12 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
       p_clock_in: formattedTime
     });
 
-    if (error) {
-      console.error("Error clocking in employee:", error);
-      throw new Error(`Error clocking in: ${error.message}`);
+    if (procError) {
+      console.error("Error clocking in employee:", procError);
+      throw new Error(`Error clocking in: ${procError.message}`);
     }
 
-    if (!data) {
+    if (!procData) {
       throw new Error("No data returned after clock in");
     }
 
@@ -70,15 +84,29 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
           poste
         )
       `)
-      .eq("id", (data as any).id)
+      .eq("id", (procData as any).id)
       .single();
 
     if (fetchError) {
       console.warn("Error fetching employee details after clock in:", fetchError);
-      return data as TimeEntry;
+      return procData as TimeEntry;
     }
 
-    return entryWithEmployee as TimeEntry;
+    // Transform to ensure type safety
+    const formattedEntry: TimeEntry = {
+      id: entryWithEmployee.id,
+      employee_id: entryWithEmployee.employee_id,
+      date: entryWithEmployee.date,
+      clock_in: entryWithEmployee.clock_in,
+      clock_out: entryWithEmployee.clock_out,
+      break_time: entryWithEmployee.break_time,
+      notes: entryWithEmployee.notes,
+      created_at: entryWithEmployee.created_at,
+      updated_at: entryWithEmployee.updated_at,
+      employee: entryWithEmployee.employee
+    };
+
+    return formattedEntry;
   } catch (error) {
     console.error("Unexpected error in clockInEmployee:", error);
     throw error;
@@ -115,7 +143,21 @@ export const clockOutEmployee = async (entryId: string): Promise<TimeEntry> => {
       throw new Error("No data returned after clock out");
     }
 
-    return data as TimeEntry;
+    // Transform to ensure type safety
+    const formattedEntry: TimeEntry = {
+      id: data.id,
+      employee_id: data.employee_id,
+      date: data.date,
+      clock_in: data.clock_in,
+      clock_out: data.clock_out,
+      break_time: data.break_time,
+      notes: data.notes,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      employee: data.employee
+    };
+
+    return formattedEntry;
   } catch (error) {
     console.error("Unexpected error in clockOutEmployee:", error);
     throw error;
