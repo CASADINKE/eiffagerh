@@ -12,40 +12,57 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, Search } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEmployeeOperations } from "@/hooks/useEmployeeOperations";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
-interface DeleteRecentEmployeesDialogProps {
+interface DeleteEmployeesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
 
-const DeleteRecentEmployeesDialog = ({
+const DeleteEmployeesDialog = ({
   open,
   onOpenChange,
   onSuccess,
-}: DeleteRecentEmployeesDialogProps) => {
-  const { fetchRecentEmployees, deleteMultipleEmployees, isLoading } = useEmployeeOperations();
-  const [recentEmployees, setRecentEmployees] = useState<any[]>([]);
+}: DeleteEmployeesDialogProps) => {
+  const { fetchEmployees, deleteMultipleEmployees, isLoading } = useEmployeeOperations();
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [filteredEmployees, setFilteredEmployees] = useState<any[]>([]);
   const [selectedEmployees, setSelectedEmployees] = useState<Record<string, boolean>>({});
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (open) {
-      loadRecentEmployees();
+      loadEmployees();
     }
   }, [open]);
+  
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredEmployees(employees);
+    } else {
+      const filtered = employees.filter(emp => 
+        emp.matricule.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        emp.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.prenom.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredEmployees(filtered);
+    }
+  }, [searchTerm, employees]);
 
-  const loadRecentEmployees = async () => {
+  const loadEmployees = async () => {
     try {
-      const employees = await fetchRecentEmployees(20);
-      console.log("Employés récents chargés:", employees);
-      setRecentEmployees(employees);
+      const employees = await fetchEmployees();
+      console.log("Employés chargés:", employees);
+      setEmployees(employees);
+      setFilteredEmployees(employees);
       
       // Initialize selected state
       const initialSelected: Record<string, boolean> = {};
@@ -55,8 +72,8 @@ const DeleteRecentEmployeesDialog = ({
       setSelectedEmployees(initialSelected);
       setIsAllSelected(false);
     } catch (error) {
-      console.error("Erreur lors du chargement des employés récents:", error);
-      toast.error("Erreur lors du chargement des employés récents");
+      console.error("Erreur lors du chargement des employés:", error);
+      toast.error("Erreur lors du chargement des employés");
     }
   };
 
@@ -65,12 +82,17 @@ const DeleteRecentEmployeesDialog = ({
       ...prev,
       [id]: checked
     }));
+    
+    // Check if all are now selected
+    const updatedSelected = { ...selectedEmployees, [id]: checked };
+    const allSelected = filteredEmployees.every(emp => updatedSelected[emp.id]);
+    setIsAllSelected(allSelected);
   };
 
   const handleSelectAll = (checked: boolean) => {
     setIsAllSelected(checked);
-    const newSelectedState: Record<string, boolean> = {};
-    recentEmployees.forEach(emp => {
+    const newSelectedState: Record<string, boolean> = { ...selectedEmployees };
+    filteredEmployees.forEach(emp => {
       newSelectedState[emp.id] = checked;
     });
     setSelectedEmployees(newSelectedState);
@@ -94,6 +116,7 @@ const DeleteRecentEmployeesDialog = ({
       console.log("Suppression des employés:", selectedIds);
       const success = await deleteMultipleEmployees(selectedIds);
       if (success) {
+        toast.success(`${selectedIds.length} employé(s) supprimé(s) avec succès!`);
         onOpenChange(false);
         onSuccess();
       }
@@ -121,12 +144,25 @@ const DeleteRecentEmployeesDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Supprimer les employés récemment ajoutés
+            Supprimer des employés
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Sélectionnez les employés récemment ajoutés que vous souhaitez supprimer. Cette action est irréversible.
+            Sélectionnez les employés que vous souhaitez supprimer. Cette action est irréversible.
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Rechercher par matricule ou nom..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
 
         <div className="bg-gray-50 p-4 rounded-md mb-4">
           <div className="flex items-center space-x-2 mb-4 pb-2 border-b">
@@ -136,13 +172,18 @@ const DeleteRecentEmployeesDialog = ({
               onCheckedChange={(checked) => handleSelectAll(!!checked)}
             />
             <Label htmlFor="select-all" className="text-sm font-medium">
-              Sélectionner tout ({recentEmployees.length} employés)
+              Sélectionner tout ({filteredEmployees.length} employés)
             </Label>
+            {selectedCount > 0 && (
+              <span className="ml-auto text-sm text-muted-foreground">
+                {selectedCount} sélectionné(s)
+              </span>
+            )}
           </div>
 
-          {recentEmployees.length > 0 ? (
+          {filteredEmployees.length > 0 ? (
             <div className="space-y-2">
-              {recentEmployees.map((employee) => (
+              {filteredEmployees.map((employee) => (
                 <div key={employee.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded">
                   <div className="flex items-center space-x-2">
                     <Checkbox 
@@ -152,8 +193,9 @@ const DeleteRecentEmployeesDialog = ({
                     />
                     <div className="ml-2">
                       <Label htmlFor={`employee-${employee.id}`} className="font-medium">
-                        Matricule: {employee.matricule}
+                        {employee.prenom} {employee.nom}
                       </Label>
+                      <p className="text-sm text-gray-500">Matricule: {employee.matricule}</p>
                     </div>
                   </div>
                   <div className="text-sm text-gray-500">
@@ -164,7 +206,7 @@ const DeleteRecentEmployeesDialog = ({
             </div>
           ) : (
             <div className="text-center py-4 text-gray-500">
-              Aucun employé récent trouvé.
+              {searchTerm ? "Aucun résultat pour cette recherche." : "Aucun employé trouvé."}
             </div>
           )}
         </div>
@@ -191,4 +233,4 @@ const DeleteRecentEmployeesDialog = ({
   );
 };
 
-export default DeleteRecentEmployeesDialog;
+export default DeleteEmployeesDialog;

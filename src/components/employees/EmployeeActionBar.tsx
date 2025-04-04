@@ -7,10 +7,10 @@ import { toast } from "sonner";
 interface EmployeeActionBarProps {
   onAddEmployee: () => void;
   onRefresh: () => void;
-  onDeleteRecent?: () => void;
+  onDeleteEmployees?: () => void;
 }
 
-const EmployeeActionBar = ({ onAddEmployee, onRefresh, onDeleteRecent }: EmployeeActionBarProps) => {
+const EmployeeActionBar = ({ onAddEmployee, onRefresh, onDeleteEmployees }: EmployeeActionBarProps) => {
   const handleBack = () => {
     toast.info("Retour à la page précédente");
     // Logique de navigation ici
@@ -21,11 +21,11 @@ const EmployeeActionBar = ({ onAddEmployee, onRefresh, onDeleteRecent }: Employe
     // Logique pour ouvrir les paramètres ici
   };
 
-  const handleDeleteRecent = () => {
-    if (onDeleteRecent) {
-      onDeleteRecent();
+  const handleDeleteEmployees = () => {
+    if (onDeleteEmployees) {
+      onDeleteEmployees();
     } else {
-      toast.info("Supprimer récents");
+      toast.info("Supprimer employés");
     }
   };
 
@@ -56,10 +56,10 @@ const EmployeeActionBar = ({ onAddEmployee, onRefresh, onDeleteRecent }: Employe
           variant="destructive" 
           size="default" 
           className="gap-1"
-          onClick={handleDeleteRecent}
+          onClick={handleDeleteEmployees}
         >
           <Trash2 size={16} />
-          Supprimer récents
+          Supprimer employés
         </Button>
       </div>
     </div>

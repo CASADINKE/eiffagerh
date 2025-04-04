@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import EmployeeFormDialog from "@/components/employees/EmployeeFormDialog";
@@ -6,7 +5,7 @@ import { useEmployeeOperations } from "@/hooks/useEmployeeOperations";
 import EmployeeActionBar from "@/components/employees/EmployeeActionBar";
 import EmployeeSearchBar from "@/components/employees/EmployeeSearchBar";
 import EmployeeTable from "@/components/employees/EmployeeTable";
-import DeleteRecentEmployeesDialog from "@/components/employees/DeleteRecentEmployeesDialog";
+import DeleteEmployeesDialog from "@/components/employees/DeleteRecentEmployeesDialog";
 import EmployeeDetailsDialog from "@/components/employees/EmployeeDetailsDialog";
 import { EmployeeUI, mapEmployeesToUI } from "@/types/employee";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -18,7 +17,7 @@ const Employees = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<EmployeeUI[]>([]);
   const [openForm, setOpenForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [deleteRecentDialogOpen, setDeleteRecentDialogOpen] = useState(false);
+  const [deleteEmployeesDialogOpen, setDeleteEmployeesDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -66,8 +65,8 @@ const Employees = () => {
     loadEmployees();
   };
 
-  const handleDeleteRecent = () => {
-    setDeleteRecentDialogOpen(true);
+  const handleDeleteEmployees = () => {
+    setDeleteEmployeesDialogOpen(true);
   };
   
   const handleRowClick = async (employee: EmployeeUI) => {
@@ -118,7 +117,7 @@ const Employees = () => {
       <EmployeeActionBar 
         onAddEmployee={handleAddEmployee} 
         onRefresh={handleRefresh}
-        onDeleteRecent={handleDeleteRecent}
+        onDeleteEmployees={handleDeleteEmployees}
       />
 
       <EmployeeSearchBar 
@@ -155,9 +154,9 @@ const Employees = () => {
         />
       )}
 
-      <DeleteRecentEmployeesDialog
-        open={deleteRecentDialogOpen}
-        onOpenChange={setDeleteRecentDialogOpen}
+      <DeleteEmployeesDialog
+        open={deleteEmployeesDialogOpen}
+        onOpenChange={setDeleteEmployeesDialogOpen}
         onSuccess={loadEmployees}
       />
       

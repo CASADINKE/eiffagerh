@@ -1,19 +1,19 @@
 
 import React from "react";
-import { Plus, RotateCw, Trash } from "lucide-react";
+import { Plus, RotateCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface EmployeeQuickActionsProps {
   onAddEmployee: () => void;
   onRefresh?: () => void;
-  onDeleteRecent?: () => void;
+  onDeleteEmployees?: () => void;
 }
 
 const EmployeeQuickActions = ({ 
   onAddEmployee, 
   onRefresh, 
-  onDeleteRecent 
+  onDeleteEmployees 
 }: EmployeeQuickActionsProps) => {
   return (
     <div className="flex gap-2">
@@ -29,7 +29,7 @@ const EmployeeQuickActions = ({
         </Button>
       )}
       
-      {onDeleteRecent && (
+      {onDeleteEmployees && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -37,14 +37,14 @@ const EmployeeQuickActions = ({
                 variant="outline" 
                 size="sm" 
                 className="gap-1 text-red-500 hover:text-red-600 hover:bg-red-50" 
-                onClick={onDeleteRecent}
+                onClick={onDeleteEmployees}
               >
-                <Trash size={16} />
-                Supprimer récents
+                <Trash2 size={16} />
+                Supprimer employés
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Supprimer les employés récemment ajoutés</p>
+              <p>Sélectionner et supprimer des employés</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
