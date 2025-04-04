@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { format, parse, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -16,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClockInMutation } from "@/hooks/timeEntries";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { EmployeeTimeClockDialog } from "@/components/timeTracking/EmployeeTimeClockDialog";
 
 const Pointage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -144,34 +146,38 @@ const Pointage = () => {
               </div>
             )}
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button
-              size="lg"
-              onClick={handleClockIn}
-              disabled={loading || !!todayPointage?.heure_entree || clockInLoading}
-              className="flex items-center"
-            >
-              {clockInLoading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <span className="mr-2">🟢</span>
-              )}
-              Pointer l'entrée
-            </Button>
-            <Button
-              size="lg"
-              onClick={handleClockOut}
-              disabled={loading || !todayPointage?.heure_entree || !!todayPointage?.heure_sortie || clockOutLoading}
-              variant="destructive"
-              className="flex items-center"
-            >
-              {clockOutLoading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <span className="mr-2">🔴</span>
-              )}
-              Pointer la sortie
-            </Button>
+          <CardFooter className="flex flex-wrap gap-3 justify-between">
+            <div className="flex gap-3">
+              <Button
+                size="lg"
+                onClick={handleClockIn}
+                disabled={loading || !!todayPointage?.heure_entree || clockInLoading}
+                className="flex items-center"
+              >
+                {clockInLoading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <span className="mr-2">🟢</span>
+                )}
+                Pointer l'entrée
+              </Button>
+              <Button
+                size="lg"
+                onClick={handleClockOut}
+                disabled={loading || !todayPointage?.heure_entree || !!todayPointage?.heure_sortie || clockOutLoading}
+                variant="destructive"
+                className="flex items-center"
+              >
+                {clockOutLoading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <span className="mr-2">🔴</span>
+                )}
+                Pointer la sortie
+              </Button>
+            </div>
+            
+            <EmployeeTimeClockDialog className="lg:ml-auto" />
           </CardFooter>
         </Card>
 
