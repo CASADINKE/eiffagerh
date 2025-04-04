@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -39,7 +40,15 @@ const LeaveFormSchema = z.object({
   }),
   end_date: z.date({
     required_error: "Veuillez sélectionner une date de fin",
-  }),
+  }).refine(
+    (date, ctx) => {
+      const { start_date } = ctx.parent;
+      return start_date && date >= start_date;
+    },
+    {
+      message: "La date de fin doit être égale ou postérieure à la date de début",
+    }
+  ),
   type: z.string({
     required_error: "Veuillez sélectionner un type de congé",
   }),
@@ -84,6 +93,17 @@ export function LeaveRequestForm({
       form.setValue("employee_id", employees[0].id);
     }
   }, [employees, form]);
+  
+  // Check if form is valid
+  const formState = form.formState;
+  const isValid = form.getValues("employee_id") && 
+                 form.getValues("start_date") && 
+                 form.getValues("end_date") && 
+                 form.getValues("type") && 
+                 !formState.errors.employee_id &&
+                 !formState.errors.start_date &&
+                 !formState.errors.end_date &&
+                 !formState.errors.type;
   
   return (
     <Form {...form}>
@@ -244,7 +264,10 @@ export function LeaveRequestForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
-          <Button type="submit">
+          <Button 
+            type="submit" 
+            disabled={isLoading || !isValid}
+          >
             {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>
         </div>

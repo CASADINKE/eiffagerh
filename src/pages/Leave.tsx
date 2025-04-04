@@ -73,15 +73,16 @@ const Leave = () => {
           .eq('type', 'leave_request')
           .eq('read', false);
         
-        // Use type assertion for notifications data
-        const notifications = asNotifications(notificationsData || []);
-        
-        if (notifications && notifications.length > 0) {
-          // Mark them as read
-          await supabase
-            .from('notifications')
-            .update({ read: true })
-            .in('id', notifications.map(n => n.id));
+        if (notificationsData && notificationsData.length > 0) {
+          // Mark them as read - use a safer approach without type assertions
+          const notificationIds = notificationsData.map((n: any) => n.id);
+          
+          if (notificationIds.length > 0) {
+            await supabase
+              .from('notifications')
+              .update({ read: true })
+              .in('id', notificationIds);
+          }
         }
       }
     } catch (error: any) {
