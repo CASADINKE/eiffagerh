@@ -150,13 +150,14 @@ const DeleteRecentEmployeesDialog = ({
                       checked={selectedEmployees[employee.id]}
                       onCheckedChange={(checked) => handleEmployeeSelect(employee.id, !!checked)}
                     />
-                    <Label htmlFor={`employee-${employee.id}`} className="font-medium">
-                      {employee.nom} {employee.prenom}
-                    </Label>
+                    <div className="ml-2">
+                      <Label htmlFor={`employee-${employee.id}`} className="font-medium">
+                        Matricule: {employee.matricule}
+                      </Label>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500 flex gap-4">
-                    <span>Matricule: {employee.matricule}</span>
-                    <span>Ajouté le: {formatDate(employee.created_at)}</span>
+                  <div className="text-sm text-gray-500">
+                    Ajouté le: {formatDate(employee.created_at)}
                   </div>
                 </div>
               ))}
