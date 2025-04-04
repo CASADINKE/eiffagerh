@@ -9,6 +9,7 @@ export interface EmployeeUI {
   status: 'active' | 'on-leave' | 'terminated';
   phone: string;
   site: string;
+  employer: string;
   avatar?: string;
 }
 
@@ -38,6 +39,7 @@ export const mapEmployeesToUI = (employees: Employee[]): EmployeeUI[] => {
     position: e.poste,
     status: 'active', // Default status, could be updated based on actual data
     phone: e.telephone,
-    site: e.site
+    site: e.site,
+    employer: e.employeur
   }));
 };

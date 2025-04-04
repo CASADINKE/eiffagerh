@@ -54,7 +54,7 @@ const EmployeeTable = ({ employees, isLoading, isError, onRowClick }: EmployeeTa
               <th className="text-left py-3 px-4 font-medium text-muted-foreground">MATRICULE</th>
               <th className="text-left py-3 px-4 font-medium text-muted-foreground">NOM & PRÉNOM</th>
               <th className="text-left py-3 px-4 font-medium text-muted-foreground">POSTE</th>
-              <th className="text-left py-3 px-4 font-medium text-muted-foreground">SITE</th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground">EMPLOYEUR</th>
               <th className="text-right py-3 px-4 font-medium text-muted-foreground">STATUT</th>
             </tr>
           </thead>
@@ -86,14 +86,14 @@ const EmployeeTable = ({ employees, isLoading, isError, onRowClick }: EmployeeTa
                   </div>
                 </td>
                 <td className="py-3 px-4">{employee.position}</td>
-                <td className="py-3 px-4">{employee.site}</td>
+                <td className="py-3 px-4">{employee.employer}</td>
                 <td className="py-3 px-4 text-right">
                   <Badge
                     variant={
                       employee.status === "active"
                         ? "success"
                         : employee.status === "on-leave"
-                        ? "warning"
+                        ? "secondary"
                         : "destructive"
                     }
                     className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
