@@ -89,7 +89,11 @@ export const clockInEmployee = async (employeeId: string, notes?: string): Promi
 
     if (fetchError) {
       console.warn("Error fetching employee details after clock in:", fetchError);
-      return procData as TimeEntry;
+      // Return a partial entry with the data we have
+      return {
+        ...(procData as any),
+        employee: null
+      } as TimeEntry;
     }
 
     // Transform to ensure type safety

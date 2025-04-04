@@ -1,89 +1,115 @@
 
+import React from "react";
+import { Loader2, User } from "lucide-react";
 import { EmployeeUI } from "@/types/employee";
-import { 
-  Table, 
-  TableHeader, 
-  TableRow, 
-  TableHead, 
-  TableBody, 
-  TableCell 
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface EmployeeTableProps {
   employees: EmployeeUI[];
   isLoading: boolean;
   isError: boolean;
+  onRowClick?: (employee: EmployeeUI) => void;
 }
 
-const EmployeeTable = ({ employees, isLoading, isError }: EmployeeTableProps) => {
-  const renderTableContent = () => {
-    if (isLoading) {
-      return Array(5).fill(0).map((_, index) => (
-        <TableRow key={`skeleton-${index}`}>
-          <TableCell><Skeleton className="h-5 w-[120px]" /></TableCell>
-          <TableCell><Skeleton className="h-5 w-[180px]" /></TableCell>
-          <TableCell><Skeleton className="h-5 w-[150px]" /></TableCell>
-          <TableCell><Skeleton className="h-5 w-[150px]" /></TableCell>
-          <TableCell><Skeleton className="h-5 w-[80px]" /></TableCell>
-        </TableRow>
-      ));
-    }
-
-    if (employees.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={5} className="h-24 text-center">
-            Aucun employé trouvé.
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return employees.map((employee) => (
-      <TableRow key={employee.id}>
-        <TableCell className="font-medium">{employee.matricule}</TableCell>
-        <TableCell>{employee.name}</TableCell>
-        <TableCell>{employee.position}</TableCell>
-        <TableCell>{employee.site}</TableCell>
-        <TableCell>
-          <span className={`px-2 py-1 text-xs rounded-full ${
-            employee.status === 'active' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-800/50' :
-            employee.status === 'on-leave' ? 'bg-amber-900/30 text-amber-400 border border-amber-800/50' :
-            'bg-red-900/30 text-red-400 border border-red-800/50'
-          }`}>
-            {employee.status === 'active' ? 'Actif' : 
-             employee.status === 'on-leave' ? 'En congé' : 'Terminé'}
-          </span>
-        </TableCell>
-      </TableRow>
-    ));
+const EmployeeTable = ({ employees, isLoading, isError, onRowClick }: EmployeeTableProps) => {
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
+  if (isLoading) {
+    return (
+      <div className="w-full flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-md">
+        Erreur lors du chargement des employés. Veuillez réessayer.
+      </div>
+    );
+  }
+
+  if (employees.length === 0) {
+    return (
+      <div className="w-full bg-muted p-6 text-center rounded-md border">
+        Aucun employé trouvé. Utilisez le bouton "Ajouter un employé" pour en créer un.
+      </div>
+    );
+  }
+
   return (
-    <div className="border border-border rounded-md overflow-hidden bg-card">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-secondary/50">
-            <TableHead className="font-semibold text-foreground">MATRICULE</TableHead>
-            <TableHead className="font-semibold text-foreground">NOM & PRÉNOM</TableHead>
-            <TableHead className="font-semibold text-foreground">POSTE</TableHead>
-            <TableHead className="font-semibold text-foreground">SITE</TableHead>
-            <TableHead className="font-semibold text-foreground">STATUT</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isError ? (
-            <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center text-destructive">
-                Erreur lors du chargement des données. Veuillez réessayer.
-              </TableCell>
-            </TableRow>
-          ) : (
-            renderTableContent()
-          )}
-        </TableBody>
-      </Table>
+    <div className="rounded-md border overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-muted">
+            <tr>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground">MATRICULE</th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground">NOM & PRÉNOM</th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground">POSTE</th>
+              <th className="text-left py-3 px-4 font-medium text-muted-foreground">SITE</th>
+              <th className="text-right py-3 px-4 font-medium text-muted-foreground">STATUT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((employee) => (
+              <tr 
+                key={employee.id} 
+                className="border-t hover:bg-muted/50 cursor-pointer"
+                onClick={() => onRowClick?.(employee)}
+              >
+                <td className="py-3 px-4">{employee.matricule}</td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      {employee.avatar ? (
+                        <AvatarImage src={employee.avatar} alt={employee.name} />
+                      ) : (
+                        <AvatarFallback>
+                          {getInitials(employee.name)}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-sm">{employee.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {employee.email}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3 px-4">{employee.position}</td>
+                <td className="py-3 px-4">{employee.site}</td>
+                <td className="py-3 px-4 text-right">
+                  <Badge
+                    variant={
+                      employee.status === "active"
+                        ? "success"
+                        : employee.status === "on-leave"
+                        ? "warning"
+                        : "destructive"
+                    }
+                    className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                  >
+                    {employee.status === "active"
+                      ? "Actif"
+                      : employee.status === "on-leave"
+                      ? "En congé"
+                      : "Terminé"}
+                  </Badge>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

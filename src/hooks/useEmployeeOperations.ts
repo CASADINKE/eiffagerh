@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -190,6 +189,31 @@ export const useEmployeeOperations = () => {
     }
   };
 
+  const fetchEmployeeById = async (employeeId: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('listes_employées')
+        .select('*')
+        .eq('id', employeeId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching employee:", error);
+        toast.error(`Erreur: ${error.message}`);
+        return null;
+      }
+
+      return data;
+    } catch (err: any) {
+      console.error("Exception when fetching employee:", err);
+      toast.error(`Erreur: ${err.message}`);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     createEmployee,
     fetchEmployees,
@@ -197,6 +221,7 @@ export const useEmployeeOperations = () => {
     updateEmployee,
     deleteMultipleEmployees,
     fetchRecentEmployees,
+    fetchEmployeeById,
     isLoading
   };
 };
