@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Clock, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -27,11 +26,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface EmployeeTimeClockDialogProps {
   className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClockIn?: (employeeId: string, notes?: string) => Promise<void>;
 }
 
-export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogProps) {
+export function EmployeeTimeClockDialog({ 
+  className, 
+  open: controlledOpen, 
+  onOpenChange: setControlledOpen,
+  onClockIn
+}: EmployeeTimeClockDialogProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Use the controlled open state if provided, otherwise use local state
+  const isOpen = controlledOpen !== undefined ? controlledOpen : open;
+  const setIsOpen = setControlledOpen || setOpen;
   
   // Use useEmployeesUI instead of useEmployees
   const { data: employees = [], isLoading: employeesLoading, isError: employeesError } = useEmployeesUI();
@@ -55,10 +66,16 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   );
   
   const onClockInOut = async (employeeId: string) => {
-    const success = await handleClockInOut(employeeId, "Pointé via dialogue");
-    if (success) {
-      // Only close dialog on success if needed
-      // setOpen(false);
+    if (onClockIn) {
+      // Use provided onClockIn callback if available
+      await onClockIn(employeeId, "Pointé via dialogue");
+    } else {
+      // Otherwise use default handler
+      const success = await handleClockInOut(employeeId, "Pointé via dialogue");
+      if (success) {
+        // Only close dialog on success if needed
+        // setIsOpen(false);
+      }
     }
   };
   
@@ -67,7 +84,7 @@ export function EmployeeTimeClockDialog({ className }: EmployeeTimeClockDialogPr
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className={className}>
           <Clock size={16} className="mr-2" />
