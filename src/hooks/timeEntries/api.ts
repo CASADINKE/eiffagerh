@@ -121,9 +121,40 @@ export const getTimeEntryById = async (id: string): Promise<TimeEntryWithEmploye
 // Clock in an employee
 export const clockInEmployee = async (employeeId: string, notes: string = ""): Promise<TimeEntryWithEmployee | null> => {
   try {
+    // Check if employee already has an active time entry for today
+    const today = new Date().toISOString().split('T')[0];
+    const { data: existingEntries, error: checkError } = await supabase
+      .from("time_entries")
+      .select("*")
+      .eq("employee_id", employeeId)
+      .eq("date", today)
+      .is("clock_out", null);
+    
+    if (checkError) throw checkError;
+    
+    // If employee already has an active entry, return that instead of creating a new one
+    if (existingEntries && existingEntries.length > 0) {
+      console.log("Employee already clocked in today:", existingEntries[0]);
+      
+      // Get the entry with employee details
+      const { data: entryWithEmployee, error: fetchError } = await supabase
+        .from("time_entries")
+        .select(`
+          *,
+          employee:employee_id(*)
+        `)
+        .eq("id", existingEntries[0].id)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      return mapTimeEntryWithEmployee(entryWithEmployee);
+    }
+    
+    // Create new time entry
     const timeEntry = {
       employee_id: employeeId,
-      date: new Date().toISOString().split('T')[0],
+      date: today,
       clock_in: new Date().toISOString(),
       notes
     };
@@ -139,6 +170,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
 
     if (error) throw error;
     
+    // Return the newly created entry
     return mapTimeEntryWithEmployee(data);
   } catch (error) {
     console.error("Error in clockInEmployee:", error);

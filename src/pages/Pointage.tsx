@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format, parse, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -14,15 +13,17 @@ import { usePointages } from "@/hooks/usePointages";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Demo: Using a fixed user ID for now
-// In a real implementation, you'd get this from auth context
-const DEMO_USER_ID = "1";
+import { useClockInMutation } from "@/hooks/timeEntries";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Pointage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [month, setMonth] = useState<Date>(new Date());
   const [searchDate, setSearchDate] = useState("");
+  const { user } = useAuth();
+  
+  const userId = user?.id || "1";
 
   const {
     todayPointage,
@@ -34,10 +35,26 @@ const Pointage = () => {
     calculateWorkDuration,
     clockInLoading,
     clockOutLoading
-  } = usePointages(DEMO_USER_ID);
+  } = usePointages(userId);
 
-  const handleClockIn = () => {
-    clockIn();
+  const clockInMutation = useClockInMutation();
+
+  const handleClockIn = async () => {
+    try {
+      clockIn();
+      
+      if (user?.id) {
+        await clockInMutation.mutateAsync({ 
+          employeeId: user.id,
+          notes: "Pointé via l'application mobile"
+        });
+      }
+      
+      toast.success("Pointage d'entrée enregistré avec succès");
+    } catch (error) {
+      console.error("Error clocking in:", error);
+      toast.error("Erreur lors du pointage d'entrée");
+    }
   };
 
   const handleClockOut = () => {
@@ -83,7 +100,6 @@ const Pointage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Today's Status Card */}
         <Card className="col-span-1 md:col-span-2">
           <CardHeader>
             <CardTitle>État du jour • {format(new Date(), "EEEE dd MMMM yyyy", { locale: fr })}</CardTitle>
@@ -159,7 +175,6 @@ const Pointage = () => {
           </CardFooter>
         </Card>
 
-        {/* Calendar Card */}
         <Card>
           <CardHeader>
             <CardTitle>Calendrier</CardTitle>
@@ -178,7 +193,6 @@ const Pointage = () => {
         </Card>
       </div>
 
-      {/* History Section */}
       <Card>
         <CardHeader>
           <CardTitle>Historique de pointage</CardTitle>

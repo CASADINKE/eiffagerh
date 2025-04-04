@@ -13,8 +13,18 @@ export interface Notification {
   type: string;
 }
 
-// Extend the Database type to add notifications
-export interface NotificationsDatabase {
+// Helper function to type cast the supabase response to Notification
+export function asNotification(data: unknown): Notification {
+  return data as Notification;
+}
+
+// Helper function to type cast an array of data to Notification[]
+export function asNotifications(data: unknown[]): Notification[] {
+  return data as Notification[];
+}
+
+// Define interface for database with notifications
+export interface DatabaseWithNotifications {
   public: {
     Tables: {
       notifications: {
@@ -42,14 +52,4 @@ export interface NotificationsDatabase {
       };
     };
   };
-}
-
-// Helper function to type cast the supabase response to Notification
-export function asNotification(data: unknown): Notification {
-  return data as Notification;
-}
-
-// Helper function to type cast an array of data to Notification[]
-export function asNotifications(data: unknown[]): Notification[] {
-  return data as Notification[];
 }
