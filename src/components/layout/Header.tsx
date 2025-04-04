@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import LogoutButton from "@/components/auth/LogoutButton";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { ModeToggle } from "@/components/ui/theme-toggle";
 import { NotificationsIndicator } from "@/components/notifications/NotificationsIndicator"; 
 

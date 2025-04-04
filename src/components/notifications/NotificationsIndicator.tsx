@@ -14,17 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, formatDistance } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
-interface Notification {
-  id: string;
-  user_id: string;
-  title: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-  related_id: string | null;
-  type: string;
-}
+import { asNotifications, Notification } from '@/integrations/supabase/types-notifications';
 
 export function NotificationsIndicator() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -49,8 +39,10 @@ export function NotificationsIndicator() {
         return;
       }
       
-      setNotifications(data as Notification[]);
-      setUnreadCount(data.filter(n => !n.read).length);
+      // Use type assertion to handle notifications data
+      const typedNotifications = asNotifications(data || []);
+      setNotifications(typedNotifications);
+      setUnreadCount(typedNotifications.filter(n => !n.read).length);
     };
     
     fetchNotifications();

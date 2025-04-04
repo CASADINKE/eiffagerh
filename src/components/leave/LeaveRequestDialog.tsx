@@ -13,6 +13,7 @@ import { toast as sonnerToast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { asNotifications } from "@/integrations/supabase/types-notifications";
 
 interface LeaveRequestDialogProps {
   open: boolean;
@@ -55,7 +56,10 @@ export function LeaveRequestDialog({
 
       // Find the employee details to include in notification
       const selectedEmployee = employees?.find(emp => emp.id === employee_id);
-      const employeeName = selectedEmployee?.full_name || "Un employé";
+      // Format the employee name from nom and prenom fields
+      const employeeName = selectedEmployee ? 
+        `${selectedEmployee.prenom || ''} ${selectedEmployee.nom || ''}`.trim() : 
+        "Un employé";
 
       // Format dates for display
       const startDate = formData.start_date.toLocaleDateString('fr-FR');
@@ -91,10 +95,10 @@ export function LeaveRequestDialog({
           type: 'leave_request'
         }));
 
-        // Insert notifications
+        // Insert notifications - using type assertion with any as a workaround
         const { error: notificationError } = await supabase
           .from('notifications')
-          .insert(notifications);
+          .insert(notifications as any);
 
         if (notificationError) {
           console.error("Erreur lors de l'envoi des notifications:", notificationError);

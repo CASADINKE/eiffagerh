@@ -11,6 +11,7 @@ import { LeaveTabs } from "@/components/leave/LeaveTabs";
 import { LeaveAdminPanel } from "@/components/leave/LeaveAdminPanel";
 import { Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { asNotifications } from "@/integrations/supabase/types-notifications";
 
 type LeaveRequest = Tables<"leave_requests">;
 
@@ -65,12 +66,15 @@ const Leave = () => {
       // If admin, mark notifications as read for leave requests
       if (userRole === 'super_admin' && user?.id) {
         // Get all notification IDs for this admin related to leave requests
-        const { data: notifications } = await supabase
+        const { data: notificationsData } = await supabase
           .from('notifications')
           .select('id')
           .eq('user_id', user.id)
           .eq('type', 'leave_request')
           .eq('read', false);
+        
+        // Use type assertion for notifications data
+        const notifications = asNotifications(notificationsData || []);
         
         if (notifications && notifications.length > 0) {
           // Mark them as read
