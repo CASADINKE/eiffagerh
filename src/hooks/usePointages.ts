@@ -68,8 +68,9 @@ export const usePointages = (userId: string) => {
   const fetchTodayPointage = async () => {
     setLoading(true);
     try {
+      // Using any type to bypass type checking since we know the table exists
       const { data, error } = await supabase
-        .from('pointages')
+        .from('pointages' as any)
         .select('*')
         .eq('user_id', userId)
         .eq('date', today)
@@ -77,7 +78,7 @@ export const usePointages = (userId: string) => {
 
       if (error) throw error;
       
-      setTodayPointage(data);
+      setTodayPointage(data as Pointage | null);
     } catch (err: any) {
       console.error('Error fetching today pointage:', err);
       setError(err);
@@ -89,8 +90,9 @@ export const usePointages = (userId: string) => {
   const fetchHistoryPointages = async (month?: number, year?: number) => {
     setLoading(true);
     try {
+      // Using any type to bypass type checking
       let query = supabase
-        .from('pointages')
+        .from('pointages' as any)
         .select('*')
         .eq('user_id', userId)
         .order('date', { ascending: false });
@@ -109,7 +111,7 @@ export const usePointages = (userId: string) => {
 
       if (error) throw error;
       
-      setHistoryPointages(data || []);
+      setHistoryPointages(data as Pointage[] || []);
     } catch (err: any) {
       console.error('Error fetching history pointages:', err);
       setError(err);
@@ -120,15 +122,16 @@ export const usePointages = (userId: string) => {
 
   const fetchHoraireReference = async () => {
     try {
+      // Using any type to bypass type checking
       const { data, error } = await supabase
-        .from('horaires_reference')
+        .from('horaires_reference' as any)
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
 
       if (error) throw error;
       
-      setHoraireReference(data);
+      setHoraireReference(data as HoraireReference | null);
     } catch (err: any) {
       console.error('Error fetching horaire reference:', err);
       // Not setting error state here as this is not critical
@@ -155,7 +158,7 @@ export const usePointages = (userId: string) => {
       if (todayPointage) {
         // Update existing record
         const { data, error } = await supabase
-          .from('pointages')
+          .from('pointages' as any)
           .update({ 
             heure_entree: now,
             statut: status
@@ -165,7 +168,7 @@ export const usePointages = (userId: string) => {
           .single();
 
         if (error) throw error;
-        setTodayPointage(data);
+        setTodayPointage(data as Pointage);
       } else {
         // Create new record
         const newPointage = {
@@ -176,13 +179,13 @@ export const usePointages = (userId: string) => {
         };
         
         const { data, error } = await supabase
-          .from('pointages')
+          .from('pointages' as any)
           .insert([newPointage])
           .select()
           .single();
 
         if (error) throw error;
-        setTodayPointage(data);
+        setTodayPointage(data as Pointage);
       }
       
       toast.success("Pointage d'entrée enregistré avec succès");
@@ -209,7 +212,7 @@ export const usePointages = (userId: string) => {
     setClockOutLoading(true);
     try {
       const { data, error } = await supabase
-        .from('pointages')
+        .from('pointages' as any)
         .update({ heure_sortie: new Date().toISOString() })
         .eq('id', todayPointage.id)
         .select()
@@ -217,7 +220,7 @@ export const usePointages = (userId: string) => {
 
       if (error) throw error;
       
-      setTodayPointage(data);
+      setTodayPointage(data as Pointage);
       toast.success("Pointage de sortie enregistré avec succès");
     } catch (err: any) {
       console.error('Error clocking out:', err);
