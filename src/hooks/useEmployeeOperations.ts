@@ -22,6 +22,23 @@ export interface EmployeeFormData {
   commentaire?: string;
 }
 
+// Type to represent what's actually in the database
+interface EmployeeDbRecord {
+  id: string;
+  matricule: string;
+  employeur: string;
+  nom: string;
+  prenom: string;
+  date_naissance: string;
+  poste: string;
+  adresse: string;
+  telephone: string;
+  affectation: string;
+  site: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const useEmployeeOperations = () => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,6 +52,8 @@ export const useEmployeeOperations = () => {
         ...existingFields,
         date_naissance: employeeData.date_naissance.toISOString().split('T')[0],
       };
+
+      console.log("Creating employee with data:", formattedData);
 
       const { data, error } = await supabase
         .from('listes_employées')
@@ -219,14 +238,16 @@ export const useEmployeeOperations = () => {
         return null;
       }
 
-      // Add UI-only properties that don't exist in the database
+      // Add UI-only properties with default values
+      // Since these fields don't exist in the database, we add them manually
       return {
         ...data,
-        categorie: data.categorie || "a", // Default value
-        salaire_base: data.salaire_base || "",
-        sursalaire: data.sursalaire || "",
-        prime_deplacement: data.prime_deplacement || "",
-        commentaire: data.commentaire || ""
+        // Add default values for UI-only fields
+        categorie: "a", 
+        salaire_base: "",
+        sursalaire: "",
+        prime_deplacement: "",
+        commentaire: ""
       };
     } catch (err: any) {
       console.error("Exception when fetching employee:", err);

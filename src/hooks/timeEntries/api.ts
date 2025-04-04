@@ -63,6 +63,9 @@ export const getTimeEntriesWithEmployees = async (): Promise<TimeEntryWithEmploy
   }
 };
 
+// Export a function with the name that's being imported elsewhere
+export const fetchTimeEntries = getTimeEntriesWithEmployees;
+
 // Get time entries for a specific employee
 export const getEmployeeTimeEntries = async (employeeId: string): Promise<TimeEntryWithEmployee[]> => {
   try {
