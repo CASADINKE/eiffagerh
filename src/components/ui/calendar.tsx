@@ -55,16 +55,20 @@ function Calendar({
         dropdown_month: "flex-1",
         dropdown_year: "flex-1",
         dropdown_icon: "hidden",
-        dropdown_month_button: cn(
+        dropdown_button: cn(
           buttonVariants({ variant: "outline" }),
-          "px-2 py-1 h-auto text-sm font-medium border-primary/20 text-primary"
+          "px-2 py-1 h-auto text-sm font-medium border-primary/20 text-primary bg-background/5"
+        ),
+        dropdown_month_button: cn(
+          "bg-black text-white border-0 px-2 py-1 h-auto text-sm font-medium rounded-md"
         ),
         dropdown_year_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "px-2 py-1 h-auto text-sm font-medium border-primary/20 text-primary"
+          "bg-black text-white border-0 px-2 py-1 h-auto text-sm font-medium rounded-md"
         ),
-        dropdown_month_content: "bg-popover border rounded-md p-1 shadow-lg",
-        dropdown_year_content: "bg-popover border rounded-md p-1 shadow-lg max-h-60 overflow-auto",
+        dropdown_month_content: "bg-black border border-white/10 rounded-md p-1 shadow-lg mt-1",
+        dropdown_year_content: "bg-black border border-white/10 rounded-md p-1 shadow-lg max-h-60 overflow-auto mt-1",
+        dropdown_item: "text-white hover:bg-white/10 rounded px-2 py-1 text-sm",
+        dropdown_item_selected: "bg-primary/20 text-primary-foreground",
         vhidden: "hidden",
         ...classNames,
       }}
