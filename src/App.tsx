@@ -6,6 +6,8 @@ import Leave from "@/pages/Leave";
 import NotFound from "@/pages/NotFound";
 import Settings from "@/pages/Settings";
 import TimeTracking from "@/pages/TimeTracking";
+import Pointage from "@/pages/Pointage";
+import PointageAdmin from "@/pages/PointageAdmin";
 import {
   BrowserRouter,
   Routes,
@@ -62,6 +64,26 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <TimeTracking />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pointage"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Pointage />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pointage-admin"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <PointageAdmin />
                     </Layout>
                   </ProtectedRoute>
                 }
