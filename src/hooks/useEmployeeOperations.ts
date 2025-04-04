@@ -54,7 +54,7 @@ export const useEmployeeOperations = () => {
       toast.error(`Erreur: ${err.message}`);
       return null;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 

@@ -55,7 +55,7 @@ export const useEmployeePointage = (employeeId?: string) => {
         .from('time_entries')
         .select(`
           *,
-          employee:employee_id(
+          employee:listes_employées(
             id, 
             nom, 
             prenom, 
@@ -77,30 +77,32 @@ export const useEmployeePointage = (employeeId?: string) => {
 
       if (error) throw error;
 
-      const formattedPointages = data.map((entry: any) => ({
-        id: entry.id,
-        employee_id: entry.employee_id,
-        clock_in: entry.clock_in,
-        clock_out: entry.clock_out,
-        date: entry.date,
-        created_at: entry.created_at,
-        updated_at: entry.updated_at,
-        break_time: entry.break_time,
-        notes: entry.notes,
-        employee: {
-          id: entry.employee.id,
-          name: `${entry.employee.prenom} ${entry.employee.nom}`,
-          department: entry.employee.affectation,
-          position: entry.employee.poste,
-          email: "email@example.com", // Default email since it's not in the database
-          phone: entry.employee.telephone,
-          status: "active" as const,
-          matricule: entry.employee.matricule,
-          site: entry.employee.site,
-          employer: entry.employee.employeur,
-          avatar: null,
-        }
-      })) as EmployeePointage[];
+      const formattedPointages = data
+        .filter((entry: any) => entry.employee) // Filter out entries without employee data
+        .map((entry: any) => ({
+          id: entry.id,
+          employee_id: entry.employee_id,
+          clock_in: entry.clock_in,
+          clock_out: entry.clock_out,
+          date: entry.date,
+          created_at: entry.created_at,
+          updated_at: entry.updated_at,
+          break_time: entry.break_time || 0,
+          notes: entry.notes || "",
+          employee: {
+            id: entry.employee.id,
+            name: `${entry.employee.prenom} ${entry.employee.nom}`,
+            department: entry.employee.affectation,
+            position: entry.employee.poste,
+            email: "email@example.com", // Default email since it's not in the database
+            phone: entry.employee.telephone,
+            status: "active" as const,
+            matricule: entry.employee.matricule,
+            site: entry.employee.site,
+            employer: entry.employee.employeur,
+            avatar: null,
+          }
+        })) as EmployeePointage[];
 
       setPointages(formattedPointages);
     } catch (err: any) {

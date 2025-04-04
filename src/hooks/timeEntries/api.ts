@@ -156,7 +156,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntryWithEmployee[]> => {
       .from("time_entries")
       .select(`
         *,
-        employee:employee_id(
+        employee:listes_employées(
           id, 
           nom, 
           prenom, 
@@ -185,7 +185,7 @@ export const fetchTimeEntries = async (): Promise<TimeEntryWithEmployee[]> => {
       notes: entry.notes,
       created_at: entry.created_at,
       updated_at: entry.updated_at,
-      employee: {
+      employee: entry.employee ? {
         id: entry.employee.id,
         name: `${entry.employee.prenom} ${entry.employee.nom}`,
         department: entry.employee.affectation,
@@ -197,8 +197,8 @@ export const fetchTimeEntries = async (): Promise<TimeEntryWithEmployee[]> => {
         site: entry.employee.site,
         employer: entry.employee.employeur,
         avatar: null,
-      },
-    }));
+      } : null,
+    })).filter(entry => entry.employee !== null) as TimeEntryWithEmployee[];
 
     return transformedData;
   } catch (error) {
@@ -216,7 +216,7 @@ export const fetchTimeEntryById = async (
       .from("time_entries")
       .select(`
         *,
-        employee:employee_id(
+        employee:listes_employées(
           id, 
           nom, 
           prenom, 
@@ -232,7 +232,7 @@ export const fetchTimeEntryById = async (
       .single();
 
     if (error) throw error;
-    if (!data) return null;
+    if (!data || !data.employee) return null;
 
     return {
       id: data.id,
@@ -274,7 +274,7 @@ export const createTimeEntry = async (
       .insert([timeEntry])
       .select(`
         *,
-        employee:employee_id(
+        employee:listes_employées(
           id, 
           nom, 
           prenom, 
@@ -289,7 +289,7 @@ export const createTimeEntry = async (
       .single();
 
     if (error) throw error;
-    if (!data) return null;
+    if (!data || !data.employee) return null;
 
     return {
       id: data.id,
@@ -333,7 +333,7 @@ export const updateTimeEntry = async (
       .eq("id", id)
       .select(`
         *,
-        employee:employee_id(
+        employee:listes_employées(
           id, 
           nom, 
           prenom, 
@@ -348,7 +348,7 @@ export const updateTimeEntry = async (
       .single();
 
     if (error) throw error;
-    if (!data) return null;
+    if (!data || !data.employee) return null;
 
     return {
       id: data.id,
