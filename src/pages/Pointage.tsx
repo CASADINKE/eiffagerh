@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -216,6 +215,7 @@ const Pointage = () => {
         open={showClockInDialog} 
         onOpenChange={setShowClockInDialog}
         onClockIn={handleClockIn}
+        className=""
       />
     </div>
   );

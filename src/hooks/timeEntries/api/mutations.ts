@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
@@ -163,3 +162,74 @@ export const deleteTimeEntry = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+/**
+ * Clock in mutation using react-query
+ */
+export function useClockInMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { employeeId: string; notes?: string }) => {
+      try {
+        // Create a new time entry for the employee
+        const { data: timeEntry, error } = await supabase
+          .from("time_entries")
+          .insert([
+            {
+              employee_id: data.employeeId,
+              clock_in: new Date().toISOString(),
+              notes: data.notes || "Clocked in via app",
+              status: "active",
+            },
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return timeEntry;
+      } catch (error) {
+        console.error("Error in clock in mutation:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch time entries queries
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
+    },
+  });
+}
+
+/**
+ * Clock out mutation using react-query
+ */
+export function useClockOutMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (timeEntryId: string) => {
+      try {
+        // Update the time entry with clock out time
+        const { data: timeEntry, error } = await supabase
+          .from("time_entries")
+          .update({
+            clock_out: new Date().toISOString(),
+            status: "completed",
+          })
+          .eq("id", timeEntryId)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return timeEntry;
+      } catch (error) {
+        console.error("Error in clock out mutation:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch time entries queries
+      queryClient.invalidateQueries({ queryKey: ["timeEntries"] });
+    },
+  });
+}

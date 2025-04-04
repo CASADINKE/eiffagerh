@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -12,8 +11,7 @@ import {
   Building,
   CreditCard,
   Clock,
-  Wallet,
-  MapPin
+  Wallet
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -34,7 +32,6 @@ const navItems = [
   { path: "/employees", title: "Employés", icon: Users },
   { path: "/leave", title: "Gestion des congés", icon: Calendar },
   { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
-  { path: "/pointage", title: "Pointage du jour", icon: MapPin },
   { path: "/gestion-salaires", title: "Gestion des salaires", icon: Wallet },
   { path: "/settings", title: "Paramètres", icon: Settings },
 ];
