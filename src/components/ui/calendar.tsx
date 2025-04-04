@@ -55,10 +55,7 @@ function Calendar({
         dropdown_month: "flex-1",
         dropdown_year: "flex-1",
         dropdown_icon: "hidden",
-        dropdown_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "px-2 py-1 h-auto text-sm font-medium border-primary/20 text-primary bg-background/5"
-        ),
+        // Remove dropdown_button as it's not a valid property
         dropdown_month_button: cn(
           "bg-black text-white border-0 px-2 py-1 h-auto text-sm font-medium rounded-md"
         ),
