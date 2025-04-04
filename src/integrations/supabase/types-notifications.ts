@@ -1,7 +1,7 @@
 
 import { Tables as SupabaseTables } from './types';
 
-// Define the Notification type as extending from the Supabase tables
+// Define the notifications type to extend Supabase types
 export interface Notification {
   id: string;
   user_id: string;
@@ -10,41 +10,38 @@ export interface Notification {
   read: boolean;
   created_at: string;
   related_id: string | null;
-  type: string | null;
+  type: string;
 }
 
-// Add notifications to the Supabase database types
-declare module './types' {
-  interface Database {
-    public: {
-      Tables: {
-        notifications: {
-          Row: Notification;
-          Insert: {
-            id?: string;
-            user_id: string;
-            title: string;
-            message: string;
-            read?: boolean;
-            created_at?: string;
-            related_id?: string | null;
-            type?: string | null;
-          };
-          Update: {
-            id?: string;
-            user_id?: string;
-            title?: string;
-            message?: string;
-            read?: boolean;
-            created_at?: string;
-            related_id?: string | null;
-            type?: string | null;
-          };
-          Relationships: [];
-        } & SupabaseTables;
+// Extend the Database type to add notifications
+export interface NotificationsDatabase {
+  public: {
+    Tables: {
+      notifications: {
+        Row: Notification;
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          message: string;
+          read?: boolean;
+          created_at?: string;
+          related_id?: string | null;
+          type?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          message?: string;
+          read?: boolean;
+          created_at?: string;
+          related_id?: string | null;
+          type?: string;
+        };
       };
     };
-  }
+  };
 }
 
 // Helper function to type cast the supabase response to Notification

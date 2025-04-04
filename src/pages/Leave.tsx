@@ -11,6 +11,7 @@ import { LeaveTabs } from "@/components/leave/LeaveTabs";
 import { LeaveAdminPanel } from "@/components/leave/LeaveAdminPanel";
 import { Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { asNotifications } from "@/integrations/supabase/types-notifications";
 
 type LeaveRequest = Tables<"leave_requests">;
 
@@ -72,16 +73,15 @@ const Leave = () => {
           .eq('type', 'leave_request')
           .eq('read', false);
         
-        if (notificationsData && notificationsData.length > 0) {
+        // Use type assertion for notifications data
+        const notifications = asNotifications(notificationsData || []);
+        
+        if (notifications && notifications.length > 0) {
           // Mark them as read
-          const notificationIds = notificationsData.map(n => n.id);
-          
-          if (notificationIds.length > 0) {
-            await supabase
-              .from('notifications')
-              .update({ read: true })
-              .in('id', notificationIds);
-          }
+          await supabase
+            .from('notifications')
+            .update({ read: true })
+            .in('id', notifications.map(n => n.id));
         }
       }
     } catch (error: any) {

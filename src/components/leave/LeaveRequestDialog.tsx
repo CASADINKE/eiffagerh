@@ -13,6 +13,7 @@ import { toast as sonnerToast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { asNotifications } from "@/integrations/supabase/types-notifications";
 
 interface LeaveRequestDialogProps {
   open: boolean;
@@ -84,7 +85,7 @@ export function LeaveRequestDialog({
 
       if (adminUsers && adminUsers.length > 0) {
         // Create notifications in the database for admins
-        const notificationsToInsert = adminUsers.map(admin => ({
+        const notifications = adminUsers.map(admin => ({
           user_id: admin.id,
           title: "Nouvelle demande de congé",
           message: `${employeeName} a soumis une demande de congé du ${startDate} au ${endDate}`,
@@ -94,10 +95,10 @@ export function LeaveRequestDialog({
           type: 'leave_request'
         }));
 
-        // Insert notifications
+        // Insert notifications - using type assertion with any as a workaround
         const { error: notificationError } = await supabase
           .from('notifications')
-          .insert(notificationsToInsert);
+          .insert(notifications as any);
 
         if (notificationError) {
           console.error("Erreur lors de l'envoi des notifications:", notificationError);
