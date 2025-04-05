@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useEmployeeSalaires } from "@/hooks/useSalaires";
 import { SalaireTable } from "@/components/salary/SalaireTable";
 import { Button } from "@/components/ui/button";
-import { Download, Printer } from "lucide-react";
+import { Download } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -62,10 +62,6 @@ export default function EmployeeSalaires() {
           <Button variant="outline" onClick={generatePDF} disabled={isPrinting || !salaires || salaires.length === 0}>
             <Download className="h-4 w-4 mr-2" />
             Télécharger PDF
-          </Button>
-          <Button variant="outline" onClick={() => window.print()} disabled={!salaires || salaires.length === 0}>
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimer
           </Button>
         </div>
       </div>
