@@ -9,6 +9,14 @@ interface RPCResponse {
   error: any;
 }
 
+// Define the interface for insert_time_entry_bypass function parameters
+interface InsertTimeEntryBypassParams {
+  p_employee_id: string;
+  p_date: string;
+  p_clock_in: string;
+  p_notes: string | null;
+}
+
 // Clock in an employee - modified to use direct SQL to bypass foreign key
 export const clockInEmployee = async (employeeId: string, notes: string = ""): Promise<TimeEntryWithEmployee | null> => {
   try {
@@ -52,14 +60,16 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       notes
     };
 
-    // Fix the type error by properly typing the RPC call
-    // Fix for type error: Use the correct type for the RPC call parameters
-    const response = await supabase.rpc('insert_time_entry_bypass', {
+    // Use the properly typed parameters for the RPC call
+    const rpcParams: InsertTimeEntryBypassParams = {
       p_employee_id: employeeId,
       p_date: today,
       p_clock_in: new Date().toISOString(),
-      p_notes: notes
-    }) as unknown as RPCResponse;
+      p_notes: notes || null
+    };
+    
+    // Fix for type error: Properly type the RPC call
+    const response = await supabase.rpc('insert_time_entry_bypass', rpcParams) as unknown as RPCResponse;
     
     const { data, error } = response;
 
