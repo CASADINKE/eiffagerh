@@ -6,7 +6,7 @@ import { fr } from "date-fns/locale";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PayslipGeneratorProps {
@@ -79,6 +79,331 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
     }
   };
 
+  // Function to generate the HTML content for printing
+  const generateBulletinHTML = () => {
+    const employeeName = employeeData 
+      ? `${employeeData.prenom} ${employeeData.nom}`
+      : salaire.nom;
+      
+    const dateNaissance = employeeData && employeeData.date_naissance
+      ? new Date(employeeData.date_naissance).toLocaleDateString('fr-FR')
+      : '10/10/1988'; // Fallback date
+
+    // Calculate values for the payslip
+    const salaireBrut = salaire.salaire_base;
+    const sursalaire = salaire.sursalaire || 0;
+    const indemniteDeplacement = salaire.indemnite_deplacement || 0;
+    const primeTransport = salaire.prime_transport || 0;
+    const retenues = {
+      ipresGen: salaire.ipres_general || 0,
+      trimf: salaire.trimf || 0,
+      ir: salaire.retenue_ir || 0
+    };
+    
+    const totalGain = salaireBrut + sursalaire + indemniteDeplacement + primeTransport;
+    const totalRetenues = retenues.ipresGen + retenues.trimf + retenues.ir;
+    const netAPayer = salaire.net_a_payer;
+    
+    // Mock values for cumulated data
+    const cumulValues = {
+      brutSocial: 443511,
+      baseIR: 443511,
+      ipresGen: 24836,
+      ipresCad: 0,
+      ir: 89308,
+      trimf: 1000,
+      netAPayer: 354360
+    };
+    
+    // Mock values for additional information
+    const congesPayes = 143005;
+    const prixParEntreprise = {
+      mois: 507131,
+      cumul: 1278988
+    };
+
+    const html = `
+      <html>
+        <head>
+          <style>
+            @page {
+              size: A4;
+              margin: 10mm;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 10pt;
+              line-height: 1.3;
+              margin: 0;
+              padding: 0;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              table-layout: fixed;
+            }
+            table, th, td {
+              border: 1px solid black;
+            }
+            th, td {
+              padding: 2mm;
+              text-align: left;
+              vertical-align: top;
+            }
+            th {
+              font-weight: bold;
+              background-color: #f2f2f2;
+            }
+            .text-center {
+              text-align: center;
+            }
+            .text-right {
+              text-align: right;
+            }
+            .header-title {
+              border: 1px solid black;
+              padding: 3mm;
+              text-align: center;
+              font-weight: bold;
+              font-size: 14pt;
+              margin-bottom: 5mm;
+            }
+            .employer-info {
+              font-size: 9pt;
+            }
+            .clearfix::after {
+              content: "";
+              clear: both;
+              display: table;
+            }
+            .eiffage-logo {
+              color: #e2001a;
+              font-weight: bold;
+              font-size: 16pt;
+            }
+            .td-division {
+              font-weight: bold;
+              font-size: 12pt;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header-title">BULLETIN DE PAIE</div>
+          
+          <div class="clearfix">
+            <table style="width: 70%; float: left; margin-bottom: 5mm;">
+              <tr>
+                <td>
+                  <div class="eiffage-logo">
+                    <img src="/lovable-uploads/0a8437e4-516c-4ba1-b2d9-24ddef68546b.png" alt="EIFFAGE ENERGIE" height="40">
+                  </div>
+                  <div class="td-division">T&D Sénégal</div>
+                  <div class="employer-info">
+                    AV. FELIX EBOUE X RTE DES BRASSERIES<br>
+                    BP<br>
+                    DAKAR SENEGAL
+                  </div>
+                  <div class="employer-info">Convention Collective Nationale</div>
+                </td>
+              </tr>
+            </table>
+            
+            <div style="width: 29%; float: right;">
+              <div style="margin-bottom: 5mm;">
+                <strong>Période de paie: ${salaire.periode_paie}</strong>
+              </div>
+              <div>
+                <strong>Matricule: ${salaire.matricule}</strong><br>
+                <strong>${employeeName.toUpperCase()}</strong>
+              </div>
+            </div>
+          </div>
+          
+          <table style="margin-bottom: 5mm;">
+            <tr>
+              <th>Embauche</th>
+              <th>Statut</th>
+              <th>Parts IR</th>
+              <th>Qualification</th>
+              <th>Date Naissance</th>
+            </tr>
+            <tr>
+              <td>02/10/23</td>
+              <td>E G</td>
+              <td>1</td>
+              <td>${employeeData?.poste || 'CONDUCTEUR ENGINS'}</td>
+              <td>${dateNaissance}</td>
+            </tr>
+          </table>
+          
+          <table style="margin-bottom: 5mm;">
+            <tr>
+              <th>Libellé</th>
+              <th>Nombre ou Base</th>
+              <th>Taux</th>
+              <th>Gain</th>
+              <th>Taux Salarial</th>
+              <th>Montant Employé</th>
+              <th>Montant Employeur</th>
+            </tr>
+            <tr>
+              <td>102 Salaire de base du mois</td>
+              <td class="text-right">${salaireBrut.toLocaleString('fr')}</td>
+              <td>1.00</td>
+              <td class="text-right">${salaireBrut.toLocaleString('fr')}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>105 Sursalaire</td>
+              <td class="text-right">${salaireBrut.toLocaleString('fr')}</td>
+              <td>1.00000</td>
+              <td class="text-right">${sursalaire.toLocaleString('fr')}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>217 Indemnité de déplacement</td>
+              <td></td>
+              <td></td>
+              <td class="text-right">${indemniteDeplacement.toLocaleString('fr')}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>411 Retenue I.R</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="text-right">${retenues.ir.toLocaleString('fr')}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>414 IPRES général</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="text-right">${retenues.ipresGen.toLocaleString('fr')}</td>
+              <td class="text-right">37 255</td>
+            </tr>
+            <tr>
+              <td>420 TRIMF</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="text-right">${retenues.trimf.toLocaleString('fr')}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>420 Prime de transport</td>
+              <td class="text-right">26 000</td>
+              <td></td>
+              <td class="text-right">${primeTransport.toLocaleString('fr')}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            
+            <tr>
+              <th colspan="3" class="text-right">TOTAUX</th>
+              <th class="text-right">${totalGain.toLocaleString('fr')}</th>
+              <th></th>
+              <th class="text-right">${totalRetenues.toLocaleString('fr')}</th>
+              <th class="text-right">37 255</th>
+            </tr>
+          </table>
+          
+          <table style="margin-bottom: 5mm;">
+            <tr>
+              <td style="width: 10%"></td>
+              <th style="width: 15%">Brut Social</th>
+              <th style="width: 15%">Base IR</th>
+              <th style="width: 15%">IPRES Gen.</th>
+              <th style="width: 15%">IPRES Cad.</th>
+              <th style="width: 15%">IR</th>
+              <th style="width: 15%">TRIMF</th>
+            </tr>
+            <tr>
+              <th>MOIS</th>
+              <td class="text-right">${cumulValues.brutSocial.toLocaleString('fr')}</td>
+              <td class="text-right">${cumulValues.baseIR.toLocaleString('fr')}</td>
+              <td class="text-right">${cumulValues.ipresGen.toLocaleString('fr')}</td>
+              <td></td>
+              <td class="text-right">${cumulValues.ir.toLocaleString('fr')}</td>
+              <td class="text-right">${cumulValues.trimf.toLocaleString('fr')}</td>
+            </tr>
+            <tr>
+              <th>CUMUL</th>
+              <td class="text-right">1 716 057</td>
+              <td class="text-right">1 716 057</td>
+              <td class="text-right">96 009</td>
+              <td></td>
+              <td class="text-right">312 731</td>
+              <td class="text-right">4 400</td>
+            </tr>
+          </table>
+          
+          <table style="margin-bottom: 5mm; text-align: center;">
+            <tr>
+              <th>NET A PAYER EN FRANCS</th>
+            </tr>
+            <tr>
+              <td class="text-center" style="font-size: 14pt; font-weight: bold;">${netAPayer.toLocaleString('fr')}</td>
+            </tr>
+            <tr>
+              <td class="text-center">1 378 988</td>
+            </tr>
+          </table>
+          
+          <table>
+            <tr>
+              <td style="width: 50%">
+                <strong>CONGES PAYES</strong><br>
+                Montant: ${congesPayes.toLocaleString('fr')}
+              </td>
+              <td style="width: 50%">
+                <strong>PRIX PAR ENTREPRISE</strong><br>
+                Mois: ${prixParEntreprise.mois.toLocaleString('fr')}<br>
+                Cumul: ${prixParEntreprise.cumul.toLocaleString('fr')}
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+    
+    return html;
+  };
+
+  // Function to generate and display bulletin
+  const generateBulletin = () => {
+    const html = generateBulletinHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    const printWindow = window.open(url, '_blank');
+    
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
+  };
+
+  const printPayslip = () => {
+    window.print();
+  };
+
+  if (isLoading) {
+    return <div className="p-4 text-center">Chargement des données employé...</div>;
+  }
+
   // Current date
   const currentDate = new Date();
   const formattedDate = format(currentDate, 'MMMM yyyy', { locale: fr });
@@ -126,20 +451,16 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
     cumul: 1278988
   };
 
-  const printPayslip = () => {
-    window.print();
-  };
-
-  if (isLoading) {
-    return <div className="p-4 text-center">Chargement des données employé...</div>;
-  }
-
   return (
     <div className="max-w-4xl mx-auto bg-white p-4">
       <div className="flex justify-end space-x-2 mb-4 print:hidden">
         <Button variant="outline" onClick={generatePDF}>
           <Download className="h-4 w-4 mr-2" />
           Télécharger PDF
+        </Button>
+        <Button variant="outline" onClick={generateBulletin}>
+          <FileText className="h-4 w-4 mr-2" />
+          Bulletin
         </Button>
         <Button variant="outline" onClick={printPayslip}>
           <Printer className="h-4 w-4 mr-2" />
@@ -410,7 +731,6 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
         </div>
       </div>
       
-      {/* Fix for the style tag error: removed the jsx and global properties */}
       <style>
         {`
         @media print {

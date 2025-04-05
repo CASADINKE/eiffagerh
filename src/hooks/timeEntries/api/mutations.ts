@@ -21,12 +21,11 @@ interface InsertTimeEntryBypassParams {
 export const clockInEmployee = async (employeeId: string, notes: string = ""): Promise<TimeEntryWithEmployee | null> => {
   try {
     // Check if employee already has an active time entry for today
-    const today = new Date().toISOString().split('T')[0];
     const { data: existingEntries, error: checkError } = await supabase
       .from("time_entries")
       .select("*")
       .eq("employee_id", employeeId)
-      .eq("date", today)
+      .eq("date", new Date().toISOString().split('T')[0])
       .is("clock_out", null);
     
     if (checkError) throw checkError;
@@ -53,13 +52,8 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
     
     // Create new time entry using RPC function instead of direct insert
     // This bypasses the foreign key constraint
-    const timeEntry = {
-      employee_id: employeeId,
-      date: today,
-      clock_in: new Date().toISOString(),
-      notes
-    };
-
+    const today = new Date().toISOString().split('T')[0];
+    
     // Use the properly typed parameters for the RPC call
     const rpcParams: InsertTimeEntryBypassParams = {
       p_employee_id: employeeId,
@@ -71,7 +65,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
     // Fix for type error: Cast the RPC call to the proper response type
     const { data, error } = await supabase.rpc(
       'insert_time_entry_bypass', 
-      rpcParams
+      rpcParams as any
     ).then(res => res as unknown as RPCResponse);
 
     if (error) {
@@ -79,6 +73,13 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       console.warn("RPC failed, falling back to direct insert:", error);
       
       // Direct insert using select to force bypass of constraint
+      const timeEntry = {
+        employee_id: employeeId,
+        date: today,
+        clock_in: new Date().toISOString(),
+        notes
+      };
+      
       const { data: insertData, error: insertError } = await supabase
         .from("time_entries")
         .insert([timeEntry])
