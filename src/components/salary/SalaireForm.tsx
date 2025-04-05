@@ -25,12 +25,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SalaireFormData } from "@/services/salaireService";
 import { useSalaires } from "@/hooks/useSalaires";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useRemunerationsOperations } from "@/hooks/useRemunerationsOperations";
 import { Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   employee: z.string().min(1, "Sélectionnez un employé"),
   periode_paie: z.string().min(1, "La période de paie est requise"),
+  categorie: z.string().optional(),
   salaire_base: z.coerce.number().min(0, "Le salaire de base ne peut pas être négatif"),
   sursalaire: z.coerce.number().min(0, "Le sursalaire ne peut pas être négatif").default(0),
   indemnite_deplacement: z.coerce.number().min(0, "L'indemnité de déplacement ne peut pas être négative").default(0),
@@ -52,8 +54,9 @@ const months = [
 export function SalaireForm() {
   const { createSalaire, isCreating } = useSalaires();
   const { data: employees } = useEmployees();
+  const { salaires, getSalaryByCategory } = useRemunerationsOperations();
   const [netAPayer, setNetAPayer] = useState<number>(0);
-  const [selectedEmployee, setSelectedEmployee] = useState<{ matricule: string; nom: string; prenom: string; salary?: number; sursalaire?: number } | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<{ matricule: string; nom: string; prenom: string; salary?: number; categorie?: string } | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoadingSalaryData, setIsLoadingSalaryData] = useState(false);
   
@@ -74,6 +77,7 @@ export function SalaireForm() {
     defaultValues: {
       employee: "",
       periode_paie: "",
+      categorie: "",
       salaire_base: 0,
       sursalaire: 0,
       indemnite_deplacement: 0,
@@ -88,6 +92,15 @@ export function SalaireForm() {
   const years = [currentYear - 1, currentYear, currentYear + 1];
   
   const watchAllFields = form.watch();
+  
+  // Update salary base when category changes
+  useEffect(() => {
+    const categorie = form.watch("categorie");
+    if (categorie) {
+      const baseSalary = getSalaryByCategory(categorie);
+      form.setValue('salaire_base', baseSalary);
+    }
+  }, [form.watch("categorie"), getSalaryByCategory]);
   
   // Fetch salary details when employee is selected
   const fetchEmployeeSalaryData = async (employeeId: string) => {
@@ -108,7 +121,10 @@ export function SalaireForm() {
       
       // If we have salary data from the salary_details table
       if (salaryData) {
-        form.setValue('salaire_base', salaryData.base_salary || 0);
+        // If there's a pay_grade that matches our categories, set it
+        if (salaryData.pay_grade && ['a', 'b', 'c'].includes(salaryData.pay_grade.toLowerCase())) {
+          form.setValue('categorie', salaryData.pay_grade.toLowerCase());
+        }
         
         // Try to get sursalaire from the most recent salary record
         const { data: lastSalaire, error: lastSalaireError } = await supabase
@@ -141,7 +157,6 @@ export function SalaireForm() {
         }
         
         if (lastSalaire) {
-          form.setValue('salaire_base', lastSalaire.salaire_base || 0);
           form.setValue('sursalaire', lastSalaire.sursalaire || 0);
           form.setValue('prime_transport', lastSalaire.prime_transport || 0);
           form.setValue('indemnite_deplacement', lastSalaire.indemnite_deplacement || 0);
@@ -154,7 +169,7 @@ export function SalaireForm() {
     }
   };
   
-  // Mettre à jour les informations de l'employé sélectionné
+  // Update employee info when selection changes
   useEffect(() => {
     const employeeId = form.getValues().employee;
     if (employeeId && employees) {
@@ -172,6 +187,7 @@ export function SalaireForm() {
     }
   }, [form.watch("employee"), employees]);
   
+  // Calculate net pay whenever form values change
   useEffect(() => {
     const totalBrut = 
       Number(watchAllFields.salaire_base || 0) + 
@@ -188,7 +204,7 @@ export function SalaireForm() {
   }, [watchAllFields]);
   
   function onSubmit(values: FormValues) {
-    // Vérifier que l'employé est sélectionné
+    // Check that employee is selected
     if (!selectedEmployee) {
       console.error("Aucun employé sélectionné");
       return;
@@ -208,7 +224,7 @@ export function SalaireForm() {
       trimf: values.trimf,
       net_a_payer: netAPayer,
       statut_paiement: 'En attente',
-      user_id: userId || undefined // Add the user ID
+      user_id: userId || undefined
     };
     
     console.log("Création du salaire avec les données:", formData);
@@ -294,6 +310,35 @@ export function SalaireForm() {
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="categorie"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Catégorie salariale</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez une catégorie" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="a">Catégorie A</SelectItem>
+                      <SelectItem value="b">Catégorie B</SelectItem>
+                      <SelectItem value="c">Catégorie C</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Le choix de la catégorie détermine automatiquement le salaire de base
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
               
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -306,9 +351,12 @@ export function SalaireForm() {
                       <Input 
                         type="number" 
                         {...field}
-                        disabled={isLoadingSalaryData}
+                        disabled={!!form.watch("categorie")}
                       />
                     </FormControl>
+                    <FormDescription>
+                      {form.watch("categorie") && "Calculé en fonction de la catégorie"}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -324,7 +372,6 @@ export function SalaireForm() {
                       <Input 
                         type="number" 
                         {...field}
-                        disabled={isLoadingSalaryData}
                       />
                     </FormControl>
                     <FormMessage />

@@ -3,6 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
 
+// Define proper interface for the RPC response
+interface RPCResponse {
+  data: { id: string } | null;
+  error: any;
+}
+
 // Clock in an employee - modified to use direct SQL to bypass foreign key
 export const clockInEmployee = async (employeeId: string, notes: string = ""): Promise<TimeEntryWithEmployee | null> => {
   try {
@@ -47,17 +53,12 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
     };
 
     // Direct SQL insert to bypass the foreign key constraint
-    interface RPCResponse {
-      data: { id: string } | null;
-      error: any;
-    }
-
     const { data, error } = await supabase.rpc('insert_time_entry_bypass', {
       p_employee_id: employeeId,
       p_date: today,
       p_clock_in: new Date().toISOString(),
       p_notes: notes
-    }) as unknown as RPCResponse;
+    }) as RPCResponse;
 
     if (error) {
       // Fallback to direct insert if RPC isn't available

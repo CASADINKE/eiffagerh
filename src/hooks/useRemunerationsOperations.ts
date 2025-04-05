@@ -56,6 +56,12 @@ export const useRemunerationsOperations = () => {
     fetchData();
   }, []);
 
+  // Get salary by category
+  const getSalaryByCategory = (category: string): number => {
+    const salaire = salaires.find(s => s.categorie === category.toLowerCase());
+    return salaire ? salaire.montant : 0;
+  };
+
   // Add a new remuneration
   const addRemuneration = async (data: Omit<Remuneration, 'id'>): Promise<void> => {
     // For now, create a mock ID
@@ -118,6 +124,7 @@ export const useRemunerationsOperations = () => {
     sursalaires,
     isLoading,
     stats,
+    getSalaryByCategory,
     addRemuneration,
     updateRemuneration,
     deleteRemuneration
