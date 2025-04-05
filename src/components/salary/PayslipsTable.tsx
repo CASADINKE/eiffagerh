@@ -161,6 +161,7 @@ export function PayslipsTable({
                     variant="ghost" 
                     size="icon"
                     onClick={() => handlePreview(payslip)}
+                    title="Aperçu"
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
@@ -169,6 +170,8 @@ export function PayslipsTable({
                     size="icon"
                     onClick={() => handleDownload(payslip)}
                     disabled={isDownloading}
+                    title="Télécharger"
+                    className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
                   >
                     <Download className="h-4 w-4" />
                   </Button>
