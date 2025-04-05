@@ -52,7 +52,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       notes
     };
 
-    // Direct SQL insert to bypass the foreign key constraint
+    // Fix the type error by properly typing the RPC call
     const { data, error } = await supabase.rpc('insert_time_entry_bypass', {
       p_employee_id: employeeId,
       p_date: today,
