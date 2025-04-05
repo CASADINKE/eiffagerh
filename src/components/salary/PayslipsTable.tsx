@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Table,
@@ -206,7 +205,6 @@ export function PayslipsTable({
         </TableBody>
       </Table>
 
-      {/* Update Status Dialog */}
       <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -296,7 +294,6 @@ export function PayslipsTable({
         </DialogContent>
       </Dialog>
       
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -318,7 +315,6 @@ export function PayslipsTable({
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Payslip Preview Dialog */}
       <PayslipPreview 
         payslip={selectedPayslip} 
         isOpen={isPreviewOpen} 
