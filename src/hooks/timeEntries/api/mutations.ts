@@ -52,7 +52,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       p_date: today,
       p_clock_in: new Date().toISOString(),
       p_notes: notes
-    });
+    }) as { data: { id: string } | null, error: any };
 
     if (error) {
       // Fallback to direct insert if RPC isn't available
