@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
@@ -79,12 +78,10 @@ export const insertTimeEntryBypass = async (
     };
     
     // Call the RPC and properly handle the response type
-    const { data, error } = await supabase.rpc(
+    const { data, error } = await supabase.rpc<RPCResponse>(
       'insert_time_entry_bypass', 
       rpcParams
-    ).then((response): { data: RPCResponse | null, error: any } => {
-      return { data: response.data as RPCResponse, error: response.error };
-    });
+    );
 
     if (error) {
       console.error("Error inserting time entry bypass:", error);

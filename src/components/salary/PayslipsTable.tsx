@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Table,
@@ -27,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { Payslip, PaymentMethod, PayslipStatus } from "@/services/payslipService";
-import { Calendar as CalendarIcon, Check, MoreHorizontal, Trash2, Eye } from "lucide-react";
+import { Calendar as CalendarIcon, Check, MoreHorizontal, Trash2, Eye, Download } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
