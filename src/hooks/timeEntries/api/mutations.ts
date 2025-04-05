@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
@@ -33,7 +34,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       if (fetchError) throw fetchError;
       
       if (!entryWithEmployee) return null;
-      return mapTimeEntryWithEmployee(entryWithEmployee);
+      return mapTimeEntryWithEmployee(entryWithEmployee as any);
     }
     
     // Create new time entry using RPC function instead of direct insert
@@ -70,7 +71,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       if (insertError) throw insertError;
       
       if (!insertData) return null;
-      return mapTimeEntryWithEmployee(insertData);
+      return mapTimeEntryWithEmployee(insertData as any);
     }
     
     // If RPC succeeded, fetch the newly created entry
@@ -87,7 +88,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       if (fetchError) throw fetchError;
       
       if (!newEntry) return null;
-      return mapTimeEntryWithEmployee(newEntry);
+      return mapTimeEntryWithEmployee(newEntry as any);
     }
     
     throw new Error("Failed to create time entry");
@@ -118,7 +119,7 @@ export const clockOutEmployee = async (id: string, breakTime: number = 0): Promi
     if (error) throw error;
     
     if (!data) return null;
-    return mapTimeEntryWithEmployee(data);
+    return mapTimeEntryWithEmployee(data as any);
   } catch (error) {
     console.error("Error in clockOutEmployee:", error);
     throw error;
@@ -141,7 +142,7 @@ export const updateTimeEntry = async (id: string, updates: Partial<TimeEntry>): 
     if (error) throw error;
     
     if (!data) return null;
-    return mapTimeEntryWithEmployee(data);
+    return mapTimeEntryWithEmployee(data as any);
   } catch (error) {
     console.error("Error in updateTimeEntry:", error);
     throw error;

@@ -23,6 +23,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import EmployeePayslipsPage from "@/pages/EmployeePayslips";
 import GestionSalaires from "@/pages/GestionSalaires";
 import EmployeeSalaires from "@/pages/EmployeeSalaires";
+import GestionRemunerations from "@/pages/GestionRemunerations";
 
 function App() {
   const queryClient = new QueryClient();
@@ -124,6 +125,16 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <GestionSalaires />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/gestion-remunerations"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <GestionRemunerations />
                     </Layout>
                   </ProtectedRoute>
                 }
