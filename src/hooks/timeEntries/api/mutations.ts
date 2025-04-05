@@ -78,8 +78,8 @@ export const insertTimeEntryBypass = async (
       p_date: date
     };
     
-    // Fix: Use any as the type parameter to resolve the constraint issue
-    const { data, error } = await supabase.rpc<any, InsertTimeEntryBypassParams>(
+    // Fix: Correct type parameters for the rpc method
+    const { data, error } = await supabase.rpc(
       'insert_time_entry_bypass', 
       rpcParams
     );
