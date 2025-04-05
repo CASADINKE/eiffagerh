@@ -410,7 +410,9 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
         </div>
       </div>
       
-      <style jsx global>{`
+      {/* Fix for the style tag error: removed the jsx and global properties */}
+      <style>
+        {`
         @media print {
           body * {
             visibility: hidden;
@@ -427,7 +429,8 @@ export function PayslipGenerator({ salaire, onClose }: PayslipGeneratorProps) {
             width: 100%;
           }
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 }
