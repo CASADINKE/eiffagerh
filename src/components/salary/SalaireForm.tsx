@@ -54,7 +54,14 @@ const months = [
 export function SalaireForm() {
   const { createSalaire, isCreating } = useSalaires();
   const { data: employees } = useEmployees();
-  const { salaires, getSalaryByCategory } = useRemunerationsOperations();
+  const { 
+    salaires, 
+    sursalaires, 
+    getSalaryByCategory, 
+    getDefaultSursalaire, 
+    getDefaultDeplacement 
+  } = useRemunerationsOperations();
+  
   const [netAPayer, setNetAPayer] = useState<number>(0);
   const [selectedEmployee, setSelectedEmployee] = useState<{ matricule: string; nom: string; prenom: string; salary?: number; categorie?: string } | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -93,14 +100,27 @@ export function SalaireForm() {
   
   const watchAllFields = form.watch();
   
-  // Update salary base when category changes
+  // Update salary base and sursalaire when category changes
   useEffect(() => {
     const categorie = form.watch("categorie");
     if (categorie) {
+      // Set base salary based on category
       const baseSalary = getSalaryByCategory(categorie);
       form.setValue('salaire_base', baseSalary);
+      
+      // Set default sursalaire
+      const defaultSursalaire = getDefaultSursalaire();
+      if (defaultSursalaire) {
+        form.setValue('sursalaire', defaultSursalaire.montant);
+      }
+      
+      // Set default indemnité déplacement
+      const defaultDeplacement = getDefaultDeplacement();
+      if (defaultDeplacement) {
+        form.setValue('indemnite_deplacement', defaultDeplacement.montant);
+      }
     }
-  }, [form.watch("categorie"), getSalaryByCategory]);
+  }, [form.watch("categorie"), getSalaryByCategory, getDefaultSursalaire, getDefaultDeplacement]);
   
   // Fetch salary details when employee is selected
   const fetchEmployeeSalaryData = async (employeeId: string) => {
@@ -333,7 +353,7 @@ export function SalaireForm() {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Le choix de la catégorie détermine automatiquement le salaire de base
+                    Le choix de la catégorie détermine automatiquement le salaire de base et le sursalaire
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -352,6 +372,7 @@ export function SalaireForm() {
                         type="number" 
                         {...field}
                         disabled={!!form.watch("categorie")}
+                        className={!!form.watch("categorie") ? "bg-muted" : ""}
                       />
                     </FormControl>
                     <FormDescription>
@@ -372,6 +393,7 @@ export function SalaireForm() {
                       <Input 
                         type="number" 
                         {...field}
+                        className={!!form.watch("categorie") ? "bg-muted/50" : ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -388,7 +410,11 @@ export function SalaireForm() {
                   <FormItem>
                     <FormLabel>Indemnité de déplacement</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} />
+                      <Input 
+                        type="number" 
+                        {...field} 
+                        className={!!form.watch("categorie") ? "bg-muted/50" : ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

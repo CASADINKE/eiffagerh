@@ -58,7 +58,7 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
       p_date: today,
       p_clock_in: new Date().toISOString(),
       p_notes: notes
-    }) as RPCResponse;
+    }) as unknown as RPCResponse;
     
     const { data, error } = response;
 
