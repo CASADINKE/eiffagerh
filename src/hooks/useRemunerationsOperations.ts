@@ -9,6 +9,16 @@ type RemunerationsStats = {
   totalSalaryMass: number;
 };
 
+export type SalaireInfo = {
+  montant: number;
+};
+
+export type SursalaireInfo = {
+  nom: string;
+  montant: number;
+  description: string;
+};
+
 export const useRemunerationsOperations = () => {
   const [salaires, setSalaires] = useState<Remuneration[]>([]);
   const [sursalaires, setSursalaires] = useState<Remuneration[]>([]);
@@ -60,6 +70,26 @@ export const useRemunerationsOperations = () => {
   const getSalaryByCategory = (category: string): number => {
     const salaire = salaires.find(s => s.categorie === category.toLowerCase());
     return salaire ? salaire.montant : 0;
+  };
+
+  // Get default sursalaire info
+  const getDefaultSursalaire = (): SursalaireInfo | null => {
+    const defaultSursalaire = sursalaires.find(s => s.nom === "Prime de performance");
+    return defaultSursalaire ? {
+      nom: defaultSursalaire.nom,
+      montant: defaultSursalaire.montant,
+      description: defaultSursalaire.description
+    } : null;
+  };
+
+  // Get default deplacement info
+  const getDefaultDeplacement = (): SursalaireInfo | null => {
+    const defaultDeplacement = sursalaires.find(s => s.nom === "Indemnité de déplacement");
+    return defaultDeplacement ? {
+      nom: defaultDeplacement.nom,
+      montant: defaultDeplacement.montant,
+      description: defaultDeplacement.description
+    } : null;
   };
 
   // Add a new remuneration
@@ -125,6 +155,8 @@ export const useRemunerationsOperations = () => {
     isLoading,
     stats,
     getSalaryByCategory,
+    getDefaultSursalaire,
+    getDefaultDeplacement,
     addRemuneration,
     updateRemuneration,
     deleteRemuneration

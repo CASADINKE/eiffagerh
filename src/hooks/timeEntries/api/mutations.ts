@@ -53,12 +53,14 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
     };
 
     // Fix the type error by properly typing the RPC call
-    const { data, error } = await supabase.rpc('insert_time_entry_bypass', {
+    const response = await supabase.rpc('insert_time_entry_bypass', {
       p_employee_id: employeeId,
       p_date: today,
       p_clock_in: new Date().toISOString(),
       p_notes: notes
     }) as RPCResponse;
+    
+    const { data, error } = response;
 
     if (error) {
       // Fallback to direct insert if RPC isn't available

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -30,6 +31,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { EmployeeFormData } from "@/hooks/useEmployeeOperations";
 import { Textarea } from "@/components/ui/textarea";
+import { useRemunerationsOperations } from "@/hooks/useRemunerationsOperations";
 
 const employerOptions = [
   { value: "phoenix", label: "Phoenix Interim Suarl" },
@@ -89,6 +91,8 @@ const EmployeeForm = ({
   initialValues,
   mode = "create"
 }: EmployeeFormProps) => {
+  const { getSalaryByCategory, getDefaultSursalaire, getDefaultDeplacement } = useRemunerationsOperations();
+  
   const form = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
@@ -114,6 +118,35 @@ const EmployeeForm = ({
       form.reset(initialValues);
     }
   }, [initialValues, form]);
+
+  // Mettre à jour le salaire de base en fonction de la catégorie sélectionnée
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'categorie') {
+        const category = value.categorie;
+        if (category) {
+          // Obtenir le salaire correspondant à la catégorie
+          const salaryAmount = getSalaryByCategory(category);
+          form.setValue('salaire_base', salaryAmount.toString());
+          
+          // Obtenir le sursalaire par défaut
+          const defaultSursalaire = getDefaultSursalaire();
+          if (defaultSursalaire) {
+            form.setValue('sursalaire', defaultSursalaire.montant.toString());
+          }
+          
+          // Obtenir l'indemnité de déplacement par défaut
+          const defaultDeplacement = getDefaultDeplacement();
+          if (defaultDeplacement) {
+            form.setValue('prime_deplacement', defaultDeplacement.montant.toString());
+          }
+        }
+      }
+    });
+    
+    // Cleanup de l'effet
+    return () => subscription.unsubscribe();
+  }, [form, getSalaryByCategory, getDefaultSursalaire, getDefaultDeplacement]);
 
   return (
     <Form {...form}>
@@ -287,10 +320,11 @@ const EmployeeForm = ({
                 <FormLabel className="text-base">Salaire de base</FormLabel>
                 <FormControl>
                   <Input 
-                    type="number" 
+                    type="text" 
                     placeholder="Ex: 350000" 
                     {...field} 
-                    className="p-3 text-base h-12" 
+                    className="p-3 text-base h-12 bg-muted/20"
+                    readOnly
                   />
                 </FormControl>
                 <FormMessage />
@@ -306,10 +340,11 @@ const EmployeeForm = ({
                 <FormLabel className="text-base">Sursalaire</FormLabel>
                 <FormControl>
                   <Input 
-                    type="number" 
+                    type="text" 
                     placeholder="Ex: 50000" 
                     {...field} 
-                    className="p-3 text-base h-12" 
+                    className="p-3 text-base h-12 bg-muted/20"
+                    readOnly
                   />
                 </FormControl>
                 <FormMessage />
@@ -325,10 +360,11 @@ const EmployeeForm = ({
                 <FormLabel className="text-base">Prime de déplacement</FormLabel>
                 <FormControl>
                   <Input 
-                    type="number" 
+                    type="text" 
                     placeholder="Ex: 25000" 
                     {...field} 
-                    className="p-3 text-base h-12" 
+                    className="p-3 text-base h-12 bg-muted/20"
+                    readOnly
                   />
                 </FormControl>
                 <FormMessage />
