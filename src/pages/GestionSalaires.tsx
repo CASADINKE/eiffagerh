@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FileCheck, FileClock, Download, PlusCircle } from "lucide-react";
+import { Search, FileCheck, FileClock, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SalairePaiementStatus, ModePaiement } from "@/services/salaireService";
 import { toast } from "sonner";
@@ -24,9 +24,7 @@ export default function GestionSalaires() {
     updateStatus, 
     isUpdating,
     deleteSalaire,
-    isDeleting,
-    generatePDF,
-    isGenerating
+    isDeleting
   } = useSalaires();
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -101,13 +99,6 @@ export default function GestionSalaires() {
     }
   };
   
-  const handleDownloadSalaire = (salaireId: string) => {
-    if (generatePDF) {
-      generatePDF(salaireId);
-      toast.success("Génération du bulletin de salaire...");
-    }
-  };
-  
   return (
     <div className="container mx-auto p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
@@ -131,7 +122,7 @@ export default function GestionSalaires() {
         </div>
       )}
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total des salaires</CardTitle>
@@ -171,26 +162,13 @@ export default function GestionSalaires() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Validés</CardTitle>
+            <CardTitle className="text-sm font-medium">Validés/Payés</CardTitle>
             <FileCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.validated.toLocaleString('fr-FR')} FCFA</div>
+            <div className="text-2xl font-bold">{(stats.validated + stats.paid).toLocaleString('fr-FR')} FCFA</div>
             <p className="text-xs text-muted-foreground">
-              {counts.validated} bulletin{counts.validated > 1 ? 's' : ''} validé{counts.validated > 1 ? 's' : ''}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Payés</CardTitle>
-            <Download className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.paid.toLocaleString('fr-FR')} FCFA</div>
-            <p className="text-xs text-muted-foreground">
-              {counts.paid} bulletin{counts.paid > 1 ? 's' : ''} payé{counts.paid > 1 ? 's' : ''}
+              {counts.validated + counts.paid} bulletin{counts.validated + counts.paid > 1 ? 's' : ''}
             </p>
           </CardContent>
         </Card>
@@ -264,8 +242,6 @@ export default function GestionSalaires() {
                 isUpdating={isUpdating}
                 onDeleteSalaire={handleDeleteSalaire}
                 isDeleting={isDeleting}
-                onDownloadSalaire={handleDownloadSalaire}
-                isDownloading={isGenerating}
               />
             </TabsContent>
             
@@ -278,8 +254,6 @@ export default function GestionSalaires() {
                 statusFilter="En attente"
                 onDeleteSalaire={handleDeleteSalaire}
                 isDeleting={isDeleting}
-                onDownloadSalaire={handleDownloadSalaire}
-                isDownloading={isGenerating}
               />
             </TabsContent>
             
@@ -292,8 +266,6 @@ export default function GestionSalaires() {
                 statusFilter="Validé"
                 onDeleteSalaire={handleDeleteSalaire}
                 isDeleting={isDeleting}
-                onDownloadSalaire={handleDownloadSalaire}
-                isDownloading={isGenerating}
               />
             </TabsContent>
             
@@ -306,8 +278,6 @@ export default function GestionSalaires() {
                 statusFilter="Payé"
                 onDeleteSalaire={handleDeleteSalaire}
                 isDeleting={isDeleting}
-                onDownloadSalaire={handleDownloadSalaire}
-                isDownloading={isGenerating}
               />
             </TabsContent>
           </Tabs>

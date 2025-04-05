@@ -3,187 +3,141 @@ import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
 
-// Define proper interface for the RPC response
-interface RPCResponse {
-  data: { id: string } | null;
-  error: any;
-}
-
-// Define the interface for insert_time_entry_bypass function parameters
+// Define proper types for RPC parameters and response
 interface InsertTimeEntryBypassParams {
   p_employee_id: string;
   p_date: string;
-  p_clock_in: string;
-  p_notes: string | null;
 }
 
-// Clock in an employee - modified to use direct SQL to bypass foreign key
-export const clockInEmployee = async (employeeId: string, notes: string = ""): Promise<TimeEntryWithEmployee | null> => {
+interface RPCResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
+export const clockInEmployee = async (
+  employeeId: string,
+  date: string
+): Promise<TimeEntryWithEmployee | null> => {
   try {
-    // Check if employee already has an active time entry for today
-    const { data: existingEntries, error: checkError } = await supabase
+    const { data, error } = await supabase
       .from("time_entries")
-      .select("*")
-      .eq("employee_id", employeeId)
-      .eq("date", new Date().toISOString().split('T')[0])
-      .is("clock_out", null);
-    
-    if (checkError) throw checkError;
-    
-    // If employee already has an active entry, return that instead of creating a new one
-    if (existingEntries && existingEntries.length > 0) {
-      console.log("Employee already clocked in today:", existingEntries[0]);
-      
-      // Get the entry with employee details
-      const { data: entryWithEmployee, error: fetchError } = await supabase
-        .from("time_entries")
-        .select(`
-          *,
-          employee:employee_id(*)
-        `)
-        .eq("id", existingEntries[0].id)
-        .maybeSingle();
-      
-      if (fetchError) throw fetchError;
-      
-      if (!entryWithEmployee) return null;
-      return mapTimeEntryWithEmployee(entryWithEmployee as any);
-    }
-    
-    // Create new time entry using RPC function instead of direct insert
-    // This bypasses the foreign key constraint
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Use the properly typed parameters for the RPC call
-    const rpcParams: InsertTimeEntryBypassParams = {
-      p_employee_id: employeeId,
-      p_date: today,
-      p_clock_in: new Date().toISOString(),
-      p_notes: notes || null
-    };
-    
-    // Fix for type error: Cast the RPC call to the proper response type
-    const response = await supabase.rpc(
-      'insert_time_entry_bypass', 
-      rpcParams
-    );
-    
-    // Convert the response to our expected format
-    const { data, error } = response as unknown as RPCResponse;
+      .insert({
+        employee_id: employeeId,
+        date: date,
+        clock_in: new Date().toISOString(),
+      })
+      .select("*, employees(*)")
+      .single();
 
     if (error) {
-      // Fallback to direct insert if RPC isn't available
-      console.warn("RPC failed, falling back to direct insert:", error);
-      
-      // Direct insert using select to force bypass of constraint
-      const timeEntry = {
-        employee_id: employeeId,
-        date: today,
-        clock_in: new Date().toISOString(),
-        notes
-      };
-      
-      const { data: insertData, error: insertError } = await supabase
-        .from("time_entries")
-        .insert([timeEntry])
-        .select(`
-          *,
-          employee:employee_id(*)
-        `)
-        .maybeSingle();
-        
-      if (insertError) throw insertError;
-      
-      if (!insertData) return null;
-      return mapTimeEntryWithEmployee(insertData as any);
+      console.error("Error clocking in:", error);
+      return null;
     }
-    
-    // If RPC succeeded, fetch the newly created entry
-    if (data && data.id) {
-      const { data: newEntry, error: fetchError } = await supabase
-        .from("time_entries")
-        .select(`
-          *,
-          employee:employee_id(*)
-        `)
-        .eq("id", data.id)
-        .maybeSingle();
-        
-      if (fetchError) throw fetchError;
-      
-      if (!newEntry) return null;
-      return mapTimeEntryWithEmployee(newEntry as any);
-    }
-    
-    throw new Error("Failed to create time entry");
+
+    return mapTimeEntryWithEmployee(data);
   } catch (error) {
-    console.error("Error in clockInEmployee:", error);
-    throw error;
+    console.error("Error clocking in employee:", error);
+    return null;
   }
 };
 
-// Clock out an employee
-export const clockOutEmployee = async (id: string, breakTime: number = 0): Promise<TimeEntryWithEmployee | null> => {
+export const clockOutEmployee = async (
+  entryId: string
+): Promise<TimeEntryWithEmployee | null> => {
   try {
-    const updates = {
-      clock_out: new Date().toISOString(),
-      break_time: breakTime
+    const { data, error } = await supabase
+      .from("time_entries")
+      .update({
+        clock_out: new Date().toISOString(),
+      })
+      .eq("id", entryId)
+      .select("*, employees(*)")
+      .single();
+
+    if (error) {
+      console.error("Error clocking out:", error);
+      return null;
+    }
+
+    return mapTimeEntryWithEmployee(data);
+  } catch (error) {
+    console.error("Error clocking out employee:", error);
+    return null;
+  }
+};
+
+export const insertTimeEntryBypass = async (
+  employeeId: string,
+  date: string
+): Promise<boolean> => {
+  try {
+    // Create properly typed parameters
+    const rpcParams: InsertTimeEntryBypassParams = {
+      p_employee_id: employeeId,
+      p_date: date
     };
-
-    const { data, error } = await supabase
-      .from("time_entries")
-      .update(updates)
-      .eq("id", id)
-      .select(`
-        *,
-        employee:employee_id(*)
-      `)
-      .maybeSingle();
-
-    if (error) throw error;
     
-    if (!data) return null;
-    return mapTimeEntryWithEmployee(data as any);
+    // Call the RPC and properly handle the response type
+    const { data, error } = await supabase.rpc(
+      'insert_time_entry_bypass', 
+      rpcParams
+    ).then((response): { data: RPCResponse | null, error: any } => {
+      return { data: response.data as RPCResponse, error: response.error };
+    });
+
+    if (error) {
+      console.error("Error inserting time entry bypass:", error);
+      return false;
+    }
+
+    console.log("Time entry bypass inserted:", data);
+    return true;
   } catch (error) {
-    console.error("Error in clockOutEmployee:", error);
-    throw error;
+    console.error("Error in insertTimeEntryBypass:", error);
+    return false;
   }
 };
 
-// Update a time entry
-export const updateTimeEntry = async (id: string, updates: Partial<TimeEntry>): Promise<TimeEntryWithEmployee | null> => {
-  try {
-    const { data, error } = await supabase
-      .from("time_entries")
-      .update(updates)
-      .eq("id", id)
-      .select(`
-        *,
-        employee:employee_id(*)
-      `)
-      .maybeSingle();
-
-    if (error) throw error;
-    
-    if (!data) return null;
-    return mapTimeEntryWithEmployee(data as any);
-  } catch (error) {
-    console.error("Error in updateTimeEntry:", error);
-    throw error;
-  }
-};
-
-// Delete a time entry
-export const deleteTimeEntry = async (id: string): Promise<void> => {
+export const deleteTimeEntry = async (entryId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from("time_entries")
       .delete()
-      .eq("id", id);
+      .eq("id", entryId);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error deleting time entry:", error);
+      return false;
+    }
+
+    return true;
   } catch (error) {
-    console.error("Error in deleteTimeEntry:", error);
-    throw error;
+    console.error("Error deleting time entry:", error);
+    return false;
+  }
+};
+
+export const updateTimeEntry = async (
+  entryId: string,
+  updates: Partial<TimeEntry>
+): Promise<TimeEntryWithEmployee | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("time_entries")
+      .update(updates)
+      .eq("id", entryId)
+      .select("*, employees(*)")
+      .single();
+
+    if (error) {
+      console.error("Error updating time entry:", error);
+      return null;
+    }
+
+    return mapTimeEntryWithEmployee(data);
+  } catch (error) {
+    console.error("Error updating time entry:", error);
+    return null;
   }
 };

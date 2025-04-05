@@ -29,7 +29,7 @@ import {
   SalairePaiementStatus,
   ModePaiement 
 } from "@/services/salaireService";
-import { CalendarIcon, CheckCircle2, Download, FileText, Trash2 } from "lucide-react";
+import { CalendarIcon, CheckCircle2, FileText, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
@@ -126,12 +126,6 @@ export function SalaireTable({
     setDeleteDialogOpen(false);
     setSalaireToDelete(null);
   };
-
-  const handleDownload = (salaireId: string) => {
-    if (onDownloadSalaire) {
-      onDownloadSalaire(salaireId);
-    }
-  };
   
   const filteredSalaires = statusFilter 
     ? salaires.filter(s => s.statut_paiement === statusFilter)
@@ -218,18 +212,6 @@ export function SalaireTable({
                         Bulletin
                       </Button>
                       
-                      {onDownloadSalaire && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownload(salaire.id)}
-                          disabled={isDownloading}
-                        >
-                          <Download className="h-4 w-4" />
-                          <span className="sr-only">Télécharger</span>
-                        </Button>
-                      )}
-                      
                       {onDeleteSalaire && (
                         <Button
                           variant="outline"
@@ -260,7 +242,6 @@ export function SalaireTable({
                           onClick={() => handleOpenPayment(salaire)}
                           disabled={isUpdating}
                         >
-                          <Download className="h-4 w-4 mr-1" />
                           Payer
                         </Button>
                       )}
