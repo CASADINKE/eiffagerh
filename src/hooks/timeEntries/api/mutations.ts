@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
@@ -62,7 +63,6 @@ export const clockInEmployee = async (employeeId: string, notes: string = ""): P
     };
     
     // Fix for type error: Cast the RPC call to the proper response type
-    // Using an explicit typed function to handle the response
     const response = await supabase.rpc(
       'insert_time_entry_bypass', 
       rpcParams

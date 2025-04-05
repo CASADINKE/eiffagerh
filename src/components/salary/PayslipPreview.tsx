@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, X, FileText } from "lucide-react";
+import { X, FileText } from "lucide-react";
 import { Payslip } from "@/services/payslipService";
 import { PayslipGenerator } from "./PayslipGenerator";
 import { generatePDFFromElement } from "@/utils/exportUtils";
@@ -38,10 +38,6 @@ export function PayslipPreview({ payslip, isOpen, onClose }: PayslipPreviewProps
     date_paiement: payslip.date_paiement
   };
   
-  const handlePrint = () => {
-    window.print();
-  };
-  
   const handleDownloadPDF = async () => {
     if (!printRef.current) return;
     
@@ -70,10 +66,6 @@ export function PayslipPreview({ payslip, isOpen, onClose }: PayslipPreviewProps
             Bulletin de paie - {payslip.nom}
           </DialogTitle>
           <div className="flex space-x-2 mt-2">
-            <Button variant="outline" onClick={handlePrint} className="hover:bg-gray-100">
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimer
-            </Button>
             <Button variant="outline" onClick={handleDownloadPDF} className="hover:bg-gray-100">
               Télécharger PDF
             </Button>
