@@ -13,7 +13,8 @@ import {
   CreditCard,
   Clock,
   Wallet,
-  DollarSign
+  DollarSign,
+  UserCog
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -28,25 +29,41 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const navItems = [
-  { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
-  { path: "/employees", title: "Employés", icon: Users },
-  { path: "/leave", title: "Gestion des congés", icon: Calendar },
-  { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
-  { path: "/gestion-salaires", title: "Gestion des salaires", icon: Wallet },
-  { path: "/gestion-remunerations", title: "Rémunérations", icon: DollarSign },
-  { path: "/settings", title: "Paramètres", icon: Settings },
-];
+import { useAuth } from "@/contexts/AuthContext";
 
 const Sidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
+  const { userRole } = useAuth();
+  
+  const isAdminOrHR = userRole === 'admin' || userRole === 'rh' || userRole === 'super_admin';
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
+
+  // Define navigation items with role-based visibility
+  const navItems = [
+    { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
+    { path: "/employees", title: "Employés", icon: Users },
+    { path: "/leave", title: "Gestion des congés", icon: Calendar },
+    { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
+    // New pointage items with role-based access
+    { path: "/mon-pointage", title: "Mon Pointage", icon: Clock }, // All users
+    { path: "/suivi-pointages", title: "Suivi des Pointages", icon: UserCog, roleRequired: ['admin', 'rh', 'super_admin', 'manager', 'supervisor'] }, // Admin/HR/Managers/Supervisors only
+    { path: "/gestion-salaires", title: "Gestion des salaires", icon: Wallet },
+    { path: "/gestion-remunerations", title: "Rémunérations", icon: DollarSign },
+    { path: "/settings", title: "Paramètres", icon: Settings },
+  ];
+  
+  // Filter nav items based on user role
+  const filteredNavItems = navItems.filter(item => {
+    if (!item.roleRequired) return true;
+    if (!userRole) return false;
+    
+    return item.roleRequired.includes(userRole);
+  });
 
   return (
     <SidebarComponent className="transition-all duration-300 ease-in-out border-r border-sidebar-border shadow-sm bg-[#1a202c] text-white">
@@ -92,7 +109,7 @@ const Sidebar = () => {
           </SidebarGroupLabel>
           <SidebarGroupContent className="mt-2 px-2">
             <SidebarMenu>
-              {navItems.map((item) => (
+              {filteredNavItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton asChild>
                     <NavLink
