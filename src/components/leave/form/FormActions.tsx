@@ -21,7 +21,7 @@ export function FormActions({ onCancel, isLoading }: FormActionsProps) {
       <Button 
         type="submit" 
         disabled={isLoading}
-        className="bg-primary hover:bg-primary/90 transition-all duration-200"
+        className="bg-blue-600 hover:bg-blue-700 transition-all duration-200 text-white"
       >
         {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
       </Button>

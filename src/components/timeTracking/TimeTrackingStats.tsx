@@ -23,19 +23,19 @@ export const TimeTrackingStats = ({
         title="Employés pointés"
         value={activeEmployeeCount.toString()}
         icon={<Users className="text-blue-500" />}
-        className="bg-blue-50 border-blue-200"
+        className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/50"
       />
       <StatCard
         title="Moyenne d'heures aujourd'hui"
         value={`${averageHours}h`}
         icon={<Clock className="text-purple-500" />}
-        className="bg-purple-50 border-purple-200"
+        className="bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800/50"
       />
       <StatCard
         title="Employés non pointés"
         value={absentCount.toString()}
         icon={<Calendar className="text-red-500" />}
-        className="bg-red-50 border-red-200"
+        className="bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800/50"
       />
     </div>
   );

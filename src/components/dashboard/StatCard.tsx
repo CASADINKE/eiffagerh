@@ -16,7 +16,7 @@ interface StatCardProps {
 const StatCard = ({ title, value, icon, trend, className }: StatCardProps) => {
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-card-hover",
+      "relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-card-hover transform hover:-translate-y-1",
       className
     )}>
       <div className="flex justify-between items-start mb-4">

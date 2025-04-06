@@ -4,14 +4,11 @@ import { NavLink, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users,
-  ClipboardList,
   Calendar, 
+  Clock,
   Settings,
   ChevronLeft,
   ChevronRight,
-  Building,
-  CreditCard,
-  Clock,
   Wallet,
   DollarSign
 } from "lucide-react";
@@ -28,6 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navItems = [
   { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
@@ -91,28 +89,39 @@ const Sidebar = () => {
             NAVIGATION PRINCIPALE
           </SidebarGroupLabel>
           <SidebarGroupContent className="mt-2 px-2">
-            <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) => cn(
-                        "flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 my-1",
-                        isActive
-                          ? "text-white bg-blue-600"
-                          : "text-gray-300 hover:text-white hover:bg-blue-600/90",
-                        collapsed && "justify-center"
+            <TooltipProvider delayDuration={50}>
+              <SidebarMenu>
+                {navItems.map((item) => (
+                  <SidebarMenuItem key={item.path}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuButton asChild>
+                          <NavLink
+                            to={item.path}
+                            className={({ isActive }) => cn(
+                              "flex items-center gap-3 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 my-1",
+                              isActive
+                                ? "bg-blue-600 text-white"
+                                : "text-gray-300 hover:text-white hover:bg-blue-600/90",
+                              collapsed && "justify-center"
+                            )}
+                            end={item.path === "/"}
+                          >
+                            <item.icon className={cn("h-5 w-5", { "text-blue-300": location.pathname === item.path })} />
+                            {!collapsed && <span>{item.title}</span>}
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </TooltipTrigger>
+                      {collapsed && (
+                        <TooltipContent side="right" className="bg-slate-800 text-white border-slate-700">
+                          {item.title}
+                        </TooltipContent>
                       )}
-                      end={item.path === "/"}
-                    >
-                      <item.icon size={18} />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+                    </Tooltip>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </TooltipProvider>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -122,7 +131,7 @@ const Sidebar = () => {
           "flex items-center gap-3",
           collapsed && "justify-center"
         )}>
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-sm">
             <span className="text-xs font-semibold">AD</span>
           </div>
           {!collapsed && (
