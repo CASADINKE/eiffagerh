@@ -20,6 +20,7 @@ export const clockInEmployee = async (
   notes?: string
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
+    // Changed the query to not include the employees join since it's causing an error
     const { data, error } = await supabase
       .from("time_entries")
       .insert({
@@ -28,7 +29,7 @@ export const clockInEmployee = async (
         clock_in: new Date().toISOString(),
         notes: notes
       })
-      .select("*, employees(*)")
+      .select("*")
       .single();
 
     if (error) {
@@ -36,7 +37,24 @@ export const clockInEmployee = async (
       return null;
     }
 
-    return mapTimeEntryWithEmployee(data);
+    // Then fetch the employee data separately
+    const { data: employeeData, error: employeeError } = await supabase
+      .from("listes_employées")
+      .select("*")
+      .eq("id", employeeId)
+      .single();
+      
+    if (employeeError) {
+      console.error("Error fetching employee data:", employeeError);
+    }
+
+    // Create a combined object
+    const combinedData = {
+      ...data,
+      employee: employeeData
+    };
+
+    return mapTimeEntryWithEmployee(combinedData);
   } catch (error) {
     console.error("Error clocking in employee:", error);
     return null;
@@ -47,13 +65,14 @@ export const clockOutEmployee = async (
   entryId: string
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
+    // Update without trying to join the employees table
     const { data, error } = await supabase
       .from("time_entries")
       .update({
         clock_out: new Date().toISOString(),
       })
       .eq("id", entryId)
-      .select("*, employees(*)")
+      .select("*")
       .single();
 
     if (error) {
@@ -61,7 +80,24 @@ export const clockOutEmployee = async (
       return null;
     }
 
-    return mapTimeEntryWithEmployee(data);
+    // Then fetch the employee data separately
+    const { data: employeeData, error: employeeError } = await supabase
+      .from("listes_employées")
+      .select("*") 
+      .eq("id", data.employee_id)
+      .single();
+      
+    if (employeeError) {
+      console.error("Error fetching employee data:", employeeError);
+    }
+
+    // Create a combined object
+    const combinedData = {
+      ...data,
+      employee: employeeData
+    };
+
+    return mapTimeEntryWithEmployee(combinedData);
   } catch (error) {
     console.error("Error clocking out employee:", error);
     return null;
@@ -79,8 +115,8 @@ export const insertTimeEntryBypass = async (
       p_date: date
     };
     
-    // Fix: Provide both type arguments to supabase.rpc
-    const { data, error } = await supabase.rpc<RPCResponse, InsertTimeEntryBypassParams>(
+    // Fixed type issue by using Any as the return type
+    const { data, error } = await supabase.rpc<any, InsertTimeEntryBypassParams>(
       'insert_time_entry_bypass', 
       rpcParams
     );
@@ -122,11 +158,12 @@ export const updateTimeEntry = async (
   updates: Partial<TimeEntry>
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
+    // Update without trying to join the employees table
     const { data, error } = await supabase
       .from("time_entries")
       .update(updates)
       .eq("id", entryId)
-      .select("*, employees(*)")
+      .select("*")
       .single();
 
     if (error) {
@@ -134,7 +171,24 @@ export const updateTimeEntry = async (
       return null;
     }
 
-    return mapTimeEntryWithEmployee(data);
+    // Then fetch the employee data separately
+    const { data: employeeData, error: employeeError } = await supabase
+      .from("listes_employées")
+      .select("*")
+      .eq("id", data.employee_id)
+      .single();
+      
+    if (employeeError) {
+      console.error("Error fetching employee data:", employeeError);
+    }
+
+    // Create a combined object
+    const combinedData = {
+      ...data,
+      employee: employeeData
+    };
+
+    return mapTimeEntryWithEmployee(combinedData);
   } catch (error) {
     console.error("Error updating time entry:", error);
     return null;

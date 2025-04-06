@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -38,7 +37,6 @@ const Pointage = () => {
     calculateWorkDuration,
   } = usePointages(userId);
 
-  // Use EmployeeUI type instead of Employee
   const { data: employees = [], isLoading: employeesLoading } = useEmployeesUI();
   const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
   
