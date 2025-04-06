@@ -79,8 +79,8 @@ export const insertTimeEntryBypass = async (
       p_date: date
     };
     
-    // Fix: Remove type casting, let TypeScript infer types correctly
-    const { data, error } = await supabase.rpc(
+    // Fix: Use explicit type annotation for supabase.rpc to resolve the type issue
+    const { data, error } = await supabase.rpc<RPCResponse>(
       'insert_time_entry_bypass', 
       rpcParams
     );
