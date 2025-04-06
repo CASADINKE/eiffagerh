@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -29,6 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Employee } from "@/hooks/useEmployees";
 import { mapEmployeesToUI } from "@/types/employee";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LeaveFormSchema = z.object({
   employee_id: z.string({
@@ -39,7 +41,15 @@ const LeaveFormSchema = z.object({
   }),
   end_date: z.date({
     required_error: "Veuillez sélectionner une date de fin",
-  }),
+  }).refine(
+    (date, ctx) => {
+      const startDate = ctx.parent.start_date;
+      return date >= startDate;
+    },
+    {
+      message: "La date de fin doit être postérieure ou égale à la date de début",
+    }
+  ),
   type: z.string({
     required_error: "Veuillez sélectionner un type de congé",
   }),
@@ -63,11 +73,12 @@ export function LeaveRequestForm({
 }: LeaveRequestFormProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
+  const { user, userRole } = useAuth();
 
   const form = useForm<LeaveFormValues>({
     resolver: zodResolver(LeaveFormSchema),
     defaultValues: {
-      employee_id: "",
+      employee_id: user?.id || "",
       start_date: date,
       end_date: addBusinessDays(date || new Date(), 5),
       type: "",
@@ -80,52 +91,58 @@ export function LeaveRequestForm({
   
   // Set default employee if available and not already set
   useEffect(() => {
-    if (employees.length > 0 && !form.getValues("employee_id")) {
+    if (user?.id && !form.getValues("employee_id")) {
+      form.setValue("employee_id", user.id);
+    } else if (employees.length > 0 && !form.getValues("employee_id")) {
       form.setValue("employee_id", employees[0].id);
     }
-  }, [employees, form]);
+  }, [employees, form, user]);
+
+  const showEmployeeField = userRole === 'super_admin';
   
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="employee_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Employé</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un employé" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {mappedEmployees.map((employee) => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      {employee.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {showEmployeeField && (
+          <FormField
+            control={form.control}
+            name="employee_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-white">Employé</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectValue placeholder="Sélectionner un employé" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                    {mappedEmployees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-red-400" />
+              </FormItem>
+            )}
+          />
+        )}
         <div className="flex flex-col md:flex-row gap-4">
           <FormField
             control={form.control}
             name="start_date"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Date de début</FormLabel>
+                <FormLabel className="text-white">Date de début</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full pl-3 text-left font-normal bg-slate-800 border-slate-700 text-white",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -150,7 +167,7 @@ export function LeaveRequestForm({
                     />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
+                <FormMessage className="text-red-400" />
               </FormItem>
             )}
           />
@@ -159,14 +176,14 @@ export function LeaveRequestForm({
             name="end_date"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Date de fin</FormLabel>
+                <FormLabel className="text-white">Date de fin</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full pl-3 text-left font-normal bg-slate-800 border-slate-700 text-white",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -191,7 +208,7 @@ export function LeaveRequestForm({
                     />
                   </PopoverContent>
                 </Popover>
-                <FormMessage />
+                <FormMessage className="text-red-400" />
               </FormItem>
             )}
           />
@@ -201,14 +218,14 @@ export function LeaveRequestForm({
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type de congé</FormLabel>
+              <FormLabel className="text-white">Type de congé</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                     <SelectValue placeholder="Sélectionner un type" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   <SelectItem value="paid">Congé payé</SelectItem>
                   <SelectItem value="unpaid">Congé non payé</SelectItem>
                   <SelectItem value="sick">Congé maladie</SelectItem>
@@ -216,7 +233,7 @@ export function LeaveRequestForm({
                   <SelectItem value="paternity">Congé paternité</SelectItem>
                 </SelectContent>
               </Select>
-              <FormMessage />
+              <FormMessage className="text-red-400" />
             </FormItem>
           )}
         />
@@ -225,26 +242,35 @@ export function LeaveRequestForm({
           name="reason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Raison (optionnel)</FormLabel>
+              <FormLabel className="text-white">Raison (optionnel)</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Décrivez la raison de votre demande de congé"
-                  className="resize-none"
+                  className="resize-none bg-slate-800 border-slate-700 text-white"
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
+              <FormDescription className="text-slate-400">
                 Fournissez une raison pour votre demande de congé.
               </FormDescription>
-              <FormMessage />
+              <FormMessage className="text-red-400" />
             </FormItem>
           )}
         />
         <div className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            className="bg-transparent border-slate-600 text-white hover:bg-slate-700 hover:text-white"
+          >
             Annuler
           </Button>
-          <Button type="submit">
+          <Button 
+            type="submit" 
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={isLoading}
+          >
             {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>
         </div>

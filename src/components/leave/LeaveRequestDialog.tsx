@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { LeaveRequestForm } from "./LeaveRequestForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +14,6 @@ import { toast as sonnerToast } from "sonner";
 import { useEmployees } from "@/hooks/useEmployees";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
-import { asNotifications } from "@/integrations/supabase/types-notifications";
 
 interface LeaveRequestDialogProps {
   open: boolean;
@@ -65,6 +65,9 @@ export function LeaveRequestDialog({
       const startDate = formData.start_date.toLocaleDateString('fr-FR');
       const endDate = formData.end_date.toLocaleDateString('fr-FR');
 
+      // Set the employee_id to the current user's ID if they're not an admin
+      const leaveEmployeeId = user?.id || employee_id;
+
       // Insert the leave request
       const { data: leaveRequest, error } = await supabase.from("leave_requests").insert({
         type: formData.type,
@@ -72,7 +75,7 @@ export function LeaveRequestDialog({
         end_date: formData.end_date.toISOString(),
         reason: formData.reason || null,
         status: "pending",
-        employee_id: employee_id,
+        employee_id: leaveEmployeeId,
       }).select('*').single();
 
       if (error) throw error;
@@ -95,17 +98,17 @@ export function LeaveRequestDialog({
           type: 'leave_request'
         }));
 
-        // Insert notifications - using type assertion with any as a workaround
+        // Insert notifications
         const { error: notificationError } = await supabase
           .from('notifications')
-          .insert(notifications as any);
+          .insert(notifications);
 
         if (notificationError) {
           console.error("Erreur lors de l'envoi des notifications:", notificationError);
         }
       }
 
-      // Afficher les deux types de notifications
+      // Show both types of notifications
       toast({
         title: "Demande envoyée",
         description: "Votre demande de congé a été soumise avec succès",
@@ -122,7 +125,7 @@ export function LeaveRequestDialog({
       console.error("Erreur lors de la soumission:", error.message);
       toast({
         title: "Erreur",
-        description: "Impossible de soumettre votre demande de congé",
+        description: "Impossible de soumettre votre demande de congé: " + error.message,
         variant: "destructive",
       });
     } finally {
@@ -136,9 +139,12 @@ export function LeaveRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[650px]">
+      <DialogContent className="sm:max-w-[650px] bg-slate-900 text-white border-slate-700">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Nouvelle demande de congé</DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Complétez le formulaire ci-dessous pour soumettre votre demande de congé.
+          </DialogDescription>
         </DialogHeader>
         <LeaveRequestForm
           onSubmit={handleSubmit}
