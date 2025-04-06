@@ -10,10 +10,19 @@ interface FormActionsProps {
 export function FormActions({ onCancel, isLoading }: FormActionsProps) {
   return (
     <div className="flex justify-between">
-      <Button type="button" variant="outline" onClick={onCancel}>
+      <Button 
+        type="button" 
+        variant="outline" 
+        onClick={onCancel}
+        className="hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
+      >
         Annuler
       </Button>
-      <Button type="submit" disabled={isLoading}>
+      <Button 
+        type="submit" 
+        disabled={isLoading}
+        className="bg-blue-600 hover:bg-blue-700 transition-all duration-200"
+      >
         {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
       </Button>
     </div>

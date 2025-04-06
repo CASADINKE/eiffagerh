@@ -87,6 +87,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: linear-gradient(to bottom, rgba(249, 250, 251, 0.8), rgba(243, 244, 246, 0.5));
+    background-attachment: fixed;
+  }
+
+  /* Card styles */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-md hover:translate-y-[-2px];
   }
 
   /* Auth page specific styles */
@@ -100,6 +107,12 @@
   
   .auth-input {
     @apply focus:border-primary/50 focus:ring-primary/50;
+  }
+
+  /* Dark mode enhancements */
+  .dark body {
+    background-image: linear-gradient(to bottom, rgba(17, 24, 39, 0.8), rgba(15, 23, 42, 0.5));
+    background-attachment: fixed;
   }
 
   @media print {
@@ -170,4 +183,28 @@
       color-adjust: exact !important;
     }
   }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Improved button styles */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200;
+}
+
+.btn-secondary {
+  @apply bg-slate-200 hover:bg-slate-300 text-slate-800 transition-all duration-200;
+}
+
+/* Card enhancements */
+.glass-card {
+  @apply bg-white/90 backdrop-blur-sm dark:bg-slate-900/70;
 }

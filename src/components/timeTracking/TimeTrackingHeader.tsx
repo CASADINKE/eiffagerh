@@ -103,17 +103,17 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
   };
   
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-5 rounded-xl shadow-sm">
       <div>
-        <h1 className="text-2xl font-bold">Pointage des employés</h1>
+        <h1 className="text-2xl font-bold text-blue-800 dark:text-blue-300">Pointage des employés</h1>
         <p className="text-muted-foreground">Gérez et suivez le temps de travail des employés</p>
       </div>
       
       <div className="flex flex-col sm:flex-row gap-2">
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="justify-start">
-              <Calendar className="mr-2 h-4 w-4" />
+            <Button variant="outline" className="justify-start border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all duration-200">
+              <Calendar className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400" />
               {formatDateRange()}
             </Button>
           </PopoverTrigger>
@@ -122,13 +122,19 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
               mode="range"
               selected={dateRange}
               onSelect={(range) => {
-                setDateRange(range || { from: undefined, to: undefined });
-                if (range?.from && (range?.to || !range.to)) {
-                  setCalendarOpen(false);
+                if (range) {
+                  setDateRange({
+                    from: range.from,
+                    to: range.to || range.from
+                  });
+                  if (range.from) {
+                    setCalendarOpen(false);
+                  }
                 }
               }}
               locale={fr}
               initialFocus
+              className="rounded-md border border-blue-200 dark:border-blue-800"
             />
           </PopoverContent>
         </Popover>
@@ -136,12 +142,12 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
         <Button 
           variant="outline"
           onClick={handleExportToExcel}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto bg-green-50 hover:bg-green-100 text-green-700 border-green-200 hover:border-green-300 dark:bg-green-900/20 dark:hover:bg-green-900/30 dark:text-green-400 dark:border-green-800 transition-all duration-200"
         >
           <FileDown className="mr-2 h-4 w-4" />
           Exporter Excel
         </Button>
-        <EmployeeTimeClockDialog className="w-full sm:w-auto" />
+        <EmployeeTimeClockDialog className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200" />
       </div>
     </div>
   );
