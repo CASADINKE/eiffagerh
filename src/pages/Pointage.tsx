@@ -13,12 +13,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { useClockInMutation, useClockOutMutation, useTimeEntries, getActiveTimeEntry } from "@/hooks/timeEntries";
-import { useEmployees } from "@/hooks/useEmployees";
+import { useEmployeesUI } from "@/hooks/useEmployees";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { EmployeeTimeClockDialog } from "@/components/timeTracking/EmployeeTimeClockDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { EmployeeUI } from "@/types/employee";
 
 const Pointage = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -37,7 +38,8 @@ const Pointage = () => {
     calculateWorkDuration,
   } = usePointages(userId);
 
-  const { data: employees = [], isLoading: employeesLoading } = useEmployees();
+  // Use EmployeeUI type instead of Employee
+  const { data: employees = [], isLoading: employeesLoading } = useEmployeesUI();
   const { data: timeEntries = [], isLoading: entriesLoading } = useTimeEntries();
   
   const clockInMutation = useClockInMutation();
