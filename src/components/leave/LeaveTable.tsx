@@ -1,6 +1,13 @@
 
 import React from "react";
-import { TableCell, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Calendar, MessageCircle } from "lucide-react";
 import { LeaveStatusBadge } from "./LeaveStatusBadge";
 import { LeaveTypeIcon } from "./LeaveTypeIcon";
@@ -30,7 +37,7 @@ export function LeaveTable({ leaveRequests, isLoading, activeTab }: LeaveTablePr
     });
   };
 
-  // Filter leave requests based on the active tab
+  // Filtrer les demandes de congés en fonction de l'onglet actif
   const getFilteredLeaveRequests = () => {
     if (activeTab === "all") {
       return leaveRequests;

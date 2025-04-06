@@ -100,11 +100,12 @@ const Leave = () => {
     setActiveTab(value);
   };
 
+  // Afficher d'abord le panneau d'administration pour les super_admin
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <LeaveNotification />
       
-      {/* Admin panel for super_admin users */}
+      {/* Panneau d'administration pour les super_admin en premier */}
       {userRole === "super_admin" && (
         <LeaveAdminPanel 
           leaveRequests={leaveRequests} 

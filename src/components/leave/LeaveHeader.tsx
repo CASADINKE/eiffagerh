@@ -27,10 +27,7 @@ export function LeaveHeader({ openLeaveRequestDialog, isLoading, leaveRequests }
           <Calendar className="mr-2 h-5 w-5" />
           Nouvelle Demande
         </Button>
-        <ExportLeaveButton 
-          data={leaveRequests} 
-          isLoading={isLoading} 
-        />
+        <ExportLeaveButton data={leaveRequests} isLoading={isLoading} />
       </div>
     </div>
   );
