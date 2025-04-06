@@ -44,11 +44,19 @@ export function LeaveRequestDialog({
   const { user } = useAuth();
   
   const handleSubmit = async (formData: LeaveFormValues) => {
+    if (!user) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez être connecté pour effectuer cette action",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
-      // Get the selected employee or use the first one if none is selected
-      const employee_id = formData.employee_id || 
-        (employees && employees.length > 0 ? employees[0].id : null);
+      // Get the selected employee or use the current user id if none is selected
+      const employee_id = formData.employee_id || user.id;
       
       if (!employee_id) {
         throw new Error("Aucun employé sélectionné ou disponible");

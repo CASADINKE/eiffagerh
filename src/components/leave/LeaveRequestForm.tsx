@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format, addBusinessDays } from "date-fns";
+import { format, addBusinessDays, isBefore } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,15 @@ const LeaveFormSchema = z.object({
     required_error: "Veuillez sélectionner un type de congé",
   }),
   reason: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    return !isBefore(data.end_date, data.start_date);
+  }, 
+  {
+    message: "La date de fin doit être après la date de début",
+    path: ["end_date"],
+  }
+);
 
 type LeaveFormValues = z.infer<typeof LeaveFormSchema>;
 
@@ -244,7 +253,7 @@ export function LeaveRequestForm({
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
-          <Button type="submit">
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? "Envoi en cours..." : "Envoyer la demande"}
           </Button>
         </div>
