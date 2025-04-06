@@ -8,8 +8,6 @@ import Settings from "@/pages/Settings";
 import TimeTracking from "@/pages/TimeTracking";
 import Pointage from "@/pages/Pointage";
 import PointageAdmin from "@/pages/PointageAdmin";
-import MonPointage from "@/pages/MonPointage"; // New page
-import SuiviPointages from "@/pages/SuiviPointages"; // New page
 import {
   BrowserRouter,
   Routes,
@@ -87,26 +85,6 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <PointageAdmin />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/mon-pointage"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <MonPointage />
-                    </Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/suivi-pointages"
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SuiviPointages />
                     </Layout>
                   </ProtectedRoute>
                 }
