@@ -13,7 +13,8 @@ import {
   CreditCard,
   Clock,
   Wallet,
-  DollarSign
+  DollarSign,
+  Timer
 } from "lucide-react";
 import { 
   Sidebar as SidebarComponent, 
@@ -28,25 +29,49 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-const navItems = [
-  { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
-  { path: "/employees", title: "Employés", icon: Users },
-  { path: "/leave", title: "Gestion des congés", icon: Calendar },
-  { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
-  { path: "/gestion-salaires", title: "Gestion des salaires", icon: Wallet },
-  { path: "/gestion-remunerations", title: "Rémunérations", icon: DollarSign },
-  { path: "/settings", title: "Paramètres", icon: Settings },
-];
+import { useAuth } from "@/contexts/AuthContext";
 
 const Sidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
+  const { userRole } = useAuth();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
+
+  // Base navigation items everyone can see
+  const baseNavItems = [
+    { path: "/dashboard", title: "Tableau de bord", icon: LayoutDashboard },
+    { path: "/mon-pointage", title: "Mon Pointage", icon: Timer },
+  ];
+
+  // Additional items for managers and admins
+  const managerNavItems = [
+    { path: "/employees", title: "Employés", icon: Users },
+    { path: "/leave", title: "Gestion des congés", icon: Calendar },
+    { path: "/time-tracking", title: "Suivi du temps", icon: Clock },
+  ];
+
+  // Admin-only items
+  const adminNavItems = [
+    { path: "/suivi-pointages", title: "Suivi Pointages", icon: ClipboardList },
+    { path: "/gestion-salaires", title: "Gestion des salaires", icon: Wallet },
+    { path: "/gestion-remunerations", title: "Rémunérations", icon: DollarSign },
+    { path: "/settings", title: "Paramètres", icon: Settings },
+  ];
+
+  // Construct navigation based on user role
+  let navItems = [...baseNavItems];
+
+  if (userRole && ['admin', 'rh', 'manager', 'superviseur', 'super_admin'].includes(userRole)) {
+    navItems = [...navItems, ...managerNavItems];
+  }
+
+  if (userRole && ['admin', 'rh', 'super_admin'].includes(userRole)) {
+    navItems = [...navItems, ...adminNavItems];
+  }
 
   return (
     <SidebarComponent className="transition-all duration-300 ease-in-out border-r border-sidebar-border shadow-sm bg-[#1a202c] text-white">
