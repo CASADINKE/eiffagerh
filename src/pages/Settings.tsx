@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Shield, Users, Building, Bell, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,9 +27,38 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogTrigger 
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
-// Mock roles and permissions data
-const roles = [
+interface Role {
+  id: string;
+  name: string;
+  description: string;
+  usersCount: number;
+  permissions: string[];
+}
+
+interface PermissionGroup {
+  id: string;
+  name: string;
+  permissions: Permission[];
+}
+
+interface Permission {
+  id: string;
+  name: string;
+  checked: boolean;
+}
+
+const initialRoles: Role[] = [
   {
     id: "1",
     name: "Administrateur",
@@ -59,11 +87,139 @@ const roles = [
     usersCount: 10,
     permissions: ["team-view", "leave-approve", "time-approve"],
   },
-] as const;
+];
+
+const initialPermissionGroups: PermissionGroup[] = [
+  {
+    id: "employees",
+    name: "Gestion des employés",
+    permissions: [
+      { id: "view-employees", name: "Voir les employés", checked: false },
+      { id: "add-employees", name: "Ajouter des employés", checked: false },
+      { id: "edit-employees", name: "Modifier les employés", checked: false },
+      { id: "delete-employees", name: "Supprimer des employés", checked: false },
+    ],
+  },
+  {
+    id: "leaves",
+    name: "Gestion des congés",
+    permissions: [
+      { id: "view-leaves", name: "Voir les congés", checked: false },
+      { id: "approve-leaves", name: "Approuver les congés", checked: false },
+      { id: "add-leave-types", name: "Ajouter des types de congés", checked: false },
+    ],
+  },
+  {
+    id: "salary",
+    name: "Paie & Salaire",
+    permissions: [
+      { id: "view-salary", name: "Voir les salaires", checked: false },
+      { id: "edit-salary", name: "Modifier les salaires", checked: false },
+      { id: "run-payroll", name: "Exécuter la paie", checked: false },
+    ],
+  },
+  {
+    id: "time",
+    name: "Suivi du temps",
+    permissions: [
+      { id: "view-time", name: "Voir les enregistrements de temps", checked: false },
+      { id: "edit-time", name: "Modifier les enregistrements de temps", checked: false },
+      { id: "approve-time", name: "Approuver les feuilles de temps", checked: false },
+    ],
+  },
+  {
+    id: "reports",
+    name: "Rapports",
+    permissions: [
+      { id: "view-reports", name: "Voir les rapports", checked: false },
+      { id: "export-reports", name: "Exporter les rapports", checked: false },
+    ],
+  },
+  {
+    id: "settings",
+    name: "Paramètres système",
+    permissions: [
+      { id: "view-settings", name: "Voir les paramètres", checked: false },
+      { id: "edit-settings", name: "Modifier les paramètres", checked: false },
+      { id: "manage-roles", name: "Gérer les rôles", checked: false },
+    ],
+  },
+];
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("roles");
-  
+  const [roles, setRoles] = useState<Role[]>(initialRoles);
+  const [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>(initialPermissionGroups);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
+  const [newRoleName, setNewRoleName] = useState("");
+  const [newRoleDescription, setNewRoleDescription] = useState("");
+
+  const handlePermissionChange = (groupId: string, permissionId: string, checked: boolean) => {
+    setPermissionGroups(prevGroups => 
+      prevGroups.map(group => {
+        if (group.id === groupId) {
+          return {
+            ...group,
+            permissions: group.permissions.map(permission => 
+              permission.id === permissionId 
+                ? { ...permission, checked } 
+                : permission
+            )
+          };
+        }
+        return group;
+      })
+    );
+  };
+
+  const handleSaveChanges = () => {
+    toast.success("Modifications enregistrées avec succès");
+  };
+
+  const handleAddRole = () => {
+    if (!newRoleName.trim()) {
+      toast.error("Le nom du rôle est requis");
+      return;
+    }
+
+    const newRole: Role = {
+      id: `${roles.length + 1}`,
+      name: newRoleName,
+      description: newRoleDescription || "Pas de description",
+      usersCount: 0,
+      permissions: [],
+    };
+
+    setRoles([...roles, newRole]);
+    setNewRoleName("");
+    setNewRoleDescription("");
+    setShowAddRoleDialog(false);
+    toast.success("Nouveau rôle ajouté avec succès");
+  };
+
+  const handleEditRole = (roleId: string) => {
+    const role = roles.find(r => r.id === roleId);
+    if (role) {
+      setSelectedRole(role);
+      
+      const updatedPermissionGroups = permissionGroups.map(group => ({
+        ...group,
+        permissions: group.permissions.map(permission => ({
+          ...permission,
+          checked: role.permissions.includes(group.id) || role.permissions.includes("all")
+        }))
+      }));
+      
+      setPermissionGroups(updatedPermissionGroups);
+    }
+  };
+
+  const handleDeleteRole = (roleId: string) => {
+    setRoles(roles.filter(role => role.id !== roleId));
+    toast.success("Rôle supprimé avec succès");
+  };
+
   return (
     <div className="container mx-auto">
       <div className="mb-6">
@@ -71,52 +227,131 @@ const Settings = () => {
         <p className="text-muted-foreground">Gérez la configuration de votre système RH</p>
       </div>
       
-      <Card>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full p-0">
-            <TabsTrigger value="roles" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+      <Card className="bg-[#1a202c] border-slate-700">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full p-0 bg-[#1a202c] rounded-none border-b border-slate-700">
+            <TabsTrigger 
+              value="roles" 
+              className={cn(
+                "gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 bg-[#1a202c] text-gray-300",
+                activeTab === "roles" && "text-white"
+              )}
+            >
               <Shield size={16} />
               <span>Rôles & Permissions</span>
             </TabsTrigger>
-            <TabsTrigger value="company" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+            <TabsTrigger 
+              value="company" 
+              className={cn(
+                "gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 bg-[#1a202c] text-gray-300",
+                activeTab === "company" && "text-white"
+              )}
+            >
               <Building size={16} />
               <span>Entreprise</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+            <TabsTrigger 
+              value="notifications" 
+              className={cn(
+                "gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 bg-[#1a202c] text-gray-300",
+                activeTab === "notifications" && "text-white"
+              )}
+            >
               <Bell size={16} />
               <span>Notifications</span>
             </TabsTrigger>
-            <TabsTrigger value="integrations" className="gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary">
+            <TabsTrigger 
+              value="integrations" 
+              className={cn(
+                "gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 bg-[#1a202c] text-gray-300",
+                activeTab === "integrations" && "text-white"
+              )}
+            >
               <Mail size={16} />
               <span>Intégrations</span>
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="roles" className="p-6">
-            <div className="flex justify-between mb-6">
+          <TabsContent value="roles" className="p-6 text-white">
+            <div className="flex justify-between mb-6 items-center">
               <h2 className="text-xl font-semibold">Rôles & Permissions</h2>
-              <Button>Ajouter un nouveau rôle</Button>
+              <Dialog open={showAddRoleDialog} onOpenChange={setShowAddRoleDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="default" className="bg-blue-600 hover:bg-blue-700">
+                    Ajouter un nouveau rôle
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-[#1a202c] text-white border-slate-700">
+                  <DialogHeader>
+                    <DialogTitle>Ajouter un nouveau rôle</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="role-name">Nom du rôle</Label>
+                      <Input 
+                        id="role-name" 
+                        value={newRoleName} 
+                        onChange={(e) => setNewRoleName(e.target.value)} 
+                        placeholder="Nom du rôle"
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="role-description">Description</Label>
+                      <Input 
+                        id="role-description" 
+                        value={newRoleDescription} 
+                        onChange={(e) => setNewRoleDescription(e.target.value)} 
+                        placeholder="Description du rôle"
+                        className="bg-slate-800 border-slate-700"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowAddRoleDialog(false)}>
+                      Annuler
+                    </Button>
+                    <Button onClick={handleAddRole} className="bg-blue-600 hover:bg-blue-700">
+                      Ajouter
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
             
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom du rôle</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Utilisateurs</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+            <Table className="border-slate-700">
+              <TableHeader className="bg-slate-800/50">
+                <TableRow className="border-slate-700 hover:bg-slate-800/80">
+                  <TableHead className="text-gray-300">Nom du rôle</TableHead>
+                  <TableHead className="text-gray-300">Description</TableHead>
+                  <TableHead className="text-gray-300">Utilisateurs</TableHead>
+                  <TableHead className="text-gray-300 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {roles.map((role) => (
-                  <TableRow key={role.id}>
+                  <TableRow key={role.id} className="border-slate-700 hover:bg-slate-800/50">
                     <TableCell className="font-medium">{role.name}</TableCell>
                     <TableCell>{role.description}</TableCell>
                     <TableCell>{role.usersCount}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm" className="mr-2">Modifier</Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mr-2 border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white"
+                        onClick={() => handleEditRole(role.id)}
+                      >
+                        Modifier
+                      </Button>
                       {role.name !== "Administrateur" && (
-                        <Button variant="outline" size="sm">Supprimer</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-slate-600 text-gray-300 hover:bg-slate-700 hover:text-white"
+                          onClick={() => handleDeleteRole(role.id)}
+                        >
+                          Supprimer
+                        </Button>
                       )}
                     </TableCell>
                   </TableRow>
@@ -128,123 +363,43 @@ const Settings = () => {
               <h3 className="text-lg font-medium mb-4">Groupes de permissions</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Gestion des employés</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-view-employees" />
-                      <label htmlFor="perm-view-employees" className="text-sm">Voir les employés</label>
+                {permissionGroups.map((group) => (
+                  <Card key={group.id} className="p-4 bg-[#111827] border-slate-700">
+                    <h4 className="text-md font-medium mb-3">{group.name}</h4>
+                    <div className="space-y-2">
+                      {group.permissions.map((permission) => (
+                        <div key={permission.id} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={permission.id} 
+                            checked={permission.checked}
+                            onCheckedChange={(checked) => 
+                              handlePermissionChange(group.id, permission.id, checked === true)
+                            }
+                            className="border-slate-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                          />
+                          <label htmlFor={permission.id} className="text-sm text-gray-300">
+                            {permission.name}
+                          </label>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-add-employees" />
-                      <label htmlFor="perm-add-employees" className="text-sm">Ajouter des employés</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-edit-employees" />
-                      <label htmlFor="perm-edit-employees" className="text-sm">Modifier les employés</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-delete-employees" />
-                      <label htmlFor="perm-delete-employees" className="text-sm">Supprimer des employés</label>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Gestion des congés</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-view-leaves" />
-                      <label htmlFor="perm-view-leaves" className="text-sm">Voir les congés</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-approve-leaves" />
-                      <label htmlFor="perm-approve-leaves" className="text-sm">Approuver les congés</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-add-leaves" />
-                      <label htmlFor="perm-add-leaves" className="text-sm">Ajouter des types de congés</label>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Paie & Salaire</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-view-salary" />
-                      <label htmlFor="perm-view-salary" className="text-sm">Voir les salaires</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-edit-salary" />
-                      <label htmlFor="perm-edit-salary" className="text-sm">Modifier les salaires</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-run-payroll" />
-                      <label htmlFor="perm-run-payroll" className="text-sm">Exécuter la paie</label>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Suivi du temps</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-view-time" />
-                      <label htmlFor="perm-view-time" className="text-sm">Voir les enregistrements de temps</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-edit-time" />
-                      <label htmlFor="perm-edit-time" className="text-sm">Modifier les enregistrements de temps</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-approve-time" />
-                      <label htmlFor="perm-approve-time" className="text-sm">Approuver les feuilles de temps</label>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Rapports</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-view-reports" />
-                      <label htmlFor="perm-view-reports" className="text-sm">Voir les rapports</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-export-reports" />
-                      <label htmlFor="perm-export-reports" className="text-sm">Exporter les rapports</label>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <h4 className="text-md font-medium mb-3">Paramètres système</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-view-settings" />
-                      <label htmlFor="perm-view-settings" className="text-sm">Voir les paramètres</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-edit-settings" />
-                      <label htmlFor="perm-edit-settings" className="text-sm">Modifier les paramètres</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="perm-manage-roles" />
-                      <label htmlFor="perm-manage-roles" className="text-sm">Gérer les rôles</label>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                ))}
               </div>
               
               <div className="mt-6 flex justify-end">
-                <Button>Enregistrer les modifications</Button>
+                <Button 
+                  onClick={handleSaveChanges}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Enregistrer les modifications
+                </Button>
               </div>
             </div>
           </TabsContent>
           
           <TabsContent value="company" className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Paramètres de l'entreprise</h2>
+            <h2 className="text-xl font-semibold mb-6 text-white">Paramètres de l'entreprise</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
@@ -380,10 +535,7 @@ const Settings = () => {
           </TabsContent>
           
           <TabsContent value="notifications" className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Paramètres de notifications</h2>
-            <p className="text-muted-foreground mb-6">
-              Configurez comment et quand vous recevez des notifications.
-            </p>
+            <h2 className="text-xl font-semibold mb-6 text-white">Paramètres de notifications</h2>
             
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -473,10 +625,7 @@ const Settings = () => {
           </TabsContent>
           
           <TabsContent value="integrations" className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Intégrations</h2>
-            <p className="text-muted-foreground mb-6">
-              Connectez votre système RH avec d'autres services et applications.
-            </p>
+            <h2 className="text-xl font-semibold mb-6 text-white">Intégrations</h2>
             
             <div className="space-y-6">
               <Card className="p-6">

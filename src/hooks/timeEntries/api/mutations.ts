@@ -109,10 +109,9 @@ export const insertTimeEntryBypass = async (
       p_date: date
     };
     
-    // Fix: Cast the function name to any to bypass the TypeScript constraint
-    // This allows the RPC call to work with the current TypeScript configuration
-    const { data, error } = await supabase.rpc(
-      'insert_time_entry_bypass' as any, 
+    // Fix: Cast the function name as any to bypass TypeScript constraint
+    const { data, error } = await (supabase.rpc as any)(
+      'insert_time_entry_bypass', 
       rpcParams
     );
 
