@@ -28,7 +28,7 @@ export function LeaveTabs({ activeTab, onTabChange, leaveRequests, isLoading }: 
       onValueChange={onTabChange} 
       className="w-full"
     >
-      <TabsList className="flex p-0 h-12 bg-transparent border-b">
+      <TabsList className="flex w-full p-0 h-12 bg-transparent border-b">
         <TabsTrigger 
           value="all" 
           className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 data-[state=active]:shadow-none"
