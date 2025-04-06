@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Search, FileDown, FileText, Loader2, UserCheck, UserX } from "lucide-react";
+import { CalendarIcon, Search, FileDown, FileText, Loader2, UserCheck, UserX, CheckSquare } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,6 +16,7 @@ import { useEmployeesUI } from "@/hooks/useEmployees";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { EmployeeTimeClockDialog } from "@/components/timeTracking/EmployeeTimeClockDialog";
+import { BatchTimeClockDialog } from "@/components/timeTracking/BatchTimeClockDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EmployeeUI } from "@/types/employee";
@@ -133,9 +134,12 @@ const Pointage = () => {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">📍 Pointage des employés</h1>
-        <Button size="lg" onClick={handleClockInDialogOpen}>
-          🟢 Pointer l'entrée
-        </Button>
+        <div className="flex gap-2">
+          <BatchTimeClockDialog /> 
+          <Button size="lg" onClick={handleClockInDialogOpen}>
+            🟢 Pointer l'entrée
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

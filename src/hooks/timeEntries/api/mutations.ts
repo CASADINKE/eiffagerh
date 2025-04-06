@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
@@ -116,8 +115,7 @@ export const insertTimeEntryBypass = async (
       p_date: date
     };
     
-    // Fix the type issue by using the correct generic syntax
-    // Note: For RPC calls, we're not specifying a return type constraint
+    // Fix the type error by not specifying types at all and letting TypeScript infer them
     const { data, error } = await supabase.rpc(
       'insert_time_entry_bypass', 
       rpcParams
