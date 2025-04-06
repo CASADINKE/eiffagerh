@@ -1,11 +1,19 @@
 
-import { Clock, FileDown } from "lucide-react";
+import { Clock, FileDown, Calendar } from "lucide-react";
 import { EmployeeTimeClockDialog } from "./EmployeeTimeClockDialog";
 import { Button } from "@/components/ui/button";
 import { exportToCSV } from "@/utils/exportUtils";
 import { useTimeEntries } from "@/hooks/timeEntries";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useState } from "react";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { fr } from "date-fns/locale";
 
 interface TimeTrackingHeaderProps {
   handleExport?: (format?: string) => void;
@@ -13,25 +21,32 @@ interface TimeTrackingHeaderProps {
 
 export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) => {
   const { data: timeEntries = [] } = useTimeEntries();
+  const [exportDate, setExportDate] = useState<Date>(new Date());
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
   const handleExportToExcel = () => {
     try {
-      const today = format(new Date(), "yyyy-MM-dd");
+      const selectedDate = format(exportDate, "yyyy-MM-dd");
       
-      // Filter entries for today
-      const todaysEntries = timeEntries.filter(entry => entry.date === today);
+      // Filter entries for selected date
+      const selectedDateEntries = timeEntries.filter(entry => entry.date === selectedDate);
       
-      // Get active employees (clocked in today)
-      const activeEmployeeIds = todaysEntries
+      if (selectedDateEntries.length === 0) {
+        toast.warning(`Aucune donnée pour le ${format(exportDate, "dd/MM/yyyy")}`);
+        return;
+      }
+      
+      // Get active employees (clocked in on selected date)
+      const activeEmployeeIds = selectedDateEntries
         .filter(entry => !entry.clock_out)
         .map(entry => entry.employee_id);
       
-      // Get all unique employee IDs from today's entries
-      const allEmployeeIds = [...new Set(todaysEntries.map(entry => entry.employee_id))];
+      // Get all unique employee IDs from selected date entries
+      const allEmployeeIds = [...new Set(selectedDateEntries.map(entry => entry.employee_id))];
       
       // Prepare data for export
       const exportData = timeEntries
-        .filter(entry => entry.date === today)
+        .filter(entry => entry.date === selectedDate)
         .map(entry => {
           const isActive = !entry.clock_out;
           return {
@@ -48,7 +63,7 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
       // Export to CSV/Excel
       exportToCSV(
         exportData,
-        `pointage-employes-${format(new Date(), 'yyyy-MM-dd')}`,
+        `pointage-employes-${format(exportDate, 'dd-MM-yyyy')}`,
         {
           nom: 'Nom',
           matricule: 'Matricule',
@@ -60,7 +75,7 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
         }
       );
       
-      toast.success('Export réussi');
+      toast.success(`Export réussi pour le ${format(exportDate, "dd/MM/yyyy")}`);
     } catch (error) {
       console.error('Erreur lors de l\'export:', error);
       toast.error('Erreur lors de l\'export');
@@ -75,14 +90,41 @@ export const TimeTrackingHeader = ({ handleExport }: TimeTrackingHeaderProps) =>
       </div>
       
       <div className="flex flex-col sm:flex-row gap-2">
-        <Button 
-          variant="outline"
-          onClick={handleExportToExcel}
-          className="w-full sm:w-auto"
-        >
-          <FileDown className="mr-2 h-4 w-4" />
-          Exporter Excel
-        </Button>
+        <div className="flex">
+          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="rounded-r-none border-r-0 whitespace-nowrap"
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {format(exportDate, "dd/MM/yyyy")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                locale={fr}
+                selected={exportDate}
+                onSelect={(date) => {
+                  if (date) {
+                    setExportDate(date);
+                    setIsCalendarOpen(false);
+                  }
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <Button 
+            variant="outline"
+            onClick={handleExportToExcel}
+            className="rounded-l-none border-l-0 w-full sm:w-auto"
+          >
+            <FileDown className="mr-2 h-4 w-4" />
+            Exporter Excel
+          </Button>
+        </div>
         <EmployeeTimeClockDialog className="w-full sm:w-auto" />
       </div>
     </div>
