@@ -12,7 +12,10 @@ export const getTimeEntriesWithEmployees = async (): Promise<TimeEntryWithEmploy
       .select("*")
       .order("date", { ascending: false });
 
-    if (entriesError) throw entriesError;
+    if (entriesError) {
+      console.error("Error fetching time entries:", entriesError);
+      throw entriesError;
+    }
     
     if (!entriesData || entriesData.length === 0) return [];
     
@@ -25,7 +28,10 @@ export const getTimeEntriesWithEmployees = async (): Promise<TimeEntryWithEmploy
       .select("*")
       .in("id", employeeIds);
       
-    if (employeesError) throw employeesError;
+    if (employeesError) {
+      console.error("Error fetching employees data:", employeesError);
+      throw employeesError;
+    }
     
     // Create a map for quick employee lookup
     const employeeMap = new Map();
@@ -67,7 +73,10 @@ export const getEmployeeTimeEntries = async (employeeId: string): Promise<TimeEn
       .eq("employee_id", employeeId)
       .order("date", { ascending: false });
 
-    if (entriesError) throw entriesError;
+    if (entriesError) {
+      console.error("Error fetching employee time entries:", entriesError);
+      throw entriesError;
+    }
     
     if (!entriesData || entriesData.length === 0) return [];
     
@@ -112,7 +121,11 @@ export const getTimeEntryById = async (id: string): Promise<TimeEntryWithEmploye
       .eq("id", id)
       .single();
 
-    if (entryError) throw entryError;
+    if (entryError) {
+      console.error("Error fetching time entry by ID:", entryError);
+      throw entryError;
+    }
+    
     if (!entryData) return null;
     
     // Fetch employee data

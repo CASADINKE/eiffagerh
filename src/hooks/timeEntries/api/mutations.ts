@@ -14,7 +14,7 @@ export const clockInEmployee = async (
   notes?: string
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
-    // Changed the query to not include the employees join since it's causing an error
+    // Insert the time entry record
     const { data, error } = await supabase
       .from("time_entries")
       .insert({
@@ -59,7 +59,7 @@ export const clockOutEmployee = async (
   entryId: string
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
-    // Update without trying to join the employees table
+    // Update the time entry with clock out time
     const { data, error } = await supabase
       .from("time_entries")
       .update({
@@ -152,7 +152,7 @@ export const updateTimeEntry = async (
   updates: Partial<TimeEntry>
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
-    // Update without trying to join the employees table
+    // Update the time entry record
     const { data, error } = await supabase
       .from("time_entries")
       .update(updates)
