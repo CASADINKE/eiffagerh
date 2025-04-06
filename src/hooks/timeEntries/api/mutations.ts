@@ -3,17 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
 
-// Define proper types for RPC parameters and response
+// Define proper types for RPC parameters
 interface InsertTimeEntryBypassParams {
   p_employee_id: string;
   p_date: string;
-}
-
-// Define a generic database response type that matches Supabase's return type
-interface RPCResponse {
-  success: boolean;
-  message: string;
-  data?: any;
 }
 
 export const clockInEmployee = async (
@@ -117,10 +110,7 @@ export const insertTimeEntryBypass = async (
     };
     
     // Remove type parameters completely and let TypeScript infer everything
-    const { data, error } = await supabase.rpc(
-      'insert_time_entry_bypass', 
-      rpcParams
-    );
+    const { data, error } = await supabase.rpc('insert_time_entry_bypass', rpcParams);
 
     if (error) {
       console.error("Error inserting time entry bypass:", error);
