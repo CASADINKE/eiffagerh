@@ -21,7 +21,7 @@ export function LeaveHeader({ openLeaveRequestDialog, isLoading, leaveRequests }
         <Button 
           variant="default" 
           size="lg" 
-          className="text-base px-6 py-5 shadow-sm transition-all duration-200 hover:shadow-md hover:translate-y-[-2px] bg-blue-600 hover:bg-blue-700 text-white"
+          className="text-base px-6 py-5 shadow-sm transition-all duration-200 hover:shadow hover:translate-y-[-2px]"
           onClick={openLeaveRequestDialog}
         >
           <Calendar className="mr-2 h-5 w-5" />
