@@ -9,6 +9,7 @@ interface InsertTimeEntryBypassParams {
   p_date: string;
 }
 
+// Define a generic database response type that matches Supabase's return type
 interface RPCResponse {
   success: boolean;
   message: string;
@@ -115,8 +116,9 @@ export const insertTimeEntryBypass = async (
       p_date: date
     };
     
-    // Fix type issue by providing both type parameters: return type and params type
-    const { data, error } = await supabase.rpc<RPCResponse, InsertTimeEntryBypassParams>(
+    // Fix the type issue by using the correct generic syntax
+    // Note: For RPC calls, we're not specifying a return type constraint
+    const { data, error } = await supabase.rpc(
       'insert_time_entry_bypass', 
       rpcParams
     );
