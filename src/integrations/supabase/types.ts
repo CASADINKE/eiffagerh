@@ -349,39 +349,33 @@ export type Database = {
       }
       pointages: {
         Row: {
-          created_at: string | null
-          date_pointage: string
-          duree_travail: string | null
-          heure_arrivee: string | null
-          heure_depart: string | null
+          created_at: string
+          date: string
+          heure_entree: string | null
+          heure_sortie: string | null
           id: string
-          remarque: string | null
           statut: string | null
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
-          date_pointage?: string
-          duree_travail?: string | null
-          heure_arrivee?: string | null
-          heure_depart?: string | null
+          created_at?: string
+          date?: string
+          heure_entree?: string | null
+          heure_sortie?: string | null
           id?: string
-          remarque?: string | null
           statut?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
-          date_pointage?: string
-          duree_travail?: string | null
-          heure_arrivee?: string | null
-          heure_depart?: string | null
+          created_at?: string
+          date?: string
+          heure_entree?: string | null
+          heure_sortie?: string | null
           id?: string
-          remarque?: string | null
           statut?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -564,6 +558,94 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      time_entries: {
+        Row: {
+          break_time: number | null
+          clock_in: string
+          clock_out: string | null
+          created_at: string
+          date: string
+          employee_id: string
+          id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          break_time?: number | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string
+          date?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          break_time?: number | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string
+          date?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_tracking: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          date: string
+          employee_id: string
+          id: string
+          notes: string | null
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          date?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_tracking_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
