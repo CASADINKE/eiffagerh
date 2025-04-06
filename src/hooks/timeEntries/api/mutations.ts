@@ -17,15 +17,16 @@ interface RPCResponse {
 
 export const clockInEmployee = async (
   employeeId: string,
-  date: string
+  notes?: string
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
     const { data, error } = await supabase
       .from("time_entries")
       .insert({
         employee_id: employeeId,
-        date: date,
+        date: new Date().toISOString().split('T')[0],
         clock_in: new Date().toISOString(),
+        notes: notes
       })
       .select("*, employees(*)")
       .single();
@@ -78,7 +79,7 @@ export const insertTimeEntryBypass = async (
       p_date: date
     };
     
-    // Fix: Correct type parameters for the rpc method
+    // Fix: Remove type parameters to let TypeScript infer them correctly
     const { data, error } = await supabase.rpc(
       'insert_time_entry_bypass', 
       rpcParams
