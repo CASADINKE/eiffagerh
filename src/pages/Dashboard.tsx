@@ -1,3 +1,4 @@
+
 import { Users, Calendar, DollarSign, Clock } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import { useEffect, useState } from "react";
@@ -12,6 +13,7 @@ const Dashboard = () => {
   const { stats } = useRemunerationsOperations();
 
   useEffect(() => {
+    // Fetch leave requests count
     const fetchLeaveRequests = async () => {
       const { data, error } = await supabase
         .from("leave_requests")
@@ -23,6 +25,7 @@ const Dashboard = () => {
       }
     };
 
+    // Fetch average working hours
     const fetchAvgHours = async () => {
       const { data, error } = await supabase
         .from("time_entries")
@@ -39,7 +42,7 @@ const Dashboard = () => {
             const start = new Date(entry.clock_in);
             const end = new Date(entry.clock_out);
             const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-            if (hours > 0 && hours < 24) {
+            if (hours > 0 && hours < 24) { // Filter out unrealistic values
               totalHours += hours;
               count++;
             }
@@ -56,6 +59,7 @@ const Dashboard = () => {
     fetchAvgHours();
   }, []);
 
+  // Format total salary with proper spacing
   const formatSalary = (value: number) => {
     return value?.toLocaleString('fr-FR').replace(/,/g, ' ');
   };
