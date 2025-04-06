@@ -16,7 +16,7 @@ interface StatCardProps {
 const StatCard = ({ title, value, icon, trend, className }: StatCardProps) => {
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-xl border bg-card p-5 shadow-sm card-hover",
+      "relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-card-hover",
       className
     )}>
       <div className="flex justify-between items-start mb-4">
@@ -35,7 +35,9 @@ const StatCard = ({ title, value, icon, trend, className }: StatCardProps) => {
             <span className="mr-1">
               {trend.positive ? '↑' : '↓'} {Math.abs(trend.value)}%
             </span>
-            par rapport au mois dernier
+            <span className="text-muted-foreground font-light">
+              par rapport au mois dernier
+            </span>
           </span>
         </div>
       )}
