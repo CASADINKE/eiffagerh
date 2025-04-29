@@ -10,10 +10,11 @@ interface StatCardProps {
     value: number;
     positive: boolean;
   };
+  subtitle?: string;
   className?: string;
 }
 
-const StatCard = ({ title, value, icon, trend, className }: StatCardProps) => {
+const StatCard = ({ title, value, icon, trend, subtitle, className }: StatCardProps) => {
   return (
     <div className={cn(
       "relative overflow-hidden rounded-xl border p-5 shadow-sm transition-all duration-200 hover:shadow-card-hover transform hover:-translate-y-1",
@@ -25,6 +26,10 @@ const StatCard = ({ title, value, icon, trend, className }: StatCardProps) => {
       </div>
       
       <div className="text-2xl font-semibold mb-2">{value}</div>
+      
+      {subtitle && (
+        <div className="text-xs text-muted-foreground mb-2">{subtitle}</div>
+      )}
       
       {trend && (
         <div className="flex items-center text-xs">
