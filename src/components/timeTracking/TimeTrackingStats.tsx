@@ -20,7 +20,7 @@ export const TimeTrackingStats = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <StatCard
-        title="Employés pointés"
+        title="Employés déjà pointés"
         value={activeEmployeeCount.toString()}
         icon={<Users className="text-blue-500" />}
         subtitle={totalEmployees ? `Sur ${totalEmployees} employés` : undefined}

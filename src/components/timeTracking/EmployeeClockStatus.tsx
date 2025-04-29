@@ -1,3 +1,4 @@
+
 import { UserCheck, UserX, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,7 +86,7 @@ export const EmployeeClockStatus = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center">
             <UserCheck className="h-5 w-5 mr-2 text-green-500" />
-            Employés ayant pointé aujourd'hui ({clockedInEmployees.length})
+            Employés déjà pointés ({clockedInEmployees.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -126,7 +127,7 @@ export const EmployeeClockStatus = ({
                       </div>
                       <div className="flex items-center mt-1">
                         <span className={`h-2 w-2 rounded-full mr-2 ${isActive ? 'bg-green-500' : 'bg-blue-500'}`}></span>
-                        <span className="text-xs">
+                        <span className="text-xs font-medium">
                           {isActive ? "En cours" : `Durée: ${duration}`}
                         </span>
                       </div>
@@ -162,7 +163,7 @@ export const EmployeeClockStatus = ({
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center">
             <UserX className="h-5 w-5 mr-2 text-red-500" />
-            Employés n'ayant pas pointé aujourd'hui ({notClockedInEmployees.length})
+            Employés non pointés ({notClockedInEmployees.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -190,7 +191,7 @@ export const EmployeeClockStatus = ({
                   </div>
                   <div className="flex items-center">
                     <span className="h-2 w-2 rounded-full bg-red-500 mr-2"></span>
-                    <span className="text-sm">Non pointé</span>
+                    <span className="text-sm font-medium text-red-500">Non pointé</span>
                   </div>
                   <div className="ml-3">
                     <Button 
