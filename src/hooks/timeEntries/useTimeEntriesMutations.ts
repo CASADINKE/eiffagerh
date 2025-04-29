@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { clockInEmployee, clockOutEmployee, updateTimeEntry, deleteTimeEntry } from "./api";
@@ -16,7 +15,7 @@ export const useClockInMutation = () => {
     },
     onError: (error) => {
       console.error("Clock in mutation error:", error);
-      toast.error(`Erreur lors du pointage d'entrée: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(`${error instanceof Error ? error.message : "Erreur lors du pointage d'entrée"}`);
     }
   });
 };

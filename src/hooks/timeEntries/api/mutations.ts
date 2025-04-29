@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TimeEntry, TimeEntryWithEmployee } from "../types";
 import { mapTimeEntryWithEmployee } from "./format-utils";
@@ -14,12 +13,38 @@ export const clockInEmployee = async (
   notes?: string
 ): Promise<TimeEntryWithEmployee | null> => {
   try {
+    // Check if employee already has an entry for today
+    const today = new Date().toISOString().split('T')[0];
+    const { data: existingEntries, error: checkError } = await supabase
+      .from("time_entries")
+      .select("*")
+      .eq("employee_id", employeeId)
+      .eq("date", today);
+
+    if (checkError) {
+      console.error("Error checking existing entries:", checkError);
+      throw new Error("Erreur lors de la vérification des pointages existants");
+    }
+
+    // If the employee already has an active entry for today, prevent clocking in again
+    if (existingEntries && existingEntries.length > 0) {
+      const activeEntry = existingEntries.find(entry => !entry.clock_out);
+      if (activeEntry) {
+        throw new Error("Cet employé a déjà pointé aujourd'hui et n'a pas encore pointé sa sortie");
+      }
+      
+      // If all entries are completed (have clock_out), don't allow creating a new entry
+      if (existingEntries.every(entry => entry.clock_out)) {
+        throw new Error("Cet employé a déjà effectué un cycle complet de pointage aujourd'hui");
+      }
+    }
+
     // Insert the time entry record
     const { data, error } = await supabase
       .from("time_entries")
       .insert({
         employee_id: employeeId,
-        date: new Date().toISOString().split('T')[0],
+        date: today,
         clock_in: new Date().toISOString(),
         notes: notes
       })
@@ -28,7 +53,7 @@ export const clockInEmployee = async (
 
     if (error) {
       console.error("Error clocking in:", error);
-      return null;
+      throw new Error("Erreur lors du pointage d'entrée");
     }
 
     // Then fetch the employee data separately
@@ -51,7 +76,7 @@ export const clockInEmployee = async (
     return mapTimeEntryWithEmployee(combinedData);
   } catch (error) {
     console.error("Error clocking in employee:", error);
-    return null;
+    throw error; // Re-throw the error to be handled by the mutation
   }
 };
 
