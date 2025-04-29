@@ -23,7 +23,7 @@ export const TimeTrackingStats = ({
         title="Employés pointés"
         value={activeEmployeeCount.toString()}
         icon={<Users className="text-blue-500" />}
-        description={totalEmployees ? `Sur ${totalEmployees} employés` : undefined}
+        subtitle={totalEmployees ? `Sur ${totalEmployees} employés` : undefined}
         className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800/50"
       />
       <StatCard
@@ -36,7 +36,7 @@ export const TimeTrackingStats = ({
         title="Employés non pointés"
         value={absentCount.toString()}
         icon={<Calendar className="text-red-500" />}
-        description={totalEmployees ? `Sur ${totalEmployees} employés` : undefined}
+        subtitle={totalEmployees ? `Sur ${totalEmployees} employés` : undefined}
         className="bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800/50"
       />
     </div>
